@@ -4,18 +4,22 @@ judge 类 Prompt 全部要求 JSON 输出（deepseek JSON Output 模式要求提
 语言选择：按「提问语言」（orchestrator 用 llm.detect_lang(question) 决定），答案语言跟随提问。
 """
 
+from .source_catalog import BUSINESS_DB_SCHEMAS
+
 Locale = str  # "zh-CN" | "en-US"
 
 ROUTER_SYS_ZH = """你是 RAG 问答系统的意图路由器。将用户问题分为四类之一并给出置信度。
 
 意图定义：
 - chitchat：闲聊、打招呼、问候、问你是谁、讲笑话等与知识库无关的对话
-- kb_qa：知识问答，需要检索知识库文档才能准确回答（技术方案、制度条款、产品功能等）
-- data_query：业务数据查询，涉及具体数字/名单/排名/趋势/销量/销售额/报表/统计等结构化数据问题
+- kb_qa：需要检索已上传文档中的事实、细节或证据才能回答
+- data_query：所需事实可由当前启用的结构化数据源 Schema 查询或聚合得到
 - summarize：总结摘要，要求归纳、概括知识库或文档中的内容要点
 
 边界规则：
-- 涉及具体数字、名单、销量、排名、趋势的问句归 data_query
+- 根据给定的数据源能力选择路径，不按问题的表面词语决定是否查询数据库
+- 只有所需事实明确落在给定 Schema 的表和字段范围内才归 data_query；不得假设存在未接入的表或字段
+- 结构化数据源未启用、能力不匹配或无法确定能否回答时，优先归 kb_qa 检索文档
 - "总结/概括/要点/梳理 + 某主题" 归 summarize
 - 需要查文档才有可靠答案的归 kb_qa；凭常识闲聊的归 chitchat
 - 用户附带图片时一律归 kb_qa（系统会先检索知识库，再结合图片与检索内容作答）
@@ -28,12 +32,14 @@ ROUTER_SYS_EN = """You are the intent router of a RAG Q&A system. Classify the u
 
 Intent definitions:
 - chitchat: casual chat, greetings, asking who you are, jokes, etc., unrelated to the knowledge base
-- kb_qa: knowledge Q&A that requires retrieving knowledge-base documents to answer accurately (technical plans, policy clauses, product features, etc.)
-- data_query: business data queries involving specific numbers/lists/rankings/trends/sales/revenue/reports/statistics and other structured data
+- kb_qa: questions requiring facts, details, or evidence from uploaded documents
+- data_query: questions whose requested facts can be queried or aggregated from the schema of a currently enabled structured source
 - summarize: summarization, requiring condensing the key points of knowledge-base or document content
 
 Boundary rules:
-- Questions involving specific numbers, lists, sales, rankings, or trends go to data_query
+- Select a source according to its supplied capabilities, not superficial wording in the question
+- Use data_query only when the requested facts clearly fit the supplied tables and fields; never assume unavailable tables or fields exist
+- If the structured source is disabled, mismatched, or its ability to answer is uncertain, prefer kb_qa to retrieve documents
 - "summarize/outline/key points + a topic" goes to summarize
 - Questions that need document lookup for a reliable answer go to kb_qa; common-sense chitchat goes to chitchat
 - Any question with an attached image always goes to kb_qa (the system first retrieves the knowledge base, then answers with the image and retrieved content)
@@ -122,11 +128,7 @@ REFLECT_SYS_EN = """You are the answer self-checker (Self-RAG) of a RAG system. 
 Output json:
 {"result": "pass or fail", "missing_info": "on fail, one sentence describing the missing information; empty string on pass"}"""
 
-NL2SQL_SYS_ZH = """你是只读业务数据库的 NL2SQL 生成器。数据库中只有一张销售记录表 sales：
-- product VARCHAR(128) 产品名，例如 '智能音箱 X1'、'工业网关 G200'、'边缘计算盒子 E5'、'车载诊断终端 V3'、'RAGent 企业版'
-- quarter VARCHAR(16) 季度，例如 '2026Q1'、'2026Q2'
-- region VARCHAR(32) 销售区域，例如 '华东'、'华南'、'华北'、'西南'
-- amount DECIMAL(14,2) 销售额（元）
+NL2SQL_SYS_ZH = "你是只读业务数据库的 NL2SQL 生成器。可查询的业务 Schema：\n" + BUSINESS_DB_SCHEMAS["zh-CN"] + """
 
 规则：
 - 只能生成单条 SELECT 语句（可用 SUM/COUNT/AVG/GROUP BY/ORDER BY/LIMIT），禁止任何写操作
@@ -137,11 +139,7 @@ NL2SQL_SYS_ZH = """你是只读业务数据库的 NL2SQL 生成器。数据库�
 以 json 格式输出：
 {"sql": "单条 SELECT 语句"}"""
 
-NL2SQL_SYS_EN = """You are the NL2SQL generator for a read-only business database. The database has only one sales record table named sales:
-- product VARCHAR(128) product name, e.g. 'Smart Speaker X1', 'Industrial Gateway G200', 'Edge Computing Box E5', 'In-Vehicle Diagnostic Terminal V3', 'RAGent Enterprise'
-- quarter VARCHAR(16) quarter, e.g. '2026Q1', '2026Q2'
-- region VARCHAR(32) sales region, e.g. 'East', 'South', 'North', 'Southwest'
-- amount DECIMAL(14,2) sales amount (CNY)
+NL2SQL_SYS_EN = "You are the NL2SQL generator for a read-only business database. Available business schema:\n" + BUSINESS_DB_SCHEMAS["en-US"] + """
 
 Rules:
 - Generate only a single SELECT statement (SUM/COUNT/AVG/GROUP BY/ORDER BY/LIMIT allowed); no write operations
@@ -246,20 +244,24 @@ def _history_block(history: list[dict] | None, locale: str = "zh-CN") -> str:
     return "\n".join(lines)
 
 
-def router_user(question: str, history: list[dict] | None, image_count: int = 0, locale: str = "zh-CN") -> str:
+def router_user(
+    question: str, history: list[dict] | None, image_count: int = 0, locale: str = "zh-CN", *, database_enabled: bool = True
+) -> str:
     if locale == "zh-CN":
         img = (
             f"\n用户随问题附带 {image_count} 张图片（带图问题统一归 kb_qa：先检索知识库，再结合图片作答）。"
             if image_count
             else ""
         )
-        return f"最近对话：\n{_history_block(history, locale)}\n\n当前用户问题：{question}{img}\n\n请输出 json。"
+        capability = BUSINESS_DB_SCHEMAS["zh-CN"] if database_enabled else "没有启用的结构化数据源，不可选择 data_query。"
+        return f"当前可用结构化数据源：\n{capability}\n\n最近对话：\n{_history_block(history, locale)}\n\n当前用户问题：{question}{img}\n\n请输出 json。"
     img = (
         f"\nThe user attached {image_count} image(s) with the question (questions with images always go to kb_qa: retrieve the knowledge base first, then answer with the image)."
         if image_count
         else ""
     )
-    return f"Recent conversation:\n{_history_block(history, locale)}\n\nCurrent user question: {question}{img}\n\nOutput json."
+    capability = BUSINESS_DB_SCHEMAS["en-US"] if database_enabled else "No structured source is enabled; data_query is unavailable."
+    return f"Available structured sources:\n{capability}\n\nRecent conversation:\n{_history_block(history, locale)}\n\nCurrent user question: {question}{img}\n\nOutput json."
 
 
 def planner_user(question: str, history: list[dict] | None, locale: str = "zh-CN") -> str:

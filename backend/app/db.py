@@ -10,6 +10,7 @@ import asyncio
 import datetime
 import decimal
 import json
+from contextlib import asynccontextmanager
 from typing import Any
 
 import pymysql
@@ -94,3 +95,40 @@ async def aexecute(sql: str, params: tuple | dict | None = None) -> int:
 
 async def aexecute_many(sql: str, seq: list[tuple]) -> int:
     return await asyncio.to_thread(execute_many, sql, seq)
+
+
+def execute_transaction(statements: list[tuple[str, tuple]]) -> None:
+    with get_conn() as conn:
+        conn.begin()
+        try:
+            with conn.cursor() as cur:
+                for sql, params in statements:
+                    cur.execute(sql, params)
+            conn.commit()
+        except BaseException:
+            conn.rollback()
+            raise
+
+
+async def aexecute_transaction(statements: list[tuple[str, tuple]]) -> None:
+    await asyncio.to_thread(execute_transaction, statements)
+
+
+@asynccontextmanager
+async def kb_write_lock(kb_id: int):
+    """跨进程协调知识库写入；独立连接持锁，关闭连接自动释放 MySQL advisory lock。"""
+    import hashlib
+
+    name = f"ragent:{hashlib.sha256(settings.mysql_db.encode()).hexdigest()[:16]}:kb:{kb_id}"
+    conn = await asyncio.to_thread(get_conn)
+    try:
+        def acquire():
+            with conn.cursor() as cur:
+                cur.execute("SELECT GET_LOCK(%s, 10) AS acquired", (name,))
+                return cur.fetchone()["acquired"]
+
+        if await asyncio.to_thread(acquire) != 1:
+            raise TimeoutError("Knowledge base is busy; please retry shortly.")
+        yield
+    finally:
+        await asyncio.to_thread(conn.close)

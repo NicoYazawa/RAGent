@@ -9,6 +9,7 @@
 """
 import os
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import pytest
@@ -143,6 +144,16 @@ def fake_db(monkeypatch):
     monkeypatch.setattr(db, "aquery_one", fake.aquery_one)
     monkeypatch.setattr(db, "aexecute", fake.aexecute)
     monkeypatch.setattr(db, "aexecute_many", fake.aexecute_many)
+    @asynccontextmanager
+    async def lock(kb_id):
+        yield
+
+    async def transaction(statements):
+        for sql, params in statements:
+            await fake.aexecute(sql, params)
+
+    monkeypatch.setattr(db, "kb_write_lock", lock)
+    monkeypatch.setattr(db, "aexecute_transaction", transaction)
     return fake
 
 

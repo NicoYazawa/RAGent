@@ -72,3 +72,16 @@ async def test_real_knn_filters_before_top_k_even_when_foreign_vector_is_closer(
     })
     response.raise_for_status()
     assert response.json()["hits"]["hits"][0]["_source"]["doc_id"] == 22
+
+
+async def test_real_delete_includes_unsearched_new_chunks_and_preserves_other_kb(isolated_es):
+    response = await isolated_es.client.put(f'/{es_module.INDEX}/_doc/33', json={
+        'kb_id': 1, 'doc_id': 33, 'chunk_uid': '33', 'content': 'new synthetic document',
+        'embedding': [0.0, 1.0],
+    })
+    response.raise_for_status()
+    # Do not refresh here: deletion must include the immediately preceding write.
+    await isolated_es.delete_by_kb(1)
+    response = await isolated_es.client.post(f'/{es_module.INDEX}/_search', json={'query': {'match_all': {}}})
+    response.raise_for_status()
+    assert [hit['_source']['doc_id'] for hit in response.json()['hits']['hits']] == [22]

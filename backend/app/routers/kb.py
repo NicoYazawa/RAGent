@@ -37,6 +37,19 @@ async def create_kb(body: dict) -> dict:
     return row  # type: ignore[return-value]
 
 
+@router.delete("/kb/{kb_id}")
+async def delete_kb(kb_id: int) -> dict:
+    try:
+        await ingestion.delete_knowledge_base(kb_id)
+    except ingestion.KnowledgeBaseMissing as e:
+        raise HTTPException(404, t("api.kb_not_found")) from e
+    except ingestion.KnowledgeBaseBusy as e:
+        raise HTTPException(409, t("api.kb_busy")) from e
+    except TimeoutError as e:
+        raise HTTPException(409, str(e)) from e
+    return {"deleted": kb_id}
+
+
 @router.get("/kb/{kb_id}/documents")
 async def list_documents(kb_id: int) -> list[dict]:
     return await db.aquery_all(
@@ -48,12 +61,13 @@ async def list_documents(kb_id: int) -> list[dict]:
 
 @router.post("/kb/{kb_id}/documents", status_code=202)
 async def upload_document(kb_id: int, background: BackgroundTasks, file: UploadFile = File(...)) -> dict:
-    kb = await db.aquery_one("SELECT id FROM kb_database WHERE id=%s", (kb_id,))
-    if kb is None:
-        raise HTTPException(404, t("api.kb_not_found"))
     content = await file.read()
     try:
-        doc_id, _, _ = await asyncio.to_thread(ingestion.save_upload, kb_id, file.filename or "untitled", content)
+        async with db.kb_write_lock(kb_id):
+            kb = await db.aquery_one("SELECT id FROM kb_database WHERE id=%s", (kb_id,))
+            if kb is None:
+                raise HTTPException(404, t("api.kb_not_found"))
+            doc_id, _, _ = await asyncio.to_thread(ingestion.save_upload, kb_id, file.filename or "untitled", content)
     except ValueError as e:
         raise HTTPException(400, str(e)) from e
     background.add_task(ingestion.process_document, doc_id)
@@ -67,17 +81,21 @@ async def upload_document(kb_id: int, background: BackgroundTasks, file: UploadF
 
 @router.delete("/kb/{kb_id}/documents/{doc_id}")
 async def delete_document(kb_id: int, doc_id: int) -> dict:
-    doc = await db.aquery_one("SELECT id FROM kb_document WHERE id=%s AND kb_id=%s", (doc_id, kb_id))
-    if doc is None:
-        raise HTTPException(404, t("api.doc_not_found"))
-    await ingestion.delete_document(kb_id, doc_id)
+    async with db.kb_write_lock(kb_id):
+        doc = await db.aquery_one("SELECT id, status FROM kb_document WHERE id=%s AND kb_id=%s", (doc_id, kb_id))
+        if doc is None:
+            raise HTTPException(404, t("api.doc_not_found"))
+        if doc.get('status') in ingestion.PROCESSING_STATUSES:
+            raise HTTPException(409, t("api.kb_busy"))
+        await ingestion.delete_document(kb_id, doc_id)
     return {"deleted": doc_id}
 
 
 @router.post("/kb/{kb_id}/documents/{doc_id}/retry", status_code=202)
 async def retry_document(kb_id: int, doc_id: int, background: BackgroundTasks) -> dict:
     try:
-        doc = await ingestion.reset_for_retry(kb_id, doc_id)
+        async with db.kb_write_lock(kb_id):
+            doc = await ingestion.reset_for_retry(kb_id, doc_id)
     except ValueError as e:
         raise HTTPException(400, str(e)) from e
     background.add_task(ingestion.process_document, doc_id)

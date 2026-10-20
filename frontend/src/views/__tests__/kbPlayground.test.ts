@@ -21,6 +21,7 @@ vi.mock('@/api/admin', async (importOriginal) => {
     listKbs: vi.fn(),
     listDocuments: vi.fn(),
     createKb: vi.fn(),
+    deleteKb: vi.fn(),
     deleteDocument: vi.fn(),
     retryDocument: vi.fn(),
     uploadDocument: vi.fn(),
@@ -38,6 +39,7 @@ import {
   listKbs,
   listDocuments,
   createKb,
+  deleteKb,
   deleteDocument,
   retryDocument,
   getDatasources,
@@ -106,6 +108,28 @@ beforeEach(() => {
 })
 
 describe('KbManageView', () => {
+  it('删除前显示库名，取消不发请求，失败可重试，成功更新列表', async () => {
+    const remove = vi.mocked(deleteKb)
+    remove.mockRejectedValueOnce(new Error('正在入库')).mockResolvedValue(undefined)
+    const w = mount(KbManageView, mountOpts)
+    await new Promise(r => setTimeout(r, 0))
+    const button = (label: string) => w.findAll('button').find(b => b.text() === label)!
+    await button('删除知识库').trigger('click')
+    expect(w.text()).toContain('确认删除知识库“制度库”？')
+    await button('取消').trigger('click')
+    expect(remove).not.toHaveBeenCalled()
+    await button('删除知识库').trigger('click')
+    await button('确认删除').trigger('click')
+    await new Promise(r => setTimeout(r, 0))
+    expect(w.text()).toContain('正在入库')
+    expect(w.text()).toContain('制度库')
+    await button('确认删除').trigger('click')
+    await new Promise(r => setTimeout(r, 0))
+    expect(remove).toHaveBeenLastCalledWith(1)
+    expect(w.text()).not.toContain('制度库')
+    expect(w.text()).not.toContain('考勤制度.md')
+    w.unmount()
+  })
   it('挂载时初始化知识库 store', async () => {
     mount(KbManageView, mountOpts)
     await new Promise((r) => setTimeout(r, 0))

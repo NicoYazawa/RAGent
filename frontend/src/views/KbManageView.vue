@@ -10,7 +10,7 @@ import DocumentRow from '@/components/kb/DocumentRow.vue'
 import UploadModal from '@/components/kb/UploadModal.vue'
 import ChunkDrawer from '@/components/kb/ChunkDrawer.vue'
 import { useKbStore } from '@/stores/kb'
-import type { KbDocument } from '@/api/types'
+import type { KbDocument, KnowledgeBase } from '@/api/types'
 
 /** 知识库管理页：库列表 → 文档列表 → 上传/状态监控/切片明细 */
 const { t } = useI18n()
@@ -20,6 +20,25 @@ const uploadOpen = ref(false)
 const newName = ref('')
 const newDesc = ref('')
 const createError = ref('')
+const deleteTarget = ref<Pick<KnowledgeBase, 'id' | 'name'> | null>(null)
+const deleteError = ref('')
+
+function openDelete(): void {
+  if (!store.selectedKb) return
+  deleteTarget.value = { id: store.selectedKb.id, name: store.selectedKb.name }
+  deleteError.value = ''
+}
+
+async function confirmDelete(): Promise<void> {
+  if (!deleteTarget.value || store.deleting) return
+  try {
+    await store.removeKb(deleteTarget.value.id)
+    deleteTarget.value = null
+    chunkDoc.value = null
+  } catch (e) {
+    deleteError.value = (e as Error).message
+  }
+}
 
 /** 当前库的切片总量（底部汇总用，由行数据求和） */
 const totalChunks = computed(() => store.documents.reduce((sum, d) => sum + d.chunk_count, 0))
@@ -113,6 +132,9 @@ function onViewChunks(doc: KbDocument): void {
           </span>
         </div>
         <div class="flex-1" />
+        <BaseButton size="sm" variant="danger" :disabled="!store.selectedKbId || store.deleting" @click="openDelete">
+          <Icon name="trash-2" :size="13" /> {{ t('kb.deleteBtn') }}
+        </BaseButton>
         <BaseButton size="sm" variant="ghost" :disabled="!store.selectedKbId" @click="uploadOpen = true">
           <Icon name="upload" :size="13" /> {{ t('kb.uploadBtn') }}
         </BaseButton>
@@ -185,6 +207,17 @@ function onViewChunks(doc: KbDocument): void {
         <div class="flex justify-end gap-2">
           <BaseButton variant="ghost" size="sm" @click="createOpen = false">{{ t('common.action.cancel') }}</BaseButton>
           <BaseButton size="sm" :loading="store.creating" @click="confirmCreate">{{ t('kb.createBtn') }}</BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
+    <BaseModal :open="deleteTarget != null" :title="t('kb.deleteTitle')" width="440px" @close="!store.deleting && (deleteTarget = null)">
+      <p class="text-sm leading-relaxed text-ink-dim">{{ t('kb.deleteWarning', { name: deleteTarget?.name ?? '' }) }}</p>
+      <p v-if="deleteError" role="alert" class="mt-3 text-sm text-danger">{{ deleteError }}</p>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <BaseButton size="sm" variant="ghost" :disabled="store.deleting" @click="deleteTarget = null">{{ t('common.action.cancel') }}</BaseButton>
+          <BaseButton size="sm" variant="danger" :loading="store.deleting" @click="confirmDelete">{{ t('kb.deleteConfirm') }}</BaseButton>
         </div>
       </template>
     </BaseModal>

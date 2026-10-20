@@ -3,7 +3,9 @@
 parsing → chunking → embedding → ready；任一步失败置 failed 并记录 error_msg，支持重试。
 删除文档：先 ES（按 doc_id）后 MySQL。
 """
+import asyncio
 import logging
+import shutil
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +21,44 @@ logger = logging.getLogger("agentic.ingestion")
 
 ALLOWED_TYPES = ["md", "txt", "pdf", "docx"]
 MAX_SIZE = 20 * 1024 * 1024
+PROCESSING_STATUSES = {'parsing', 'chunking', 'embedding'}
+
+
+class KnowledgeBaseBusy(ValueError):
+    pass
+
+
+class KnowledgeBaseMissing(ValueError):
+    pass
+
+
+def _remove_upload_directory(kb_id: int) -> None:
+    root = UPLOAD_DIR.resolve()
+    target = root / str(kb_id)
+    if kb_id <= 0 or target.is_symlink() or target.resolve() != target:
+        raise ValueError('Invalid knowledge base upload directory')
+    if target.exists():
+        shutil.rmtree(target)
+
+
+async def delete_knowledge_base(kb_id: int) -> None:
+    """先清理 ES 和文件，再事务删除元数据；任一失败允许保留库记录后重试。"""
+    async with db.kb_write_lock(kb_id):
+        if await db.aquery_one('SELECT id FROM kb_database WHERE id=%s', (kb_id,)) is None:
+            raise KnowledgeBaseMissing()
+        active = await db.aquery_one(
+            "SELECT id FROM kb_document WHERE kb_id=%s AND status IN ('parsing','chunking','embedding') LIMIT 1",
+            (kb_id,),
+        )
+        if active:
+            raise KnowledgeBaseBusy()
+        await elastic.delete_by_kb(kb_id)
+        await asyncio.to_thread(_remove_upload_directory, kb_id)
+        await db.aexecute_transaction([
+            ('DELETE c FROM kb_chunk c INNER JOIN kb_document d ON c.doc_id=d.id WHERE d.kb_id=%s', (kb_id,)),
+            ('DELETE FROM kb_document WHERE kb_id=%s', (kb_id,)),
+            ('DELETE FROM kb_database WHERE id=%s', (kb_id,)),
+        ])
 
 
 def validate_upload(file_name: str, size: int) -> str:
@@ -66,6 +106,16 @@ async def process_document(doc_id: int) -> None:
     if doc is None:
         logger.error("文档 %s 不存在，跳过入库", doc_id)
         return
+    try:
+        async with db.kb_write_lock(int(doc['kb_id'])):
+            doc = await db.aquery_one("SELECT * FROM kb_document WHERE id=%s", (doc_id,))
+            if doc is None:
+                return
+            await _set_status(doc_id, "parsing")
+    except Exception as e:
+        logger.exception("文档 %s 入库启动失败", doc_id)
+        await _set_status(doc_id, "failed", str(e))
+        return
     path = Path(doc["file_path"])
     if not path.exists():
         await _set_status(doc_id, "failed", f"源文件缺失：{doc['file_name']}（原上传文件已被清理）")
@@ -74,7 +124,6 @@ async def process_document(doc_id: int) -> None:
     kb_id = int(doc["kb_id"])
     try:
         # 1. 解析
-        await _set_status(doc_id, "parsing")
         blocks = await _parse(path, doc["file_type"])
 
         # 2. 切片（清旧切片，重试场景可重跑）

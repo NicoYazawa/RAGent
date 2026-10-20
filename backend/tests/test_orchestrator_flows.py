@@ -138,8 +138,8 @@ async def test_data_query_uses_nl2sql_directly(h, monkeypatch):
     assert h.calls["gather"] == []
 
 
-async def test_data_query_adds_disclaimer_when_grade_not_pass(h, monkeypatch):
-    """NL2SQL 结果不达标 → 生成侧加声明"""
+async def test_data_query_falls_back_to_documents_when_grade_not_pass(h, monkeypatch):
+    """NL2SQL 结果不达标，必须检索文档而不能直接推断知识库缺失。"""
     h.intent = "data_query"
     h.grade_score = 2.0
     h.grade_verdict = "fail"
@@ -152,6 +152,64 @@ async def test_data_query_adds_disclaimer_when_grade_not_pass(h, monkeypatch):
     monkeypatch.setattr(orchestrator.db_retriever, "search", _db_search)
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "销售额", None)])
     assert any(t == "grade" and d.get("verdict") == "fail" for t, d in events)
+    assert h.calls["gather"]
+
+
+@pytest.mark.parametrize("db_verdict, db_score", [("fail", 0.0), ("partial", 6.0)])
+@pytest.mark.parametrize("question", [
+    "最近来的候选人的具体信息有哪些",
+    "这份合同约定的付款期限是几天",
+    "设备告警代码的含义和处理方法是什么",
+])
+async def test_unrelated_database_evidence_falls_back_to_document_search(h, monkeypatch, db_verdict, db_score, question):
+    h.intent = "data_query"  # Any misclassified domain can recover via document retrieval.
+    h.items = [RetrieverResult("keyword", 0.9, "document", "DOCUMENT_EVIDENCE", {
+        "doc_name": "document", "doc_id": 30, "kb_id": 9, "chunk_uid": "chunk-30", "chunk_no": 1,
+    })]
+    db_calls = []
+    grades = iter([(db_score, db_verdict, "unrelated database"), (9.0, "pass", "document found")])
+
+    async def db_search(query, top_k=5, locale="zh-CN"):
+        db_calls.append(query)
+        return "SELECT 1", [RetrieverResult("database", 1, "sales", "UNRELATED_SALES_SENTINEL", {"db": True})]
+
+    async def grade(*args):
+        return next(grades)
+
+    async def stream(messages, usage=None):
+        context = json.dumps(messages)
+        assert "DOCUMENT_EVIDENCE" in context
+        assert "UNRELATED_SALES_SENTINEL" not in context
+        yield "document fact [1]"
+
+    monkeypatch.setattr(orchestrator.db_retriever, "search", db_search)
+    monkeypatch.setattr(orchestrator, "do_grade", grade)
+    monkeypatch.setattr(orchestrator, "stream_generate", stream)
+    events = _parse_events([ev async for ev in orchestrator.run_ask(1, question, [9])])
+    assert db_calls == [question]
+    assert h.calls["gather"][0]["kb_ids"] == [9]
+    assert any(kind == "router" and payload.get("intent") == "kb_qa" for kind, payload in events)
+    citation = next(payload for kind, payload in events if kind == "citation")
+    assert citation["citations"][0]["doc_id"] == 30
+    assert citation["citations"][0]["ref_id"] == 1
+    assert events[-1][0] == "done"
+
+
+async def test_disabled_database_cannot_be_selected_even_if_router_requests_it(h, monkeypatch):
+    h.intent = "data_query"
+
+    async def enabled():
+        return {"vector": True, "keyword": True, "database": False}
+
+    async def forbidden_query(*args, **kwargs):
+        pytest.fail("Disabled data source must not be queried")
+
+    monkeypatch.setattr(orchestrator, "enabled_sources", enabled)
+    monkeypatch.setattr(orchestrator.db_retriever, "search", forbidden_query)
+    events = _parse_events([ev async for ev in orchestrator.run_ask(1, "question", [9])])
+    assert next(payload for kind, payload in events if kind == "router")["intent"] == "kb_qa"
+    assert h.calls["gather"][0]["kb_ids"] == [9]
+    assert events[-1][0] == "done"
 
 
 # ---------- 总结（轻量检索） ----------
@@ -401,8 +459,8 @@ async def test_final_stream_matches_persisted_exhaustion_warning(h, monkeypatch)
 async def test_reflect_backflow_in_data_query_hits_database(h, monkeypatch):
     """data_query 场景的反思回流回到数据库而不是知识库"""
     h.intent = "data_query"
-    h.grade_score = 2.0
-    h.grade_verdict = "fail"
+    h.grade_score = 9.0
+    h.grade_verdict = "pass"
     h.reflect_results = ["fail", "pass"]
     captured = {}
 

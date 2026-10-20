@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { useI18n } from 'vue-i18n'
+import i18n from '@/i18n'
 import type { KbDocument, KnowledgeBase } from '@/api/types'
 import * as adminApi from '@/api/admin'
 
@@ -13,6 +13,7 @@ export const useKbStore = defineStore('kb', () => {
   const selectedKbId = ref<number | null>(null)
   const loading = ref(false)
   const creating = ref(false)
+  const deleting = ref(false)
   const documentsRefreshing = ref(false)
 
   const kbs = ref<KnowledgeBase[]>([])
@@ -22,20 +23,29 @@ export const useKbStore = defineStore('kb', () => {
   const processingCount = computed(() => documents.value.filter((d) => ['parsing', 'chunking', 'embedding'].includes(d.status)).length)
   const failedCount = computed(() => documents.value.filter((d) => d.status === 'failed').length)
 
+  let kbRequest = 0
+  let documentRequest = 0
+
   async function loadKbs(): Promise<void> {
-    kbs.value = await adminApi.listKbs()
+    const request = ++kbRequest
+    const result = await adminApi.listKbs()
+    if (request === kbRequest) kbs.value = result
   }
 
   async function loadDocuments(): Promise<void> {
+    const request = ++documentRequest
+    const kbId = selectedKbId.value
     if (!selectedKbId.value) {
       documents.value = []
+      documentsRefreshing.value = false
       return
     }
     documentsRefreshing.value = true
     try {
-      documents.value = await adminApi.listDocuments(selectedKbId.value)
+      const result = await adminApi.listDocuments(selectedKbId.value)
+      if (request === documentRequest && kbId === selectedKbId.value) documents.value = result
     } finally {
-      documentsRefreshing.value = false
+      if (request === documentRequest) documentsRefreshing.value = false
     }
   }
 
@@ -87,7 +97,7 @@ export const useKbStore = defineStore('kb', () => {
   }
 
   async function upload(files: File[]): Promise<{ ok: number; errors: string[] }> {
-    const { t } = useI18n({ useScope: 'global' })
+    const { t } = i18n.global
     if (!selectedKbId.value) return { ok: 0, errors: [t('kb.noSelection')] }
     let ok = 0
     const errors: string[] = []
@@ -101,6 +111,23 @@ export const useKbStore = defineStore('kb', () => {
     }
     await refresh()
     return { ok, errors }
+  }
+
+  async function removeKb(kbId: number): Promise<void> {
+    if (deleting.value) return
+    deleting.value = true
+    try {
+      await adminApi.deleteKb(kbId)
+      ++kbRequest
+      kbs.value = kbs.value.filter(k => k.id !== kbId)
+      if (selectedKbId.value === kbId) {
+        ++documentRequest
+        documents.value = []
+        selectedKbId.value = kbs.value[0]?.id ?? null
+      }
+    } finally {
+      deleting.value = false
+    }
   }
 
   async function removeDoc(docId: number): Promise<void> {
@@ -122,12 +149,14 @@ export const useKbStore = defineStore('kb', () => {
     documents,
     loading,
     creating,
+    deleting,
     documentsRefreshing,
     processingCount,
     failedCount,
     init,
     refresh,
     createKb,
+    removeKb,
     upload,
     removeDoc,
     retryDoc,

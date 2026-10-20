@@ -29,6 +29,10 @@ export async function createKb(name: string, description: string): Promise<Knowl
   return apiJson<KnowledgeBase>('/api/admin/kb', jsonInit('POST', { name, description }))
 }
 
+export async function deleteKb(kbId: number): Promise<void> {
+  await apiJson(`/api/admin/kb/${kbId}`, { method: 'DELETE' })
+}
+
 /** GET /api/admin/kb/{kb_id}/documents */
 export async function listDocuments(kbId: number): Promise<KbDocument[]> {
   return apiJson<KbDocument[]>(`/api/admin/kb/${kbId}/documents`)

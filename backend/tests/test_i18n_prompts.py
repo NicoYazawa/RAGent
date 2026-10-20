@@ -1,10 +1,26 @@
 """LLM 提示词双语化 — 语言探测 + 提示词 bundle 一致性"""
 import re
 
+import pytest
+
 from app.agent import prompts
 from app.agent.llm import detect_lang
 
 CJK = re.compile(r"[\u4e00-\u9fff]")
+
+
+@pytest.mark.parametrize("locale", ["zh-CN", "en-US"])
+def test_router_and_sql_generator_receive_the_same_source_capabilities(locale):
+    schema = prompts.BUSINESS_DB_SCHEMAS[locale]
+    assert schema in prompts.router_user("question", None, locale=locale)
+    assert schema in prompts.get_prompt("nl2sql_sys", locale)
+
+
+@pytest.mark.parametrize("locale", ["zh-CN", "en-US"])
+def test_disabled_database_is_not_advertised_to_router(locale):
+    text = prompts.router_user("question", None, locale=locale, database_enabled=False)
+    assert "sales" not in text
+    assert prompts.BUSINESS_DB_SCHEMAS[locale] not in text
 
 
 def test_detect_lang():

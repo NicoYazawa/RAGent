@@ -535,15 +535,19 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
             (question[:18] + ("…" if len(question) > 18 else ""), session_id),
         )
 
+    # 以当前启用的数据源能力约束路由，而不是让模型猜测有哪些业务表。
+    src_enabled = await enabled_sources()
     # ① Router 意图路由（带图时直接读图提取图中要点；带图问题一律 kb_qa：先检索知识库，再结合图片回答）
     r = await _judge_retry(
         RouterOut,
         prompts.get_prompt("router_sys", st.lang),
-        prompts.router_user(question, history, len(st.image_data_urls), st.lang),
+        prompts.router_user(question, history, len(st.image_data_urls), st.lang, database_enabled=src_enabled["database"]),
         st.usage,
         images=st.image_data_urls,
     )
     if r.intent not in VALID_INTENTS:
+        r.intent = "kb_qa"
+    if r.intent == "data_query" and not src_enabled["database"]:
         r.intent = "kb_qa"
     # 代码层兜底强制：附图消息不走闲聊/数据查询旁路，统一主链检索 + 视觉生成
     if st.image_data_urls:
@@ -597,14 +601,19 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
         detail = t("sse.grade.score", st.locale, score=score, icon=verdict_icon(verdict, st.locale), suffix="")
         yield sse("grade", 4, detail, score=score, verdict=verdict, reason=reason)
         st.mark(4, "grade", detail, {"score": score, "verdict": verdict, "reason": reason})
-        if verdict != "pass":
-            disclaimer = t("disclaimer.db_insufficient", st.locale)
-        async for ev in _generate_and_finish(st, history, kb_ids, ctx_blocks, items, disclaimer, supp_db=True):
-            yield ev
-        return
+        if verdict == "pass":
+            async for ev in _generate_and_finish(st, history, kb_ids, ctx_blocks, items, disclaimer, supp_db=True):
+                yield ev
+            return
+        # 数据库无关或证据不足不能证明文档库缺失；回到完整知识库链路，
+        # 不把无关 SQL 结果带入生成上下文或最终引用。
+        r.intent = "kb_qa"
+        detail = t("sse.router.db_fallback", st.locale)
+        payload = {"intent": r.intent, "confidence": r.confidence, "fallback_from": "data_query", "reason": reason}
+        yield sse("router", 1, detail, **payload)
+        st.mark(1, "router", detail, payload)
 
     # ---- 知识问答 / 总结主链路 ----
-    src_enabled = await enabled_sources()
     rerank_on = settings.rerank_enabled and _rerank_ready()
     st.rerank_on = rerank_on
     # provider 不可用时 rerank_on=False，候选深度保持默认（Important 1 修复）

@@ -147,6 +147,26 @@ class Elastic:
         )
         r.raise_for_status()
 
+    async def delete_by_kb(self, kb_id: int) -> None:
+        # delete_by_query 仅能看到已刷新的切片；bulk 写入后立即删除也必须完整清理。
+        refreshed = await self.client.post(f"/{INDEX}/_refresh")
+        if refreshed.status_code == 404 and refreshed.json().get('error', {}).get('type') == 'index_not_found_exception':
+            return
+        refreshed.raise_for_status()
+        if refreshed.json().get('_shards', {}).get('failed', 0):
+            raise RuntimeError('Knowledge base index refresh incomplete; please retry.')
+        r = await self.client.post(
+            f"/{INDEX}/_delete_by_query",
+            json={"query": {"term": {"kb_id": kb_id}}},
+            params={"refresh": "true"},
+        )
+        if r.status_code == 404 and r.json().get('error', {}).get('type') == 'index_not_found_exception':
+            return
+        r.raise_for_status()
+        result = r.json()
+        if result.get('timed_out') or result.get('failures') or result.get('version_conflicts'):
+            raise RuntimeError('Knowledge base index cleanup incomplete; please retry.')
+
     async def count(self) -> int:
         r = await self.client.get(f"/{INDEX}/_count")
         r.raise_for_status()

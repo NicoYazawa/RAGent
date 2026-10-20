@@ -26,6 +26,7 @@ MESSAGES: dict[str, dict[str, str]] = {
     "intent.summarize": {"zh-CN": "总结（走生成侧，轻量检索）", "en-US": "Summarization (generation side, lightweight retrieval)"},
     # —— ② 路由事件 ——
     "sse.router.judging": {"zh-CN": "正在判断问题类型 → {intent}", "en-US": "Classifying intent → {intent}"},
+    "sse.router.db_fallback": {"zh-CN": "业务数据库证据不足，转为知识问答并检索已上传文档", "en-US": "Business-database evidence is insufficient; switching to knowledge-base Q&A and retrieving uploaded documents"},
     "sse.router.image_note": {"zh-CN": "（附图问答，图中要点：{note}）", "en-US": "(Image-based Q&A, key points in the image: {note})"},
     "sse.router.no_note": {"zh-CN": "未提取到", "en-US": "not extracted"},
     # —— ③ 改写事件 ——
@@ -88,6 +89,7 @@ MESSAGES: dict[str, dict[str, str]] = {
     "api.session_not_found": {"zh-CN": "会话不存在", "en-US": "Session not found."},
     "api.doc_not_found": {"zh-CN": "文档不存在", "en-US": "Document not found."},
     "api.kb_not_found": {"zh-CN": "知识库不存在", "en-US": "Knowledge base not found."},
+    "api.kb_busy": {"zh-CN": "知识库内有文档正在入库，请等待处理完成后再删除", "en-US": "Documents are being processed. Wait until ingestion finishes before deleting."},
     "api.log_not_found": {"zh-CN": "决策日志不存在", "en-US": "Decision log not found."},
     "api.image_not_found": {"zh-CN": "图片不存在", "en-US": "Image not found."},
     "api.unknown_source": {"zh-CN": "未知检索源：{source}", "en-US": "Unknown retrieval source: {source}"},

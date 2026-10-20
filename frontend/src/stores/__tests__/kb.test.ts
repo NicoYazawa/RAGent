@@ -5,6 +5,7 @@ vi.mock('@/api/admin', () => ({
   listKbs: vi.fn(),
   listDocuments: vi.fn(),
   createKb: vi.fn(),
+  deleteKb: vi.fn(),
   uploadDocument: vi.fn(),
   deleteDocument: vi.fn(),
   retryDocument: vi.fn(),
@@ -12,10 +13,6 @@ vi.mock('@/api/admin', () => ({
   updateDatasources: vi.fn(),
   queryDecisionLogs: vi.fn(),
   getDecisionLog: vi.fn(),
-}))
-
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({ t: (k: string) => k }),
 }))
 
 import * as adminApi from '@/api/admin'
@@ -35,6 +32,43 @@ beforeEach(() => {
 })
 
 describe('kb store', () => {
+  it('删除后忽略旧轮询返回的库和文档', async () => {
+    mockAdmin.listKbs.mockResolvedValue([kb(1)])
+    mockAdmin.listDocuments.mockResolvedValue([])
+    mockAdmin.deleteKb.mockResolvedValue(undefined)
+    const s = useKbStore()
+    await s.init()
+    await Promise.resolve()
+    let resolveKbs!: (value: any[]) => void
+    let resolveDocs!: (value: any[]) => void
+    mockAdmin.listKbs.mockReturnValueOnce(new Promise(r => { resolveKbs = r }))
+    mockAdmin.listDocuments.mockReturnValueOnce(new Promise(r => { resolveDocs = r }))
+    const pending = s.refresh()
+    await s.removeKb(1)
+    resolveKbs([kb(1)])
+    resolveDocs([doc(1, 'ready')])
+    await pending
+    expect(s.kbs).toEqual([])
+    expect(s.documents).toEqual([])
+    expect(s.selectedKbId).toBeNull()
+  })
+  it('删除成功后选择剩余知识库，失败时保留数据', async () => {
+    mockAdmin.listKbs.mockResolvedValue([kb(1), kb(2)])
+    mockAdmin.listDocuments.mockResolvedValue([])
+    const s = useKbStore()
+    await s.init()
+    mockAdmin.deleteKb.mockRejectedValueOnce(new Error('busy'))
+    await expect(s.removeKb(1)).rejects.toThrow('busy')
+    expect(s.kbs).toHaveLength(2)
+    expect(s.selectedKbId).toBe(1)
+    mockAdmin.deleteKb.mockResolvedValue(undefined)
+    await s.removeKb(1)
+    expect(s.selectedKbId).toBe(2)
+    expect(s.kbs.map(k => k.id)).toEqual([2])
+    await s.removeKb(2)
+    expect(s.selectedKbId).toBeNull()
+    expect(s.documents).toEqual([])
+  })
   it('init 加载知识库并自动选中第一个', async () => {
     mockAdmin.listKbs.mockResolvedValue([kb(1), kb(2)])
     mockAdmin.listDocuments.mockResolvedValue([])
