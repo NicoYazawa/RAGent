@@ -1,6 +1,6 @@
 # RAGent
 
-[![CI](https://github.com/NicoYazawa/RAGent/actions/workflows/ci.yml/badge.svg)](https://github.com/NicoYazawa/RAGent/actions/workflows/ci.yml)
+简体中文 | [English](README.en.md)
 
 一个支持多知识库、混合检索和可回放决策链的 RAG 问答项目。前端使用 Vue 3，后端使用 FastAPI，通过 SSE 展示检索、纠正、生成与反思过程。
 
@@ -23,7 +23,7 @@
 | 元数据 | MySQL 8：文档、切片、会话、数据源配置与决策日志 |
 | 检索索引 | Elasticsearch 8：dense vector kNN、BM25；IK 不可用时回退 standard 分词器 |
 | 模型接口 | OpenAI 兼容接口；适配器目录位于 `backend/app/providers/` |
-| 部署与测试 | Docker Compose、Nginx、pytest、Ruff、Vitest、GitHub Actions |
+| 部署 | Docker Compose、Nginx |
 
 文档入库：`上传 → 解析 → 切片 → Embedding → Elasticsearch + MySQL`。
 
@@ -98,7 +98,7 @@ docker compose down
 
 ## 本地开发
 
-后端以 **Python 3.12** 为 CI 基准；前端需要 **Node.js 20.19+ 或 22.12+**，建议使用 Node.js 22。MySQL 和 ES 可使用已有实例，也可在配置根目录 `.env` 后运行 `docker compose up -d db es`。
+后端使用 **Python 3.12**；前端需要 **Node.js 20.19+ 或 22.12+**，建议使用 Node.js 22。MySQL 和 ES 可使用已有实例，也可在配置根目录 `.env` 后运行 `docker compose up -d db es`。
 
 ### 后端
 
@@ -167,45 +167,6 @@ LLM 适配目录包含 `deepseek`、`qwen`、`openai`、`moonshot`、`zhipu`、`
 
 切换供应商时，应清理旧的模型和地址覆盖值，尤其是历史变量 `DEEPSEEK_BASE_URL` / `DASHSCOPE_BASE_URL`。切换 Embedding 模型后需重新向量化已有切片；维度变化时还需重建匹配维度的索引，不要直接对已有索引混用不同模型的向量。
 
-## 测试与 CI
-
-后端检查，在 `backend` 目录执行：
-
-```bash
-python -m ruff check .
-python -m pytest -q
-```
-
-前端检查，在 `frontend` 目录执行：
-
-```bash
-npm run build
-npm run test:coverage
-```
-
-普通单元测试隔离供应商密钥并模拟外部依赖，不需要真实 LLM / Embedding。真实 ES 隔离测试需要显式指定测试实例：
-
-```powershell
-# Windows PowerShell，在 backend 目录下执行
-$env:RAGENT_TEST_ES_URL='http://localhost:9200'
-python -m pytest -q
-```
-
-```bash
-# macOS / Linux，在 backend 目录下执行
-RAGENT_TEST_ES_URL=http://localhost:9200 python -m pytest -q
-```
-
-该测试仅创建并清理独立 UUID 临时索引；未指定环境变量时跳过真实 ES 用例。更多说明见 [检索、答案和引用回归](docs/testing/retrieval-correctness.md)。
-
-[GitHub Actions 工作流](.github/workflows/ci.yml) 在推送 `main` / `master` 及 Pull Request 时运行：
-
-- 后端：Ruff、pytest、真实 Elasticsearch 隔离回归，覆盖率至少 90%。
-- 前端：类型检查、生产构建和 Vitest；语句/行覆盖率至少 90%，分支/函数至少 85%。
-- 保存后端和前端覆盖率报告供下载。
-
-**当前工作流提供 CI 验证，尚未配置镜像发布或自动部署（CD）。**
-
 ## 项目目录
 
 ```text
@@ -221,15 +182,6 @@ RAGent/
 ├── docs/                 # 国际化与回归验证说明
 ├── test_docs/            # 演示文档
 ├── elasticsearch/        # 可选 IK 插件镜像构建配置
-├── .github/workflows/    # GitHub Actions CI
 ├── docker-compose.yml
 └── ragent_init.sql       # 演示数据库建表和种子数据
 ```
-
-## 当前使用边界
-
-项目适合本地演示和开发验证。当前未实现用户认证及会话归属隔离，NL2SQL 路径仍使用应用数据库连接；正式共享部署前需要补齐访问控制和独立只读数据库权限。知识库范围过滤不等同于用户权限控制。
-
-文档入库使用进程内后台任务，重启中断后的任务恢复和跨存储失败补偿尚不完整。扫描版 PDF 未配置 OCR。Nginx 默认配置也尚未对齐后端 20MB 文档上传上限，部署上传大文件时需调整请求体限制。
-
-健康端点在依赖异常时可能仍返回 HTTP 200，请同时查看 JSON 中的 `status`、`mysql`、`elasticsearch` 和 `consistency`。不要仅凭页面能打开判断检索服务已就绪。
