@@ -1,0 +1,71 @@
+决策链	Decision Chain
+六大决策点	Six Decision Points
+意图路由	Intent Router
+意图	Intent
+知识问答	Knowledge-Base Q&A
+数据查询	Data Query
+闲聊	Chitchat
+总结	Summarization
+查询规划	Query Planner
+查询改写	Query Rewriting
+子问题	Sub-queries
+指代消解	Coreference Resolution
+假设性答案文档	Hypothetical Document (HyDE)
+多路检索	Multi-Lane Retrieval
+检索路	Retrieval Lane
+向量检索	Vector Retrieval
+关键词检索	Keyword Retrieval
+混合检索	Hybrid Retrieval
+融合	Fusion
+粗排	First-Stage Retrieval
+精排	Reranking
+检索质量评估	Retrieval Grader
+相关度	Relevance Score
+纠正	Correction
+纠正轮次	Correction Round
+放弃检索	Give Up Retrieval
+反思	Reflection
+回流	Reflect Backflow
+引用溯源	Citation Attribution
+引用序号	Citation Marker
+答案生成	Answer Generation
+首 token	First Token
+流式输出	Streaming Output
+决策日志	Decision Log
+知识库	Knowledge Base
+文档上传	Document Upload
+文档解析	Document Parsing
+切片	Chunk
+切片预览	Chunk Preview
+章节路径	Section Path
+入库	Ingestion
+重新入库	Re-ingestion
+向量化	Embedding
+批量向量化	Batch Embedding
+失败重试	Retry on Failure
+文档状态	Document Status
+数据源	Data Source
+数据源配置	Data Source Configuration
+只读账号	Read-Only Account
+业务数据库	Business Database
+查询结果集	Result Set
+会话	Session
+新会话	New Session
+多轮上下文	Multi-Turn Context
+示例问题	Sample Questions
+附图问答	Image-Based Q&A
+决策链时间轴	Decision Timeline
+降级	Degraded
+健康检查	Health Check
+启动自检	Startup Self-Check
+一致性检查	Consistency Check
+索引维度	Index Dimensions
+金标准集	Gold Set
+基线	Baseline
+进退步	Improvement / Regression
+灰度开关	Feature Flag
+熔断	Circuit Breaker
+平均倒数排名	Mean Reciprocal Rank (MRR)
+归一化折损累积增益	Normalized Discounted Cumulative Gain (nDCG)
+召回率	Recall
+检索测试	Retrieval Playground

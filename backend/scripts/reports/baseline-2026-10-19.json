@@ -1,0 +1,2768 @@
+{
+ "tag": "baseline-2026-10-19",
+ "config": {
+  "top_k": 5,
+  "rerank": false
+ },
+ "results": [
+  {
+   "id": "kaoqin-01",
+   "q": "迟到是怎么认定和处罚的？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:员工考勤与休假管理制度#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工考勤与休假管理制度#3",
+    "chunk:信息安全应急响应预案#2",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:差旅费用报销管理办法#6",
+    "chunk:检索增强生成技术原理说明#2",
+    "chunk:员工考勤与休假管理制度#5",
+    "chunk:账号权限管理与审计规范#5",
+    "chunk:检索增强生成技术原理说明#10"
+   ],
+   "doc_keys": [
+    "doc:员工考勤与休假管理制度",
+    "doc:信息安全应急响应预案",
+    "doc:网络故障排查与处理手册",
+    "doc:差旅费用报销管理办法",
+    "doc:检索增强生成技术原理说明",
+    "doc:员工考勤与休假管理制度",
+    "doc:账号权限管理与审计规范",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 341.3,
+    "keyword_ms": 14.5,
+    "rerank_ms": 0.0,
+    "total_ms": 355.9
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "kaoqin-02",
+   "q": "上班忘记打卡有什么补救办法？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:员工考勤与休假管理制度#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工考勤与休假管理制度#3",
+    "chunk:员工手册-入职与试用期指引#8",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:检索增强生成技术原理说明#2"
+   ],
+   "doc_keys": [
+    "doc:员工考勤与休假管理制度",
+    "doc:员工手册-入职与试用期指引",
+    "doc:网络故障排查与处理手册",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 151.3,
+    "keyword_ms": 12.9,
+    "rerank_ms": 0.0,
+    "total_ms": 164.2
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "kaoqin-03",
+   "q": "工作满十年的员工年假有几天？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:员工考勤与休假管理制度#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工考勤与休假管理制度#5",
+    "chunk:员工手册-入职与试用期指引#7",
+    "chunk:员工考勤与休假管理制度#4",
+    "chunk:员工考勤与休假管理制度#2",
+    "chunk:系统API接口文档V2#9"
+   ],
+   "doc_keys": [
+    "doc:员工考勤与休假管理制度",
+    "doc:员工手册-入职与试用期指引",
+    "doc:员工考勤与休假管理制度",
+    "doc:员工考勤与休假管理制度",
+    "doc:系统API接口文档V2"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 186.8,
+    "keyword_ms": 12.2,
+    "rerank_ms": 0.0,
+    "total_ms": 199.0
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "kaoqin-04",
+   "q": "请假三天以上需要谁审批？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:员工考勤与休假管理制度#7"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工考勤与休假管理制度#7",
+    "chunk:公司组织架构与部门职责#8",
+    "chunk:智能问答机器人产品白皮书#4",
+    "chunk:员工考勤与休假管理制度#4",
+    "chunk:差旅费用报销管理办法#3",
+    "chunk:账号权限管理与审计规范#2",
+    "chunk:服务器巡检与日常运维手册#5"
+   ],
+   "doc_keys": [
+    "doc:员工考勤与休假管理制度",
+    "doc:公司组织架构与部门职责",
+    "doc:智能问答机器人产品白皮书",
+    "doc:员工考勤与休假管理制度",
+    "doc:差旅费用报销管理办法",
+    "doc:账号权限管理与审计规范",
+    "doc:服务器巡检与日常运维手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 175.2,
+    "keyword_ms": 13.0,
+    "rerank_ms": 0.0,
+    "total_ms": 188.3
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "kaoqin-05",
+   "q": "公司每天上下班时间是怎么规定的？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:员工考勤与休假管理制度#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工考勤与休假管理制度#2",
+    "chunk:数据库备份与恢复操作指南#4",
+    "chunk:员工考勤与休假管理制度#3",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:员工手册-入职与试用期指引#7"
+   ],
+   "doc_keys": [
+    "doc:员工考勤与休假管理制度",
+    "doc:数据库备份与恢复操作指南",
+    "doc:员工考勤与休假管理制度",
+    "doc:网络故障排查与处理手册",
+    "doc:员工手册-入职与试用期指引"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 227.0,
+    "keyword_ms": 14.8,
+    "rerank_ms": 0.0,
+    "total_ms": 241.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "kaoqin-06",
+   "q": "加班需要提前多久申请？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:员工考勤与休假管理制度#4"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工考勤与休假管理制度#4",
+    "chunk:员工手册-入职与试用期指引#8",
+    "chunk:账号权限管理与审计规范#2",
+    "chunk:会议室使用与行政服务指南#4",
+    "chunk:会议室使用与行政服务指南#2",
+    "chunk:员工手册-入职与试用期指引#2"
+   ],
+   "doc_keys": [
+    "doc:员工考勤与休假管理制度",
+    "doc:员工手册-入职与试用期指引",
+    "doc:账号权限管理与审计规范",
+    "doc:会议室使用与行政服务指南",
+    "doc:会议室使用与行政服务指南",
+    "doc:员工手册-入职与试用期指引"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 177.6,
+    "keyword_ms": 12.8,
+    "rerank_ms": 0.0,
+    "total_ms": 190.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "org-01",
+   "q": "产品研发中心下设哪几个组，各自负责什么？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:公司组织架构与部门职责#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:公司组织架构与部门职责#3",
+    "chunk:信息安全应急响应预案#3",
+    "chunk:公司组织架构与部门职责#6"
+   ],
+   "doc_keys": [
+    "doc:公司组织架构与部门职责",
+    "doc:信息安全应急响应预案",
+    "doc:公司组织架构与部门职责"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 174.7,
+    "keyword_ms": 14.7,
+    "rerank_ms": 0.0,
+    "total_ms": 189.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "org-02",
+   "q": "部门之间职责有争议找谁处理？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:公司组织架构与部门职责#7"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:公司组织架构与部门职责#7",
+    "chunk:公司组织架构与部门职责#3",
+    "chunk:信息安全应急响应预案#3",
+    "chunk:公司组织架构与部门职责#1"
+   ],
+   "doc_keys": [
+    "doc:公司组织架构与部门职责",
+    "doc:公司组织架构与部门职责",
+    "doc:信息安全应急响应预案",
+    "doc:公司组织架构与部门职责"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 185.0,
+    "keyword_ms": 11.7,
+    "rerank_ms": 0.0,
+    "total_ms": 196.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "org-03",
+   "q": "信息技术部管哪些事情？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:公司组织架构与部门职责#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:公司组织架构与部门职责#6",
+    "chunk:检索增强生成技术原理说明#1",
+    "chunk:网络故障排查与处理手册#8",
+    "chunk:员工手册-入职与试用期指引#1",
+    "chunk:产品需求文档-智能客服机器人PRD#1"
+   ],
+   "doc_keys": [
+    "doc:公司组织架构与部门职责",
+    "doc:检索增强生成技术原理说明",
+    "doc:网络故障排查与处理手册",
+    "doc:员工手册-入职与试用期指引",
+    "doc:产品需求文档-智能客服机器人PRD"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 165.1,
+    "keyword_ms": 11.9,
+    "rerank_ms": 0.0,
+    "total_ms": 177.0
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "org-04",
+   "q": "公司一共设有哪些部门？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:公司组织架构与部门职责#1",
+    "chunk:公司组织架构与部门职责#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:公司组织架构与部门职责#1",
+    "chunk:公司组织架构与部门职责#3"
+   ],
+   "doc_keys": [
+    "doc:公司组织架构与部门职责",
+    "doc:公司组织架构与部门职责"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 0.6131471927654584,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 168.1,
+    "keyword_ms": 11.5,
+    "rerank_ms": 0.0,
+    "total_ms": 179.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "proc-01",
+   "q": "每月物资需求要在几号前提报？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:办公用品采购与领用规范#3"
+   ],
+   "gold_rank": 4,
+   "chunk_keys": [
+    "chunk:办公用品采购与领用规范#7",
+    "chunk:产品需求文档-智能客服机器人PRD#4",
+    "chunk:产品需求文档-智能客服机器人PRD#6",
+    "chunk:办公用品采购与领用规范#3",
+    "chunk:办公用品采购与领用规范#5"
+   ],
+   "doc_keys": [
+    "doc:办公用品采购与领用规范",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:办公用品采购与领用规范",
+    "doc:办公用品采购与领用规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.25,
+    "ndcg@8": 0.43067655807339306,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 161.3,
+    "keyword_ms": 11.9,
+    "rerank_ms": 0.0,
+    "total_ms": 173.2
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "proc-02",
+   "q": "办公用品盘点差异率超过多少要上报？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:办公用品采购与领用规范#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:办公用品采购与领用规范#5",
+    "chunk:数据库备份与恢复操作指南#3",
+    "chunk:办公用品采购与领用规范#3"
+   ],
+   "doc_keys": [
+    "doc:办公用品采购与领用规范",
+    "doc:数据库备份与恢复操作指南",
+    "doc:办公用品采购与领用规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 216.9,
+    "keyword_ms": 13.8,
+    "rerank_ms": 0.0,
+    "total_ms": 230.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "proc-03",
+   "q": "哪些物资可以自己扫码领用？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:办公用品采购与领用规范#4"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:办公用品采购与领用规范#4",
+    "chunk:办公用品采购与领用规范#2",
+    "chunk:差旅费用报销管理办法#3",
+    "chunk:智能问答机器人产品白皮书#5",
+    "chunk:办公用品采购与领用规范#1"
+   ],
+   "doc_keys": [
+    "doc:办公用品采购与领用规范",
+    "doc:办公用品采购与领用规范",
+    "doc:差旅费用报销管理办法",
+    "doc:智能问答机器人产品白皮书",
+    "doc:办公用品采购与领用规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 162.9,
+    "keyword_ms": 11.8,
+    "rerank_ms": 0.0,
+    "total_ms": 174.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "travel-01",
+   "q": "差旅费要在返回后多久内报销？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:差旅费用报销管理办法#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:差旅费用报销管理办法#6"
+   ],
+   "doc_keys": [
+    "doc:差旅费用报销管理办法"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 170.5,
+    "keyword_ms": 11.6,
+    "rerank_ms": 0.0,
+    "total_ms": 182.0
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "travel-02",
+   "q": "伙食补助一天多少钱？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:差旅费用报销管理办法#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:差旅费用报销管理办法#5",
+    "chunk:员工手册-入职与试用期指引#7",
+    "chunk:员工考勤与休假管理制度#7",
+    "chunk:产品需求文档-智能客服机器人PRD#4",
+    "chunk:账号权限管理与审计规范#5"
+   ],
+   "doc_keys": [
+    "doc:差旅费用报销管理办法",
+    "doc:员工手册-入职与试用期指引",
+    "doc:员工考勤与休假管理制度",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:账号权限管理与审计规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 154.5,
+    "keyword_ms": 10.3,
+    "rerank_ms": 0.0,
+    "total_ms": 164.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "travel-03",
+   "q": "总监出差能坐商务舱吗？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:差旅费用报销管理办法#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:差旅费用报销管理办法#3",
+    "chunk:智能问答机器人产品白皮书#2"
+   ],
+   "doc_keys": [
+    "doc:差旅费用报销管理办法",
+    "doc:智能问答机器人产品白皮书"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 1409.9,
+    "keyword_ms": 12.0,
+    "rerank_ms": 0.0,
+    "total_ms": 1422.0
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "travel-04",
+   "q": "住宿费超了怎么办？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:差旅费用报销管理办法#4"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:差旅费用报销管理办法#4",
+    "chunk:数据库备份与恢复操作指南#3",
+    "chunk:差旅费用报销管理办法#7"
+   ],
+   "doc_keys": [
+    "doc:差旅费用报销管理办法",
+    "doc:数据库备份与恢复操作指南",
+    "doc:差旅费用报销管理办法"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 173.1,
+    "keyword_ms": 11.2,
+    "rerank_ms": 0.0,
+    "total_ms": 184.3
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "meeting-01",
+   "q": "会议室最早可以提前几天订？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:会议室使用与行政服务指南#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:会议室使用与行政服务指南#2",
+    "chunk:会议室使用与行政服务指南#1",
+    "chunk:差旅费用报销管理办法#3",
+    "chunk:会议室使用与行政服务指南#3"
+   ],
+   "doc_keys": [
+    "doc:会议室使用与行政服务指南",
+    "doc:会议室使用与行政服务指南",
+    "doc:差旅费用报销管理办法",
+    "doc:会议室使用与行政服务指南"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 256.2,
+    "keyword_ms": 11.9,
+    "rerank_ms": 0.0,
+    "total_ms": 268.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "meeting-02",
+   "q": "开涉密会议要去哪间？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:会议室使用与行政服务指南#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:会议室使用与行政服务指南#3",
+    "chunk:会议室使用与行政服务指南#1",
+    "chunk:信息安全应急响应预案#7",
+    "chunk:账号权限管理与审计规范#5",
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:前端界面设计与交互规范#3"
+   ],
+   "doc_keys": [
+    "doc:会议室使用与行政服务指南",
+    "doc:会议室使用与行政服务指南",
+    "doc:信息安全应急响应预案",
+    "doc:账号权限管理与审计规范",
+    "doc:服务器巡检与日常运维手册",
+    "doc:前端界面设计与交互规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 173.8,
+    "keyword_ms": 10.9,
+    "rerank_ms": 0.0,
+    "total_ms": 184.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "meeting-03",
+   "q": "行政服务台几点上班？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:会议室使用与行政服务指南#4"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:会议室使用与行政服务指南#4",
+    "chunk:公司组织架构与部门职责#5",
+    "chunk:员工考勤与休假管理制度#2",
+    "chunk:服务器巡检与日常运维手册#7",
+    "chunk:服务器巡检与日常运维手册#1",
+    "chunk:办公用品采购与领用规范#7",
+    "chunk:会议室使用与行政服务指南#1",
+    "chunk:员工手册-入职与试用期指引#3"
+   ],
+   "doc_keys": [
+    "doc:会议室使用与行政服务指南",
+    "doc:公司组织架构与部门职责",
+    "doc:员工考勤与休假管理制度",
+    "doc:服务器巡检与日常运维手册",
+    "doc:服务器巡检与日常运维手册",
+    "doc:办公用品采购与领用规范",
+    "doc:会议室使用与行政服务指南",
+    "doc:员工手册-入职与试用期指引"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 178.2,
+    "keyword_ms": 11.3,
+    "rerank_ms": 0.0,
+    "total_ms": 189.5
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "handbook-01",
+   "q": "三年劳动合同的试用期多久？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:员工手册-入职与试用期指引#4"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工手册-入职与试用期指引#4",
+    "chunk:员工考勤与休假管理制度#5",
+    "chunk:检索增强生成技术原理说明#6",
+    "chunk:员工手册-入职与试用期指引#6",
+    "chunk:员工考勤与休假管理制度#1",
+    "chunk:员工考勤与休假管理制度#2",
+    "chunk:员工手册-入职与试用期指引#3",
+    "chunk:办公用品采购与领用规范#1"
+   ],
+   "doc_keys": [
+    "doc:员工手册-入职与试用期指引",
+    "doc:员工考勤与休假管理制度",
+    "doc:检索增强生成技术原理说明",
+    "doc:员工手册-入职与试用期指引",
+    "doc:员工考勤与休假管理制度",
+    "doc:员工考勤与休假管理制度",
+    "doc:员工手册-入职与试用期指引",
+    "doc:办公用品采购与领用规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 200.6,
+    "keyword_ms": 11.9,
+    "rerank_ms": 0.0,
+    "total_ms": 212.5
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "handbook-02",
+   "q": "什么样的员工能当导师？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:员工手册-入职与试用期指引#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工手册-入职与试用期指引#5",
+    "chunk:检索增强生成技术原理说明#9",
+    "chunk:网络故障排查与处理手册#1"
+   ],
+   "doc_keys": [
+    "doc:员工手册-入职与试用期指引",
+    "doc:检索增强生成技术原理说明",
+    "doc:网络故障排查与处理手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 221.0,
+    "keyword_ms": 13.8,
+    "rerank_ms": 0.0,
+    "total_ms": 234.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "handbook-03",
+   "q": "新员工报到第一天流程是什么？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:员工手册-入职与试用期指引#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:员工手册-入职与试用期指引#3",
+    "chunk:差旅费用报销管理办法#6",
+    "chunk:员工考勤与休假管理制度#7",
+    "chunk:信息安全应急响应预案#4"
+   ],
+   "doc_keys": [
+    "doc:员工手册-入职与试用期指引",
+    "doc:差旅费用报销管理办法",
+    "doc:员工考勤与休假管理制度",
+    "doc:信息安全应急响应预案"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 163.3,
+    "keyword_ms": 11.8,
+    "rerank_ms": 0.0,
+    "total_ms": 175.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "prd-01",
+   "q": "首 token 响应时间要求多少？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:产品需求文档-智能客服机器人PRD#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:产品需求文档-智能客服机器人PRD#5",
+    "chunk:网络故障排查与处理手册#7",
+    "chunk:系统API接口文档V2#10",
+    "chunk:员工考勤与休假管理制度#2",
+    "chunk:前端界面设计与交互规范#5",
+    "chunk:前端界面设计与交互规范#7",
+    "chunk:智能问答机器人产品白皮书#6",
+    "chunk:信息安全应急响应预案#4"
+   ],
+   "doc_keys": [
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:网络故障排查与处理手册",
+    "doc:系统API接口文档V2",
+    "doc:员工考勤与休假管理制度",
+    "doc:前端界面设计与交互规范",
+    "doc:前端界面设计与交互规范",
+    "doc:智能问答机器人产品白皮书",
+    "doc:信息安全应急响应预案"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 197.9,
+    "keyword_ms": 11.1,
+    "rerank_ms": 0.0,
+    "total_ms": 209.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": false
+   },
+   "rerank": null
+  },
+  {
+   "id": "prd-02",
+   "q": "P0 功能验收通过率要求？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:产品需求文档-智能客服机器人PRD#7"
+   ],
+   "gold_rank": 2,
+   "chunk_keys": [
+    "chunk:网络故障排查与处理手册#7",
+    "chunk:产品需求文档-智能客服机器人PRD#7",
+    "chunk:产品需求文档-智能客服机器人PRD#4",
+    "chunk:服务器巡检与日常运维手册#2",
+    "chunk:监控告警体系配置规范#7"
+   ],
+   "doc_keys": [
+    "doc:网络故障排查与处理手册",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:服务器巡检与日常运维手册",
+    "doc:监控告警体系配置规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.5,
+    "ndcg@8": 0.6309297535714575,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 0.5
+   },
+   "timings": {
+    "vector_ms": 158.5,
+    "keyword_ms": 12.6,
+    "rerank_ms": 0.0,
+    "total_ms": 171.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "prd-03",
+   "q": "客服中心每天多少通咨询？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:产品需求文档-智能客服机器人PRD#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:产品需求文档-智能客服机器人PRD#2",
+    "chunk:智能问答机器人产品白皮书#11",
+    "chunk:智能问答机器人产品白皮书#2",
+    "chunk:会议室使用与行政服务指南#4",
+    "chunk:产品需求文档-智能客服机器人PRD#3",
+    "chunk:产品需求文档-智能客服机器人PRD#6",
+    "chunk:数据库备份与恢复操作指南#4",
+    "chunk:服务器巡检与日常运维手册#7"
+   ],
+   "doc_keys": [
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:智能问答机器人产品白皮书",
+    "doc:智能问答机器人产品白皮书",
+    "doc:会议室使用与行政服务指南",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:数据库备份与恢复操作指南",
+    "doc:服务器巡检与日常运维手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 176.6,
+    "keyword_ms": 11.1,
+    "rerank_ms": 0.0,
+    "total_ms": 187.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "rag-01",
+   "q": "混合检索用的是什么融合算法？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:检索增强生成技术原理说明#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:检索增强生成技术原理说明#6",
+    "chunk:智能问答机器人产品白皮书#4",
+    "chunk:系统API接口文档V2#9",
+    "chunk:智能问答机器人产品白皮书#9",
+    "chunk:检索增强生成技术原理说明#9",
+    "chunk:检索增强生成技术原理说明#1",
+    "chunk:检索增强生成技术原理说明#10"
+   ],
+   "doc_keys": [
+    "doc:检索增强生成技术原理说明",
+    "doc:智能问答机器人产品白皮书",
+    "doc:系统API接口文档V2",
+    "doc:智能问答机器人产品白皮书",
+    "doc:检索增强生成技术原理说明",
+    "doc:检索增强生成技术原理说明",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 177.6,
+    "keyword_ms": 11.0,
+    "rerank_ms": 0.0,
+    "total_ms": 188.6
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "rag-02",
+   "q": "文档解析支持哪些格式？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:检索增强生成技术原理说明#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:检索增强生成技术原理说明#3",
+    "chunk:智能问答机器人产品白皮书#4",
+    "chunk:系统API接口文档V2#6",
+    "chunk:系统API接口文档V2#4",
+    "chunk:数据源接入配置指南#1"
+   ],
+   "doc_keys": [
+    "doc:检索增强生成技术原理说明",
+    "doc:智能问答机器人产品白皮书",
+    "doc:系统API接口文档V2",
+    "doc:系统API接口文档V2",
+    "doc:数据源接入配置指南"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 184.1,
+    "keyword_ms": 10.7,
+    "rerank_ms": 0.0,
+    "total_ms": 194.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "rag-03",
+   "q": "检索质量用哪些指标衡量？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:检索增强生成技术原理说明#10"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:检索增强生成技术原理说明#10",
+    "chunk:智能问答机器人产品白皮书#5",
+    "chunk:系统API接口文档V2#9",
+    "chunk:监控告警体系配置规范#6",
+    "chunk:检索增强生成技术原理说明#9",
+    "chunk:检索增强生成技术原理说明#7",
+    "chunk:智能问答机器人产品白皮书#6",
+    "chunk:数据库备份与恢复操作指南#4"
+   ],
+   "doc_keys": [
+    "doc:检索增强生成技术原理说明",
+    "doc:智能问答机器人产品白皮书",
+    "doc:系统API接口文档V2",
+    "doc:监控告警体系配置规范",
+    "doc:检索增强生成技术原理说明",
+    "doc:检索增强生成技术原理说明",
+    "doc:智能问答机器人产品白皮书",
+    "doc:数据库备份与恢复操作指南"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 175.6,
+    "keyword_ms": 12.2,
+    "rerank_ms": 0.0,
+    "total_ms": 187.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "rag-04",
+   "q": "知识入库流水线有哪几个阶段？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:检索增强生成技术原理说明#3"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:检索增强生成技术原理说明#3",
+    "chunk:智能问答机器人产品白皮书#3",
+    "chunk:数据源接入配置指南#6",
+    "chunk:系统API接口文档V2#4",
+    "chunk:系统API接口文档V2#3",
+    "chunk:智能问答机器人产品白皮书#5",
+    "chunk:产品需求文档-智能客服机器人PRD#8"
+   ],
+   "doc_keys": [
+    "doc:检索增强生成技术原理说明",
+    "doc:智能问答机器人产品白皮书",
+    "doc:数据源接入配置指南",
+    "doc:系统API接口文档V2",
+    "doc:系统API接口文档V2",
+    "doc:智能问答机器人产品白皮书",
+    "doc:产品需求文档-智能客服机器人PRD"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 327.9,
+    "keyword_ms": 12.9,
+    "rerank_ms": 0.0,
+    "total_ms": 340.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "fe-01",
+   "q": "品牌主色的色值是多少？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:前端界面设计与交互规范#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:前端界面设计与交互规范#2",
+    "chunk:监控告警体系配置规范#3",
+    "chunk:产品需求文档-智能客服机器人PRD#3",
+    "chunk:服务器巡检与日常运维手册#2",
+    "chunk:账号权限管理与审计规范#3",
+    "chunk:公司组织架构与部门职责#4"
+   ],
+   "doc_keys": [
+    "doc:前端界面设计与交互规范",
+    "doc:监控告警体系配置规范",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:服务器巡检与日常运维手册",
+    "doc:账号权限管理与审计规范",
+    "doc:公司组织架构与部门职责"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 173.9,
+    "keyword_ms": 10.7,
+    "rerank_ms": 0.0,
+    "total_ms": 184.6
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "fe-02",
+   "q": "页面切换动画最长多久？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:前端界面设计与交互规范#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:前端界面设计与交互规范#5",
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:检索增强生成技术原理说明#4",
+    "chunk:前端界面设计与交互规范#4",
+    "chunk:检索增强生成技术原理说明#5"
+   ],
+   "doc_keys": [
+    "doc:前端界面设计与交互规范",
+    "doc:服务器巡检与日常运维手册",
+    "doc:检索增强生成技术原理说明",
+    "doc:前端界面设计与交互规范",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 180.3,
+    "keyword_ms": 13.6,
+    "rerank_ms": 0.0,
+    "total_ms": 194.0
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "fe-03",
+   "q": "移动端界面多宽开始变布局？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:前端界面设计与交互规范#7"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:前端界面设计与交互规范#7",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:前端界面设计与交互规范#1",
+    "chunk:服务器巡检与日常运维手册#6",
+    "chunk:前端界面设计与交互规范#3"
+   ],
+   "doc_keys": [
+    "doc:前端界面设计与交互规范",
+    "doc:网络故障排查与处理手册",
+    "doc:前端界面设计与交互规范",
+    "doc:服务器巡检与日常运维手册",
+    "doc:前端界面设计与交互规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 164.0,
+    "keyword_ms": 12.2,
+    "rerank_ms": 0.0,
+    "total_ms": 176.2
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "ds-01",
+   "q": "接入 MySQL 数据源要检查什么？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:数据源接入配置指南#2"
+   ],
+   "gold_rank": 3,
+   "chunk_keys": [
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:数据源接入配置指南#7",
+    "chunk:数据源接入配置指南#2",
+    "chunk:系统API接口文档V2#8"
+   ],
+   "doc_keys": [
+    "doc:服务器巡检与日常运维手册",
+    "doc:数据源接入配置指南",
+    "doc:数据源接入配置指南",
+    "doc:系统API接口文档V2"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.3333333333333333,
+    "ndcg@8": 0.5,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 0.5
+   },
+   "timings": {
+    "vector_ms": 171.3,
+    "keyword_ms": 10.8,
+    "rerank_ms": 0.0,
+    "total_ms": 182.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "ds-02",
+   "q": "表结构改了怎么刷新？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:数据源接入配置指南#4"
+   ],
+   "gold_rank": 2,
+   "chunk_keys": [
+    "chunk:数据源接入配置指南#8",
+    "chunk:数据源接入配置指南#4",
+    "chunk:服务器巡检与日常运维手册#8",
+    "chunk:检索增强生成技术原理说明#7",
+    "chunk:数据源接入配置指南#7"
+   ],
+   "doc_keys": [
+    "doc:数据源接入配置指南",
+    "doc:数据源接入配置指南",
+    "doc:服务器巡检与日常运维手册",
+    "doc:检索增强生成技术原理说明",
+    "doc:数据源接入配置指南"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.5,
+    "ndcg@8": 0.6309297535714575,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 221.9,
+    "keyword_ms": 10.6,
+    "rerank_ms": 0.0,
+    "total_ms": 232.5
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "ds-03",
+   "q": "连通测试失败怎么排查？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:数据源接入配置指南#7"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:数据源接入配置指南#7",
+    "chunk:系统API接口文档V2#9",
+    "chunk:网络故障排查与处理手册#2",
+    "chunk:网络故障排查与处理手册#5",
+    "chunk:网络故障排查与处理手册#4"
+   ],
+   "doc_keys": [
+    "doc:数据源接入配置指南",
+    "doc:系统API接口文档V2",
+    "doc:网络故障排查与处理手册",
+    "doc:网络故障排查与处理手册",
+    "doc:网络故障排查与处理手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 154.4,
+    "keyword_ms": 10.7,
+    "rerank_ms": 0.0,
+    "total_ms": 165.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "api-01",
+   "q": "上传文档大小上限是多少？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:系统API接口文档V2#4"
+   ],
+   "gold_rank": null,
+   "chunk_keys": [
+    "chunk:系统API接口文档V2#10",
+    "chunk:智能问答机器人产品白皮书#4",
+    "chunk:信息安全应急响应预案#6",
+    "chunk:差旅费用报销管理办法#3",
+    "chunk:检索增强生成技术原理说明#1"
+   ],
+   "doc_keys": [
+    "doc:系统API接口文档V2",
+    "doc:智能问答机器人产品白皮书",
+    "doc:信息安全应急响应预案",
+    "doc:差旅费用报销管理办法",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 0.0,
+    "recall@8": 0.0,
+    "mrr": 0.0,
+    "ndcg@8": 0.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 151.9,
+    "keyword_ms": 11.0,
+    "rerank_ms": 0.0,
+    "total_ms": 162.9
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": false
+   },
+   "rerank": null
+  },
+  {
+   "id": "api-02",
+   "q": "对话接口一分钟能调多少次？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:系统API接口文档V2#10"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:系统API接口文档V2#10",
+    "chunk:系统API接口文档V2#6",
+    "chunk:产品需求文档-智能客服机器人PRD#6",
+    "chunk:账号权限管理与审计规范#7",
+    "chunk:前端界面设计与交互规范#5"
+   ],
+   "doc_keys": [
+    "doc:系统API接口文档V2",
+    "doc:系统API接口文档V2",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:账号权限管理与审计规范",
+    "doc:前端界面设计与交互规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 380.4,
+    "keyword_ms": 11.2,
+    "rerank_ms": 0.0,
+    "total_ms": 391.6
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "api-03",
+   "q": "怎么创建一个知识库？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:系统API接口文档V2#3"
+   ],
+   "gold_rank": 2,
+   "chunk_keys": [
+    "chunk:智能问答机器人产品白皮书#3",
+    "chunk:系统API接口文档V2#3",
+    "chunk:检索增强生成技术原理说明#3"
+   ],
+   "doc_keys": [
+    "doc:智能问答机器人产品白皮书",
+    "doc:系统API接口文档V2",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.5,
+    "ndcg@8": 0.6309297535714575,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 0.5
+   },
+   "timings": {
+    "vector_ms": 176.9,
+    "keyword_ms": 12.5,
+    "rerank_ms": 0.0,
+    "total_ms": 189.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "wp-01",
+   "q": "混合检索延迟要求多少毫秒？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:智能问答机器人产品白皮书#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:智能问答机器人产品白皮书#6",
+    "chunk:检索增强生成技术原理说明#9",
+    "chunk:前端界面设计与交互规范#5",
+    "chunk:检索增强生成技术原理说明#6",
+    "chunk:系统API接口文档V2#9",
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:检索增强生成技术原理说明#10"
+   ],
+   "doc_keys": [
+    "doc:智能问答机器人产品白皮书",
+    "doc:检索增强生成技术原理说明",
+    "doc:前端界面设计与交互规范",
+    "doc:检索增强生成技术原理说明",
+    "doc:系统API接口文档V2",
+    "doc:服务器巡检与日常运维手册",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 261.3,
+    "keyword_ms": 10.6,
+    "rerank_ms": 0.0,
+    "total_ms": 271.9
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "wp-02",
+   "q": "系统支持哪些检索方式？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:智能问答机器人产品白皮书#5"
+   ],
+   "gold_rank": null,
+   "chunk_keys": [
+    "chunk:系统API接口文档V2#9",
+    "chunk:智能问答机器人产品白皮书#11",
+    "chunk:智能问答机器人产品白皮书#9",
+    "chunk:检索增强生成技术原理说明#3",
+    "chunk:检索增强生成技术原理说明#7",
+    "chunk:服务器巡检与日常运维手册#3"
+   ],
+   "doc_keys": [
+    "doc:系统API接口文档V2",
+    "doc:智能问答机器人产品白皮书",
+    "doc:智能问答机器人产品白皮书",
+    "doc:检索增强生成技术原理说明",
+    "doc:检索增强生成技术原理说明",
+    "doc:服务器巡检与日常运维手册"
+   ],
+   "metrics": {
+    "recall@5": 0.0,
+    "recall@8": 0.0,
+    "mrr": 0.0,
+    "ndcg@8": 0.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 0.5
+   },
+   "timings": {
+    "vector_ms": 318.1,
+    "keyword_ms": 11.5,
+    "rerank_ms": 0.0,
+    "total_ms": 329.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "wp-03",
+   "q": "那家银行的知识库有多少篇文档？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:智能问答机器人产品白皮书#8"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:智能问答机器人产品白皮书#8",
+    "chunk:系统API接口文档V2#3",
+    "chunk:系统API接口文档V2#5",
+    "chunk:检索增强生成技术原理说明#3",
+    "chunk:产品需求文档-智能客服机器人PRD#8"
+   ],
+   "doc_keys": [
+    "doc:智能问答机器人产品白皮书",
+    "doc:系统API接口文档V2",
+    "doc:系统API接口文档V2",
+    "doc:检索增强生成技术原理说明",
+    "doc:产品需求文档-智能客服机器人PRD"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 317.1,
+    "keyword_ms": 11.3,
+    "rerank_ms": 0.0,
+    "total_ms": 328.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "dba-01",
+   "q": "核心交易库能丢多少数据？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:数据库备份与恢复操作指南#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:数据库备份与恢复操作指南#2",
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:系统API接口文档V2#10",
+    "chunk:数据源接入配置指南#6",
+    "chunk:数据库备份与恢复操作指南#12",
+    "chunk:智能问答机器人产品白皮书#5",
+    "chunk:系统API接口文档V2#8",
+    "chunk:监控告警体系配置规范#3"
+   ],
+   "doc_keys": [
+    "doc:数据库备份与恢复操作指南",
+    "doc:服务器巡检与日常运维手册",
+    "doc:系统API接口文档V2",
+    "doc:数据源接入配置指南",
+    "doc:数据库备份与恢复操作指南",
+    "doc:智能问答机器人产品白皮书",
+    "doc:系统API接口文档V2",
+    "doc:监控告警体系配置规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 183.0,
+    "keyword_ms": 9.8,
+    "rerank_ms": 0.0,
+    "total_ms": 192.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "dba-02",
+   "q": "全量备份凌晨几点跑？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:数据库备份与恢复操作指南#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:数据库备份与恢复操作指南#5",
+    "chunk:数据库备份与恢复操作指南#4"
+   ],
+   "doc_keys": [
+    "doc:数据库备份与恢复操作指南",
+    "doc:数据库备份与恢复操作指南"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 184.0,
+    "keyword_ms": 10.6,
+    "rerank_ms": 0.0,
+    "total_ms": 194.6
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "dba-03",
+   "q": "表被误删了怎么找回？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:数据库备份与恢复操作指南#7"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:数据库备份与恢复操作指南#7",
+    "chunk:数据源接入配置指南#7",
+    "chunk:系统API接口文档V2#8",
+    "chunk:系统API接口文档V2#5",
+    "chunk:数据库备份与恢复操作指南#12",
+    "chunk:服务器巡检与日常运维手册#4",
+    "chunk:检索增强生成技术原理说明#7"
+   ],
+   "doc_keys": [
+    "doc:数据库备份与恢复操作指南",
+    "doc:数据源接入配置指南",
+    "doc:系统API接口文档V2",
+    "doc:系统API接口文档V2",
+    "doc:数据库备份与恢复操作指南",
+    "doc:服务器巡检与日常运维手册",
+    "doc:检索增强生成技术原理说明"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 153.0,
+    "keyword_ms": 8.9,
+    "rerank_ms": 0.0,
+    "total_ms": 161.9
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "net-01",
+   "q": "有台机器上不了外网怎么查？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:网络故障排查与处理手册#4"
+   ],
+   "gold_rank": 4,
+   "chunk_keys": [
+    "chunk:网络故障排查与处理手册#2",
+    "chunk:账号权限管理与审计规范#7",
+    "chunk:数据源接入配置指南#7",
+    "chunk:网络故障排查与处理手册#4",
+    "chunk:服务器巡检与日常运维手册#1",
+    "chunk:网络故障排查与处理手册#1"
+   ],
+   "doc_keys": [
+    "doc:网络故障排查与处理手册",
+    "doc:账号权限管理与审计规范",
+    "doc:数据源接入配置指南",
+    "doc:网络故障排查与处理手册",
+    "doc:服务器巡检与日常运维手册",
+    "doc:网络故障排查与处理手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.25,
+    "ndcg@8": 0.43067655807339306,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 178.3,
+    "keyword_ms": 10.6,
+    "rerank_ms": 0.0,
+    "total_ms": 188.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "net-02",
+   "q": "DNS 时不时解析失败怎么办？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:网络故障排查与处理手册#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:网络故障排查与处理手册#6",
+    "chunk:数据库备份与恢复操作指南#3",
+    "chunk:数据源接入配置指南#7",
+    "chunk:网络故障排查与处理手册#3",
+    "chunk:员工考勤与休假管理制度#2",
+    "chunk:网络故障排查与处理手册#5"
+   ],
+   "doc_keys": [
+    "doc:网络故障排查与处理手册",
+    "doc:数据库备份与恢复操作指南",
+    "doc:数据源接入配置指南",
+    "doc:网络故障排查与处理手册",
+    "doc:员工考勤与休假管理制度",
+    "doc:网络故障排查与处理手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 166.8,
+    "keyword_ms": 9.6,
+    "rerank_ms": 0.0,
+    "total_ms": 176.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "net-03",
+   "q": "CLOSE_WAIT 连接太多是什么原因？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:网络故障排查与处理手册#3"
+   ],
+   "gold_rank": 2,
+   "chunk_keys": [
+    "chunk:网络故障排查与处理手册#2",
+    "chunk:网络故障排查与处理手册#3",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:数据源接入配置指南#7",
+    "chunk:检索增强生成技术原理说明#2",
+    "chunk:前端界面设计与交互规范#1"
+   ],
+   "doc_keys": [
+    "doc:网络故障排查与处理手册",
+    "doc:网络故障排查与处理手册",
+    "doc:网络故障排查与处理手册",
+    "doc:数据源接入配置指南",
+    "doc:检索增强生成技术原理说明",
+    "doc:前端界面设计与交互规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.5,
+    "ndcg@8": 0.6309297535714575,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 154.1,
+    "keyword_ms": 10.1,
+    "rerank_ms": 0.0,
+    "total_ms": 164.2
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "sec-01",
+   "q": "中了勒索病毒第一步做什么？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:信息安全应急响应预案#5"
+   ],
+   "gold_rank": null,
+   "chunk_keys": [
+    "chunk:信息安全应急响应预案#4",
+    "chunk:服务器巡检与日常运维手册#3",
+    "chunk:数据库备份与恢复操作指南#9",
+    "chunk:检索增强生成技术原理说明#2",
+    "chunk:信息安全应急响应预案#7"
+   ],
+   "doc_keys": [
+    "doc:信息安全应急响应预案",
+    "doc:服务器巡检与日常运维手册",
+    "doc:数据库备份与恢复操作指南",
+    "doc:检索增强生成技术原理说明",
+    "doc:信息安全应急响应预案"
+   ],
+   "metrics": {
+    "recall@5": 0.0,
+    "recall@8": 0.0,
+    "mrr": 0.0,
+    "ndcg@8": 0.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 289.9,
+    "keyword_ms": 10.6,
+    "rerank_ms": 0.0,
+    "total_ms": 300.5
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": false
+   },
+   "rerank": null
+  },
+  {
+   "id": "sec-02",
+   "q": "什么情况算一级事件？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:信息安全应急响应预案#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:信息安全应急响应预案#2",
+    "chunk:网络故障排查与处理手册#7",
+    "chunk:检索增强生成技术原理说明#2",
+    "chunk:监控告警体系配置规范#5",
+    "chunk:员工手册-入职与试用期指引#1"
+   ],
+   "doc_keys": [
+    "doc:信息安全应急响应预案",
+    "doc:网络故障排查与处理手册",
+    "doc:检索增强生成技术原理说明",
+    "doc:监控告警体系配置规范",
+    "doc:员工手册-入职与试用期指引"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 181.5,
+    "keyword_ms": 9.9,
+    "rerank_ms": 0.0,
+    "total_ms": 191.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "sec-03",
+   "q": "一级事件要上报给哪些人？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:信息安全应急响应预案#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:信息安全应急响应预案#6",
+    "chunk:信息安全应急响应预案#2",
+    "chunk:监控告警体系配置规范#7",
+    "chunk:智能问答机器人产品白皮书#4",
+    "chunk:差旅费用报销管理办法#3",
+    "chunk:系统API接口文档V2#6"
+   ],
+   "doc_keys": [
+    "doc:信息安全应急响应预案",
+    "doc:信息安全应急响应预案",
+    "doc:监控告警体系配置规范",
+    "doc:智能问答机器人产品白皮书",
+    "doc:差旅费用报销管理办法",
+    "doc:系统API接口文档V2"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 186.0,
+    "keyword_ms": 10.7,
+    "rerank_ms": 0.0,
+    "total_ms": 196.7
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "acc-01",
+   "q": "什么情况必须开双因子认证？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:账号权限管理与审计规范#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:账号权限管理与审计规范#5",
+    "chunk:服务器巡检与日常运维手册#3",
+    "chunk:信息安全应急响应预案#4",
+    "chunk:产品需求文档-智能客服机器人PRD#5",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:差旅费用报销管理办法#3"
+   ],
+   "doc_keys": [
+    "doc:账号权限管理与审计规范",
+    "doc:服务器巡检与日常运维手册",
+    "doc:信息安全应急响应预案",
+    "doc:产品需求文档-智能客服机器人PRD",
+    "doc:网络故障排查与处理手册",
+    "doc:差旅费用报销管理办法"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 192.5,
+    "keyword_ms": 10.9,
+    "rerank_ms": 0.0,
+    "total_ms": 203.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "acc-02",
+   "q": "特权账号怎么管？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:账号权限管理与审计规范#4"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:账号权限管理与审计规范#4"
+   ],
+   "doc_keys": [
+    "doc:账号权限管理与审计规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 177.3,
+    "keyword_ms": 10.0,
+    "rerank_ms": 0.0,
+    "total_ms": 187.3
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "acc-03",
+   "q": "导出数据会被审计吗？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:账号权限管理与审计规范#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:账号权限管理与审计规范#6",
+    "chunk:系统API接口文档V2#8",
+    "chunk:会议室使用与行政服务指南#1",
+    "chunk:智能问答机器人产品白皮书#9",
+    "chunk:员工手册-入职与试用期指引#5",
+    "chunk:账号权限管理与审计规范#7",
+    "chunk:检索增强生成技术原理说明#8",
+    "chunk:数据库备份与恢复操作指南#12"
+   ],
+   "doc_keys": [
+    "doc:账号权限管理与审计规范",
+    "doc:系统API接口文档V2",
+    "doc:会议室使用与行政服务指南",
+    "doc:智能问答机器人产品白皮书",
+    "doc:员工手册-入职与试用期指引",
+    "doc:账号权限管理与审计规范",
+    "doc:检索增强生成技术原理说明",
+    "doc:数据库备份与恢复操作指南"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 170.1,
+    "keyword_ms": 9.3,
+    "rerank_ms": 0.0,
+    "total_ms": 179.4
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "srv-01",
+   "q": "CPU 用到多少要告警？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:服务器巡检与日常运维手册#2"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:服务器巡检与日常运维手册#2",
+    "chunk:监控告警体系配置规范#3",
+    "chunk:网络故障排查与处理手册#7",
+    "chunk:服务器巡检与日常运维手册#4"
+   ],
+   "doc_keys": [
+    "doc:服务器巡检与日常运维手册",
+    "doc:监控告警体系配置规范",
+    "doc:网络故障排查与处理手册",
+    "doc:服务器巡检与日常运维手册"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 189.1,
+    "keyword_ms": 10.1,
+    "rerank_ms": 0.0,
+    "total_ms": 199.2
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "srv-02",
+   "q": "什么时候不能改生产配置？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:服务器巡检与日常运维手册#7"
+   ],
+   "gold_rank": 4,
+   "chunk_keys": [
+    "chunk:网络故障排查与处理手册#8",
+    "chunk:监控告警体系配置规范#8",
+    "chunk:数据库备份与恢复操作指南#3",
+    "chunk:服务器巡检与日常运维手册#7",
+    "chunk:智能问答机器人产品白皮书#3",
+    "chunk:数据源接入配置指南#4",
+    "chunk:检索增强生成技术原理说明#2",
+    "chunk:产品需求文档-智能客服机器人PRD#6"
+   ],
+   "doc_keys": [
+    "doc:网络故障排查与处理手册",
+    "doc:监控告警体系配置规范",
+    "doc:数据库备份与恢复操作指南",
+    "doc:服务器巡检与日常运维手册",
+    "doc:智能问答机器人产品白皮书",
+    "doc:数据源接入配置指南",
+    "doc:检索增强生成技术原理说明",
+    "doc:产品需求文档-智能客服机器人PRD"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.25,
+    "ndcg@8": 0.43067655807339306,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 0.25
+   },
+   "timings": {
+    "vector_ms": 222.8,
+    "keyword_ms": 9.7,
+    "rerank_ms": 0.0,
+    "total_ms": 232.5
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": false
+   },
+   "rerank": null
+  },
+  {
+   "id": "srv-03",
+   "q": "主从延迟多少秒要关注？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:服务器巡检与日常运维手册#5"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:网络故障排查与处理手册#5",
+    "chunk:监控告警体系配置规范#4",
+    "chunk:数据库备份与恢复操作指南#8",
+    "chunk:数据库备份与恢复操作指南#7",
+    "chunk:服务器巡检与日常运维手册#3",
+    "chunk:前端界面设计与交互规范#5"
+   ],
+   "doc_keys": [
+    "doc:服务器巡检与日常运维手册",
+    "doc:网络故障排查与处理手册",
+    "doc:监控告警体系配置规范",
+    "doc:数据库备份与恢复操作指南",
+    "doc:数据库备份与恢复操作指南",
+    "doc:服务器巡检与日常运维手册",
+    "doc:前端界面设计与交互规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 460.0,
+    "keyword_ms": 9.9,
+    "rerank_ms": 0.0,
+    "total_ms": 469.8
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "mon-01",
+   "q": "首 token 慢到多少秒要报警？",
+   "tags": [
+    "hard"
+   ],
+   "gold": [
+    "chunk:监控告警体系配置规范#4"
+   ],
+   "gold_rank": 8,
+   "chunk_keys": [
+    "chunk:监控告警体系配置规范#3",
+    "chunk:员工手册-入职与试用期指引#3",
+    "chunk:系统API接口文档V2#10",
+    "chunk:服务器巡检与日常运维手册#5",
+    "chunk:监控告警体系配置规范#6",
+    "chunk:检索增强生成技术原理说明#9",
+    "chunk:网络故障排查与处理手册#7",
+    "chunk:监控告警体系配置规范#4"
+   ],
+   "doc_keys": [
+    "doc:监控告警体系配置规范",
+    "doc:员工手册-入职与试用期指引",
+    "doc:系统API接口文档V2",
+    "doc:服务器巡检与日常运维手册",
+    "doc:监控告警体系配置规范",
+    "doc:检索增强生成技术原理说明",
+    "doc:网络故障排查与处理手册",
+    "doc:监控告警体系配置规范"
+   ],
+   "metrics": {
+    "recall@5": 0.0,
+    "recall@8": 1.0,
+    "mrr": 0.125,
+    "ndcg@8": 0.31546487678572877,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 151.4,
+    "keyword_ms": 9.7,
+    "rerank_ms": 0.0,
+    "total_ms": 161.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "mon-02",
+   "q": "告警太多怎么治理？",
+   "tags": [
+    "semantic"
+   ],
+   "gold": [
+    "chunk:监控告警体系配置规范#6"
+   ],
+   "gold_rank": 1,
+   "chunk_keys": [
+    "chunk:监控告警体系配置规范#6",
+    "chunk:网络故障排查与处理手册#7",
+    "chunk:监控告警体系配置规范#4"
+   ],
+   "doc_keys": [
+    "doc:监控告警体系配置规范",
+    "doc:网络故障排查与处理手册",
+    "doc:监控告警体系配置规范"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 1.0,
+    "ndcg@8": 1.0,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 1.0
+   },
+   "timings": {
+    "vector_ms": 364.5,
+    "keyword_ms": 8.6,
+    "rerank_ms": 0.0,
+    "total_ms": 373.1
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  },
+  {
+   "id": "mon-03",
+   "q": "值班表什么时候排？",
+   "tags": [
+    "direct"
+   ],
+   "gold": [
+    "chunk:监控告警体系配置规范#7"
+   ],
+   "gold_rank": 2,
+   "chunk_keys": [
+    "chunk:服务器巡检与日常运维手册#7",
+    "chunk:监控告警体系配置规范#7",
+    "chunk:网络故障排查与处理手册#1",
+    "chunk:员工考勤与休假管理制度#8",
+    "chunk:员工手册-入职与试用期指引#8",
+    "chunk:员工考勤与休假管理制度#2"
+   ],
+   "doc_keys": [
+    "doc:服务器巡检与日常运维手册",
+    "doc:监控告警体系配置规范",
+    "doc:网络故障排查与处理手册",
+    "doc:员工考勤与休假管理制度",
+    "doc:员工手册-入职与试用期指引",
+    "doc:员工考勤与休假管理制度"
+   ],
+   "metrics": {
+    "recall@5": 1.0,
+    "recall@8": 1.0,
+    "mrr": 0.5,
+    "ndcg@8": 0.6309297535714575,
+    "doc_recall@5": 1.0,
+    "doc_recall@8": 1.0,
+    "doc_mrr": 0.5
+   },
+   "timings": {
+    "vector_ms": 177.4,
+    "keyword_ms": 9.5,
+    "rerank_ms": 0.0,
+    "total_ms": 186.9
+   },
+   "gold_in_lanes": {
+    "vector": true,
+    "keyword": true
+   },
+   "rerank": null
+  }
+ ],
+ "summary": {
+  "recall@5": 0.9333,
+  "recall@8": 0.95,
+  "mrr": 0.8451,
+  "ndcg@8": 0.8646,
+  "doc_recall@5": 1.0,
+  "doc_recall@8": 1.0,
+  "doc_mrr": 0.9458,
+  "vector_ms_avg": 224.1,
+  "vector_ms_p50": 177.6,
+  "vector_ms_p95": 364.5,
+  "keyword_ms_avg": 11.3,
+  "keyword_ms_p50": 11.1,
+  "keyword_ms_p95": 13.8,
+  "rerank_ms_avg": 0.0,
+  "rerank_ms_p50": 0.0,
+  "rerank_ms_p95": 0.0,
+  "total_ms_avg": 235.5,
+  "total_ms_p50": 189.4,
+  "total_ms_p95": 373.1,
+  "n": 60,
+  "hit": 57,
+  "rerank_on": false
+ }
+}

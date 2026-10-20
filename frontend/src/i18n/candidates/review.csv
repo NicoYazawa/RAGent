@@ -1,0 +1,281 @@
+﻿zh,en,kinds,files
+关闭,Close,attr|literal|text,components\kb\UploadModal.vue|components\ui\BaseDrawer.vue|components\ui\BaseModal.vue
+CRAG 纠正,CRAG Correction,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+theme.mode === 'dark' ? '切换到亮色模式' : '切换到暗色模式',theme.mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',attr|literal,components\layout\TopNavBar.vue
+多路检索,Multi-Lane Retrieval,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+引用溯源,Citation Attribution,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+意图路由,Intent Router,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+查询规划,Query Planner,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+质量评估,Retrieval Grader,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+会话不存在,Session not found.,api,chat.py
+决策日志,Decision Log,literal|text,components\layout\TopNavBar.vue|router\index.ts|views\DecisionLogView.vue
+智能问答,Intelligent Q&A,literal|text,components\chat\MessageList.vue|components\layout\TopNavBar.vue|router\index.ts
+生成与反思,Generation & Reflection,literal,components\chat\DecisionPipeline.vue|components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+>耗时</span><span class=,>Elapsed</span><span class=,literal,components\chat\DecisionSidebar.vue
+>轮次</span><span class=,>Round</span><span class=,literal,components\chat\DecisionSidebar.vue
+`入库进度：${stageIdx + (status === 'failed' ? 0 : 1)}/4`,`Ingestion progress: ${stageIdx + (status === 'failed' ? 0 : 1)}/4`,attr|literal,components\kb\StatusBadge.vue
+`决策日志 #${logId}`,`Decision Log #${logId}`,attr|literal,components\logs\LogDetailDrawer.vue
+`切片明细 · ${doc?.file_name ?? ''}`,`Chunk Details · ${doc?.file_name ?? ''}`,attr|literal,components\kb\ChunkDrawer.vue
+`本环节耗时 ${card.elapsedMs}ms`,`Stage elapsed: ${card.elapsedMs}ms`,attr|literal,components\chat\DecisionStepCard.vue
+`每路召回 top_k=${k}`,`top_k=${k} per lane`,attr|literal,views\PlaygroundView.vue
+`移除图片${i + 1}`,`Remove image ${i + 1}`,attr|literal,components\chat\ChatInput.vue
+`第 ${card.round} 轮回流`,`Reflect backflow round ${card.round}`,attr|literal,components\chat\DecisionStepCard.vue
+`附件${i + 1}`,`Attachment ${i + 1}`,attr|literal,components\chat\ChatInput.vue
+`附件${ii + 1}`,`Attachment ${ii + 1}`,attr|literal,components\chat\MessageList.vue
+`预览图 ${index + 1}`,`Preview image ${index + 1}`,attr|literal,components\ui\ImageViewer.vue
+copied ? '已复制 Markdown' : '复制决策链 Markdown',copied ? 'Markdown copied' : 'Copy Decision Chain Markdown',attr|literal,components\chat\DecisionSidebar.vue
+copied ? '已复制' : '复制全文',copied ? 'Copied' : 'Copy full text',attr|literal,components\chat\MessageActions.vue
+expanded.has(chunk.id) ? '收起' : '展开全文',expanded.has(chunk.id) ? 'Collapse' : 'Expand full text',attr|literal,components\kb\ChunkDrawer.vue
+isDb ? '引用溯源 · 数据查询' : '引用溯源 · 切片原文',isDb ? 'Citation Attribution · Data Query' : 'Citation Attribution · Chunk Source Text',attr|literal,components\chat\CitationChunkDrawer.vue
+playing ? '暂停' : '播放',playing ? 'Pause' : 'Play',attr|literal,components\logs\StepPlayer.vue
+sidebarOpen ? '折叠决策侧栏' : '展开决策侧栏',sidebarOpen ? 'Collapse decision sidebar' : 'Expand decision sidebar',attr|literal,views\ChatView.vue
+上一张,Previous,attr|literal,components\ui\ImageViewer.vue
+上一步,Previous step,attr|literal,components\logs\StepPlayer.vue
+上一页,Previous page,attr|literal,components\ui\BasePagination.vue
+上传文档,Upload Document,attr|literal,components\kb\UploadModal.vue
+下一张,Next,attr|literal,components\ui\ImageViewer.vue
+下一步,Next step,attr|literal,components\logs\StepPlayer.vue
+下一页,Next page,attr|literal,components\ui\BasePagination.vue
+业务数据库,Business Database,literal|text,api\admin.ts|views\DatasourceView.vue
+主导航,Main navigation,attr|literal,components\layout\TopNavBar.vue
+会话 ID,Session ID,attr|literal,views\DecisionLogView.vue
+关闭预览,Close preview,attr|literal,components\ui\ImageViewer.vue
+决策,Decision,literal,components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+切换到亮色模式,Switch to light mode,literal,components\layout\TopNavBar.vue
+切换到暗色模式,Switch to dark mode,literal,components\layout\TopNavBar.vue
+切换回放速度,Change replay speed,attr|literal,components\logs\StepPlayer.vue
+切片,Chunk,text,views\KbManageView.vue
+删除会话,Delete session,attr|literal,components\chat\SessionList.vue
+删除文档（先 ES 后 MySQL）,"Delete document (ES first, then MySQL)",attr|literal,components\kb\DocumentRow.vue
+发送,Send,attr|literal,components\chat\ChatInput.vue
+可选,Optional,attr|literal,views\KbManageView.vue
+回看本次问答的 Agent 决策链,Review the Agent Decision Chain for this Q&A,attr|literal,components\chat\MessageActions.vue
+基于上一问重新生成（重走完整 Agent 决策链）,Regenerate from the previous question (reruns the full Agent Decision Chain),attr|literal,components\chat\MessageActions.vue
+失败,Failed,literal|text,components\kb\StatusBadge.vue|views\PlaygroundView.vue
+失败重试（从失败阶段续传）,Retry on Failure (resume from the failed stage),attr|literal,components\kb\DocumentRow.vue
+如：技术库 / 产品库 / 制度库,e.g. Technology KB / Product KB / Policy KB,attr|literal,views\KbManageView.vue
+导出决策链 JSON,Export Decision Chain JSON,attr|literal,components\chat\DecisionSidebar.vue
+开始日期,Start date,attr|literal,views\DecisionLogView.vue
+文档,Document,text,views\KbManageView.vue
+文档不存在,Document does not exist.,api,kb.py
+新建知识库,New Knowledge Base,attr|literal,views\KbManageView.vue
+未选择知识库,No Knowledge Base selected,literal,stores\kb.ts|views\KbManageView.vue
+查看切片明细（chunk_no / 章节路径 / 正文）,View Chunk details (chunk_no / Section Path / content),attr|literal,components\kb\DocumentRow.vue
+查看引用出处,View citation sources,attr|literal,components\chat\MarkdownText.vue
+检索测试,Retrieval Playground,literal,components\layout\TopNavBar.vue|router\index.ts
+没有符合条件的决策日志,No Decision Logs match the current filters,attr|literal,views\DecisionLogView.vue
+流程,Flow,literal,components\chat\DecisionStepCard.vue|utils\decisionExport.ts
+知识库,Knowledge Base,literal|text,components\layout\TopNavBar.vue|views\KbManageView.vue
+示例,Example,text,components\chat\ChatInput.vue|views\PlaygroundView.vue
+移除,Remove,attr|literal,components\kb\UploadModal.vue
+答案操作,Answer actions,attr|literal,components\chat\MessageActions.vue
+结束日期,End date,attr|literal,views\DecisionLogView.vue
+耗时,Duration,text,components\chat\DecisionSidebar.vue
+该知识库暂无文档，点击右上角上传,No documents in this Knowledge Base yet. Click Upload in the top right corner.,attr|literal,views\KbManageView.vue
+请先选择或创建知识库,Please select or create a Knowledge Base first.,attr|literal,views\KbManageView.vue
+请输入知识库名称,Enter a Knowledge Base name,attr|literal,views\KbManageView.vue
+轮次,Round,text,components\chat\DecisionSidebar.vue
+输入查询并执行，观察三路召回与 RRF 融合过程,Enter a query and run it to observe the three-lane recall and RRF Fusion process,attr|literal,views\PlaygroundView.vue
+输入测试查询，如：ES 混合检索方案 / 信息安全制度要点 / 智能音箱销量,"Enter a test query, e.g. ES Hybrid Retrieval solution / Information security policy highlights / Smart speaker sales",attr|literal,views\PlaygroundView.vue
+输入问题，Enter 发送 / Shift+Enter 换行，可附带或粘贴图片（试试：上季度哪个产品卖得最好？）,"Enter a question. Press Enter to send, Shift+Enter for a new line. You can attach or paste images. (Try: Which product sold best last quarter?)",attr|literal,components\chat\ChatInput.vue
+进行中,In progress,attr|literal,components\chat\DecisionStepCard.vue
+退出回放，回到实时决策流,Exit replay and return to the live decision stream,attr|literal,components\chat\DecisionSidebar.vue
+重置回放,Reset replay,attr|literal,components\logs\StepPlayer.vue
+附带图片,Attach images,attr|literal,components\chat\ChatInput.vue
+附带图片（支持粘贴 / 拖拽，最多 4 张）,"Attach images (paste or drag & drop, up to 4)",attr|literal,components\chat\ChatInput.vue
+&lt; 5.0 不及格 → CRAG 纠正（≤2 轮）,&lt; 5.0 Fail → CRAG Correction (≤2 rounds),text,views\PlaygroundView.vue
+**汇总**：总耗时 ${fmtMs(stats.elapsedMs)} · tokens ${tokens} · 检索轮次 ${stats.rounds},**Summary**: Total time ${fmtMs(stats.elapsedMs)} · tokens ${tokens} · Retrieval rounds ${stats.rounds},literal,utils\decisionExport.ts
+**问题**：${question},**Question**: ${question},literal,utils\decisionExport.ts
+0 命中,0 hits,text,views\PlaygroundView.vue
+5.0 ~ 7.0 部分相关 → 补充检索一次,5.0 ~ 7.0 Partially relevant → One supplementary retrieval,text,views\PlaygroundView.vue
+"<button type=""button"" class=""cite-mark"" data-n=""${idx}"" title=""查看引用出处"">[${idx}]</button>","<button type=""button"" class=""cite-mark"" data-n=""${idx}"" title=""View citation source"">[${idx}]</button>",literal,components\chat\MarkdownText.vue
+> 由问答页决策侧栏导出，与 agent_decision_log.steps 同源,> Exported from the decision sidebar of the Q&A page; same source as agent_decision_log.steps,literal,utils\decisionExport.ts
+Agent 正在决策，过程见右侧…,"Agent is making decisions, see the right panel…",text,components\chat\MessageList.vue
+ES BM25 match 精确匹配（ik_max_word 中文分词）,ES BM25 match exact matching (ik_max_word Chinese tokenizer),literal,api\admin.ts
+ES dense_vector kNN 语义检索（text-embedding-v4 · 1024 维）,ES dense_vector kNN semantic retrieval (text-embedding-v4 · 1024 dimensions),literal,api\admin.ts
+ES 同集群双路（kNN + BM25），是常规知识问答的主力检索源,Dual-lane in the same ES cluster (kNN + BM25); the primary retrieval source for regular Knowledge-Base Q&A,text,views\DatasourceView.vue
+ES 的向量检索和 BM25 关键词检索怎么配合,How do ES Vector Retrieval and BM25 Keyword Retrieval work together,literal,views\PlaygroundView.vue
+FAIL · 进入 CRAG,FAIL · Enter CRAG,literal,views\PlaygroundView.vue
+MySQL 只读 NL2SQL 查询（SELECT 白名单 + LIMIT 截断）,MySQL read-only NL2SQL query (SELECT whitelist + LIMIT truncation),literal,api\admin.ts
+NL2SQL 只读查询,NL2SQL read-only query,text,components\chat\CitationChunkDrawer.vue
+NL2SQL 生成的查询语句,Query generated by NL2SQL,text,components\chat\CitationChunkDrawer.vue
+PARTIAL · 补充检索,PARTIAL · Supplementary retrieval,literal,views\PlaygroundView.vue
+PASS · 直接生成,PASS · Generate directly,literal,views\PlaygroundView.vue
+RAGent 知识库问答系统,RAGent Knowledge-Base Q&A System,literal,router\index.ts
+R·反思回流,R · Reflection Backflow,literal,components\chat\DecisionPipeline.vue
+R·纠正回流,R · Correction Backflow,literal,components\chat\DecisionPipeline.vue
+SELECT 白名单 · LIMIT 20,SELECT whitelist · LIMIT 20,text,components\chat\CitationChunkDrawer.vue
+SQL 实时结果,Real-time SQL results,text,components\chat\MessageList.vue
+[{0}] 《{1}》{2}（切片#{3}）\n{4},"[{0}] ""{1}"" {2} (Chunk #{3})\n{4}",sse,orchestrator.py
+[{0}] 业务数据库 sales 表查询结果（来自业务数据库）\n{1},[{0}] Query results from the sales table (from Business Database)\n{1},sse,orchestrator.py
+\n\n参考最近对话（用于理解指代，不要从中引用答案）：\n,\n\nRefer to the recent conversation (to understand references; do not cite answers from it):\n,prompt,prompts.py
+\n用户随问题附带 {0} 张图片（带图问题统一归 kb_qa：先检索知识库，再结合图片作答）,"\nThe user attached {0} image(s) to the question (questions with images are always routed to kb_qa: first retrieve from the Knowledge Base, then answer using the images)",prompt,prompts.py
+chunk_size=500 字,chunk_size=500 characters,text,components\kb\ChunkDrawer.vue
+k=60 · 截取 Top-8,k=60 · Take Top-8,text,views\PlaygroundView.vue
+overlap=50 字,overlap=50 characters,text,components\kb\ChunkDrawer.vue
+| # | 环节 | 状态 | 耗时 | 说明 |,| # | Step | Status | Time | Notes |,literal,utils\decisionExport.ts
+≥ 7.0 通过 → 生成,≥ 7.0 Pass → Generate,text,views\PlaygroundView.vue
+⚠ 告警,⚠ Alerts,literal,utils\decisionExport.ts
+⚠️ 部分相关,⚠️ Partially relevant,sse,orchestrator.py
+✓ 完成,✓ Done,literal,utils\decisionExport.ts
+✓ 通过,✓ Pass,sse,orchestrator.py
+✗ 不及格,✗ Fail,sse,orchestrator.py
+《{0}》不存在切片 #{1}，可能文档已重新入库,《{0}》 has no Chunk #{1}; the document may have been re-ingested,api,kb.py
+上季度智能音箱卖得怎么样,How did smart speaker sales do last quarter?,literal,views\PlaygroundView.vue
+业务数据,Business Data,literal,views\PlaygroundView.vue
+业务数据库 sales 表,Business Database sales table,text,components\chat\CitationChunkDrawer.vue
+业务数据行,Business data rows,literal,views\PlaygroundView.vue
+产品研发中心下设哪几个组，各自负责什么,"Which teams sit under the Product R&D Center, and what does each of them own?",literal,api\samples.ts
+休假福利,Leave Benefits,literal,api\samples.ts
+会话,Session,text,components\chat\SessionList.vue
+会话创建失败：${(e as Error).message},Failed to create Session: ${(e as Error).message},literal,stores\chat.ts
+保留章节路径,Keep Section Path,text,components\kb\ChunkDrawer.vue
+入库状态,Ingestion Status,text,views\KbManageView.vue
+入库进度：${stageIdx + (status === 'failed' ? 0 : 1)}/4,Ingestion Progress: ${stageIdx + (status === 'failed' ? 0 : 1)}/4,literal,components\kb\StatusBadge.vue
+关键词,Keyword,literal,components\chat\DecisionStepCard.vue
+关键词检索,Keyword Retrieval,literal,api\admin.ts
+决策日志 #${logId},Decision Log #${logId},literal,components\logs\LogDetailDrawer.vue
+决策日志不存在,Decision Log not found,api,decision_logs.py
+决策过程,Decision Process,text,components\chat\DecisionSidebar.vue
+决策链,Decision Chain,text,components\chat\MessageActions.vue
+切分中…,Chunking…,text,components\kb\DocumentRow.vue
+切片中,Chunking,literal,components\kb\StatusBadge.vue
+切片明细 · ${doc?.file_name ?? ''},Chunk Details · ${doc?.file_name ?? ''},literal,components\kb\ChunkDrawer.vue
+创建,Create,text,views\KbManageView.vue
+单张图片不能超过 10MB,Each image must not exceed 10MB,literal,components\chat\ChatInput.vue
+历史决策链,Decision Chain History,text,components\chat\DecisionSidebar.vue
+反思,Reflection,literal,components\chat\StepTimingBar.vue
+取消,Cancel,text,views\KbManageView.vue
+只读账号 + SELECT 白名单 + LIMIT 截断，服务 data_query 意图的 NL2SQL,Read-Only Account + SELECT allowlist + LIMIT truncation; NL2SQL serving the data_query Intent,text,views\DatasourceView.vue
+名称（唯一）,Name (unique),text,views\KbManageView.vue
+向量,Vector,literal,components\chat\DecisionStepCard.vue
+向量 + 关键词,Vector + Keyword,text,views\DatasourceView.vue
+向量化,Embedding,literal,components\kb\StatusBadge.vue
+向量检索,Vector Retrieval,literal,api\admin.ts
+图片不存在,Image not found,api,chat.py
+图片已失效,Image expired,text,components\chat\MessageList.vue
+图片解析失败,Image parsing failed,literal,components\chat\ChatInput.vue
+复制全文,Copy Full Text,literal,components\chat\MessageActions.vue
+复制决策链 Markdown,Copy Decision Chain Markdown,literal,components\chat\DecisionSidebar.vue
+完成,Done,literal,utils\decisionExport.ts
+实时查询返回行,Rows returned by real-time query,text,components\chat\CitationChunkDrawer.vue
+密钥仅存环境变量引用名，不入库不入仓,Only environment variable reference names are stored for keys — never in the database or repository,text,components\admin\SourceCard.vue
+对比一下向量检索和 BM25 关键词检索的区别与适用场景,Compare the differences and use cases of Vector Retrieval and BM25 Keyword Retrieval,literal,api\samples.ts
+展开全文,Expand Full Text,literal,components\kb\ChunkDrawer.vue
+展开决策侧栏,Expand Decision Sidebar,literal,views\ChatView.vue
+工作满十年的员工年假有几天,How many days of annual leave do employees with ten years of service get?,literal,api\samples.ts
+差旅报销,Travel Reimbursement,literal,api\samples.ts
+已复制,Copied,literal,components\chat\MessageActions.vue
+已复制 Markdown,Markdown Copied,literal,components\chat\DecisionSidebar.vue
+已就绪,Ready,literal,components\kb\StatusBadge.vue
+异常,Error,literal,components\chat\StepTimingBar.vue
+异常中断,Interrupted by Error,literal,utils\decisionExport.ts
+引用溯源 · 切片原文,Citation Attribution · Chunk Source Text,literal,components\chat\CitationChunkDrawer.vue
+引用溯源 · 数据查询,Citation Attribution · Data Query,literal,components\chat\CitationChunkDrawer.vue
+总结模式 · 未改写,Summarization Mode · No Rewriting,literal,components\chat\DecisionPipeline.vue
+总结（走生成侧，轻量检索）,"Summarization (generation side, lightweight retrieval)",sse,orchestrator.py
+执行检索,Run Retrieval,literal,views\PlaygroundView.vue
+技术原理,Technical Principles,literal,api\samples.ts
+折叠决策侧栏,Collapse Decision Sidebar,literal,views\ChatView.vue
+拖拽文件到此处，或点击选择,"Drag files here, or click to select",text,components\kb\UploadModal.vue
+描述,Description,text,views\KbManageView.vue
+播放,Play,literal,components\logs\StepPlayer.vue
+操作,Actions,text,views\KbManageView.vue
+收起,Collapse,literal,components\kb\ChunkDrawer.vue
+数据库,Database,literal,components\chat\DecisionStepCard.vue
+数据恢复,Data Recovery,literal,api\samples.ts
+数据旁路 · 不走纠正,Data Bypass · Skip Correction,literal,components\chat\DecisionPipeline.vue
+数据查询 · 业务数据库 sales 表,Data Query · Business Database table sales,text,components\chat\MessageList.vue
+数据查询 · 直达检索,Data Query · Direct Retrieval,literal,components\chat\DecisionPipeline.vue
+数据查询（跳过改写，直达数据库检索）,"Data Query (skip rewriting, go straight to database retrieval)",sse,orchestrator.py
+数据源,Data Source,literal,components\layout\TopNavBar.vue
+数据源配置,Data Source Configuration,literal,router\index.ts
+文档尚未完成入库，暂无切片,"The document has not finished ingestion, so no chunks are available yet.",api,kb.py
+时间线,Timeline,literal,components\chat\DecisionSidebar.vue
+昨天,Yesterday,literal,components\chat\SessionList.vue
+普通员工去上海出差，住宿费报销上限是多少,What is the maximum accommodation reimbursement for a regular employee on a business trip to Shanghai?,literal,api\samples.ts
+暂停,Pause,literal,components\logs\StepPlayer.vue
+暂无数据,No data,literal,components\ui\BaseEmpty.vue
+更新时间,Updated At,text,views\KbManageView.vue
+最多附带 ${MAX_IMAGES} 张图片,Up to ${MAX_IMAGES} images can be attached,literal,components\chat\ChatInput.vue
+最多附带 ${MAX_IMAGES} 张图片，已忽略多余 ${list.length - room} 张,Up to ${MAX_IMAGES} images can be attached; ${list.length - room} extra image(s) were ignored,literal,components\chat\ChatInput.vue
+最近对话：\n{0}\n\n当前用户问题：{1}{2}\n\n请输出 json,Recent conversation:\n{0}\n\nCurrent user question: {1}{2}\n\nPlease output JSON,prompt,prompts.py
+最近对话：\n{0}\n\n当前问题：{1}\n\n请输出 json,Recent conversation:\n{0}\n\nCurrent question: {1}\n\nPlease output JSON,prompt,prompts.py
+未找到文档《{0}》：可能已被删除或未完成入库,"Document ""{0}"" not found: it may have been deleted or not yet ingested",api,kb.py
+未知数据源类型：{0},Unknown data source type: {0},api,datasources.py
+未知检索源：{0},Unknown retrieval source: {0},api,retrieval_test.py
+未知错误,Unknown error,literal,stores\chat.ts
+未选择,Not selected,literal,components\kb\UploadModal.vue
+未选择会话,No session selected,literal,views\ChatView.vue
+本环节耗时 ${card.elapsedMs}ms,This step took ${card.elapsedMs}ms,literal,components\chat\DecisionStepCard.vue
+本轮完成,Round completed,text,components\chat\DecisionSidebar.vue
+来源路,Source Lane,text,views\PlaygroundView.vue
+检索,Retrieval,literal,components\chat\StepTimingBar.vue
+检索中…,Retrieving…,literal,views\PlaygroundView.vue
+正在准备生成…,Preparing to generate…,literal,stores\chat.ts
+正在多路并行检索…,Running multi-lane retrieval in parallel…,literal,stores\chat.ts
+正在执行纠正策略…,Applying correction strategy…,literal,stores\chat.ts
+正在收尾统计…,Finalizing statistics…,literal,stores\chat.ts
+正在改写查询…,Rewriting query…,literal,stores\chat.ts
+正在整理引用出处…,Compiling citations…,literal,stores\chat.ts
+正在流式生成答案…,Streaming answer…,literal,stores\chat.ts
+正在流式生成答案（${streamingText.value.length} 字）…,Streaming answer (${streamingText.value.length} characters)…,literal,stores\chat.ts
+正在融合与评估检索结果…,Fusing and grading retrieval results…,literal,stores\chat.ts
+每路召回 top_k=${k},top_k=${k} per lane,literal,views\PlaygroundView.vue
+流程图,Flow Diagram,literal,components\chat\DecisionSidebar.vue
+混合检索,Hybrid Retrieval,literal,views\PlaygroundView.vue
+溯源,Attribution,literal,components\chat\StepTimingBar.vue
+片段,Snippet,text,views\PlaygroundView.vue
+生成,Generate,literal,components\chat\StepTimingBar.vue
+生成答案,Generate Answer,literal,utils\decisionExport.ts
+生效范围,Applies To,text,views\DatasourceView.vue
+用户问题：{0}\n\n请输出 json（仅含 sql 字段）,User question: {0}\n\nPlease output JSON (with only the sql field),prompt,prompts.py
+知识库不存在,Knowledge Base not found,api,kb.py
+知识库名称「{0}」已存在（name 唯一约束）,"Knowledge Base name ""{0}"" already exists (name unique constraint)",api,kb.py
+知识库名称不能为空,Knowledge Base name cannot be empty,api,kb.py
+知识库管理,Knowledge Base Management,literal,router\index.ts
+知识问答,Knowledge-Base Q&A,sse,orchestrator.py
+磁盘使用率超过多少会触发告警,What disk usage percentage triggers an alert,literal,views\PlaygroundView.vue
+移除图片${i + 1},Remove image ${i + 1},literal,components\chat\ChatInput.vue
+第 ${card.round} 轮回流,Round ${card.round} Reflect Backflow,literal,components\chat\DecisionStepCard.vue
+等待融合完成…,Waiting for fusion to complete…,text,views\PlaygroundView.vue
+答案生成完成（{0} 字）,Answer generation complete ({0} characters),sse,orchestrator.py
+精排,Reranking,literal,components\chat\DecisionStepCard.vue
+纠正,Correction,literal,components\chat\StepTimingBar.vue
+组织架构,Organizational Structure,literal,api\samples.ts
+考勤制度,Attendance Policy,literal,api\samples.ts
+耗时分布,Latency Distribution,text,components\chat\StepTimingBar.vue
+自我反思,Self-Reflection,literal,utils\decisionExport.ts
+自检 ${String(refl.payload.result)},Self-check ${String(refl.payload.result)},literal,components\chat\DecisionPipeline.vue
+融合结果为空,Fusion result is empty,text,views\PlaygroundView.vue
+规划,Planning,literal,components\chat\StepTimingBar.vue
+解析中,Parsing,literal,components\kb\StatusBadge.vue
+评估,Grading,literal,components\chat\StepTimingBar.vue
+评分达标 · 无需纠正,Score meets threshold · No correction needed,literal,components\chat\DecisionPipeline.vue
+误删了数据表，还能恢复到误操作之前的状态吗,I accidentally deleted a table. Can it be restored to the state before the mistake?,literal,api\samples.ts
+请分析这 ${images.value.length} 张图片,Please analyze these ${images.value.length} images,literal,components\chat\ChatInput.vue
+请分析这张图片,Please analyze this image,literal,components\chat\ChatInput.vue
+路由,Routing,literal,components\chat\StepTimingBar.vue
+运维告警,Operations Alerts,literal,views\PlaygroundView.vue
+迟到是怎么认定和处罚的,How is lateness defined and penalized?,literal,api\samples.ts
+重新生成,Regenerate,text,components\chat\MessageActions.vue
+问题：{0}\n\n检索上下文：\n{1}\n\n生成的答案：\n{2}\n\n请输出 json 判定,Question: {0}\n\nRetrieved context:\n{1}\n\nGenerated answer:\n{2}\n\nOutput a JSON verdict,prompt,prompts.py
+问题：{0}\n上一轮评估结论：{1}\n\n已检索到的片段：\n{2}\n\n请输出 json 诊断,Question: {0}\nGrading result from the previous round: {1}\n\nRetrieved chunks:\n{2}\n\nOutput a JSON diagnosis,prompt,prompts.py
+问题：{0}\n子问题：{1}\n\n检索片段：\n{2}\n\n请输出 json 评分,Question: {0}\nSub-queries: {1}\n\nRetrieved chunks:\n{2}\n\nOutput a JSON score,prompt,prompts.py
+闲聊直答 · 无引用,Chitchat direct answer · No citations,literal,components\chat\DecisionPipeline.vue
+闲聊直答 · 无需纠正,Chitchat direct answer · No correction needed,literal,components\chat\DecisionPipeline.vue
+闲聊直答 · 跳过改写,Chitchat direct answer · Query Rewriting skipped,literal,components\chat\DecisionPipeline.vue
+闲聊直答 · 跳过检索,Chitchat direct answer · Retrieval skipped,literal,components\chat\DecisionPipeline.vue
+闲聊直答 · 跳过评估,Chitchat direct answer · Grading skipped,literal,components\chat\DecisionPipeline.vue
+闲聊（前置拦截，不触发检索）,"Chitchat (intercepted upfront, retrieval not triggered)",sse,orchestrator.py
+附件${i + 1},Attachment ${i + 1},literal,components\chat\ChatInput.vue
+附件${ii + 1},Attachment ${ii + 1},literal,components\chat\MessageList.vue
+预览图 ${index + 1},Preview image ${index + 1},literal,components\ui\ImageViewer.vue
+（无历史对话，这是会话第一条问题）,(No conversation history; this is the first question in the Session),prompt,prompts.py
+（无检索上下文）,(No retrieved context),prompt,prompts.py
+（无检索结果）,(No retrieval results),prompt,prompts.py
+（暂无描述）,(No description),literal,views\KbManageView.vue
+（本次无可用检索结果）,(No usable retrieval results in this run),prompt,prompts.py
+（本次问答链路异常中断，未生成答案，详见决策日志）,(The Q&A pipeline was interrupted unexpectedly and no answer was generated. See the Decision Log for details.),sse,orchestrator.py
+（检索结果为空）,(Retrieval results are empty),prompt,prompts.py
+（综合各路检索查询）,(Combined queries from all Retrieval Lanes),api,retrieval_test.py

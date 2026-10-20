@@ -1,0 +1,6 @@
+.deps
+data
+__pycache__
+*.pyc
+.git
+.env

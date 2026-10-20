@@ -1,0 +1,82 @@
+services:
+  web:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    env_file:
+      - .env
+    environment:
+      # 容器内通过服务名访问依赖
+      - MYSQL_HOST=db
+      - ES_URL=http://es:9200
+    volumes:
+      - uploads:/app/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      es:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/api/health').status==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DB}
+      # 允许从 compose 网络（其他容器）以 root 连接；默认仅 localhost
+      - MYSQL_ROOT_HOST=%
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./ragent_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    # 演示用默认口令，仅绑定回环地址：宿主机本地客户端可连，局域网/公网不可达。
+    # 需要对外暴露时改成 "3306:3306" 即可。
+    ports:
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  es:
+    # docker.elastic.co 镜像在本环境首次拉取超时（大层），重试通常可续传完成。
+    # 如需中文 IK 分词，改回 build（见 elasticsearch/Dockerfile），但需确认 IK 插件地址可用。
+    # es.py 在 IK 缺失时自动回退 standard 分词器。
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    # 同样仅绑定回环地址（ES 索引内含知识库原文，不应暴露到局域网）。
+    ports:
+      - "127.0.0.1:9200:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  es_data:
+  uploads:

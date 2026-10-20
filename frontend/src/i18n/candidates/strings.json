@@ -1,0 +1,2893 @@
+[
+ {
+  "zh": "关闭",
+  "kinds": [
+   "attr",
+   "literal",
+   "text"
+  ],
+  "files": [
+   "components\\kb\\UploadModal.vue",
+   "components\\ui\\BaseDrawer.vue",
+   "components\\ui\\BaseModal.vue"
+  ],
+  "count": 5
+ },
+ {
+  "zh": "CRAG 纠正",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "theme.mode === 'dark' ? '切换到亮色模式' : '切换到暗色模式'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "多路检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "引用溯源",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "意图路由",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "查询规划",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "质量评估",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 4
+ },
+ {
+  "zh": "会话不存在",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "chat.py"
+  ],
+  "count": 3
+ },
+ {
+  "zh": "决策日志",
+  "kinds": [
+   "literal",
+   "text"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue",
+   "router\\index.ts",
+   "views\\DecisionLogView.vue"
+  ],
+  "count": 3
+ },
+ {
+  "zh": "智能问答",
+  "kinds": [
+   "literal",
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue",
+   "components\\layout\\TopNavBar.vue",
+   "router\\index.ts"
+  ],
+  "count": 3
+ },
+ {
+  "zh": "生成与反思",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue",
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 3
+ },
+ {
+  "zh": ">耗时</span><span class=",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": ">轮次</span><span class=",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`入库进度：${stageIdx + (status === 'failed' ? 0 : 1)}/4`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`决策日志 #${logId}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\LogDetailDrawer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`切片明细 · ${doc?.file_name ?? ''}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`本环节耗时 ${card.elapsedMs}ms`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`每路召回 top_k=${k}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`移除图片${i + 1}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`第 ${card.round} 轮回流`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`附件${i + 1}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`附件${ii + 1}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "`预览图 ${index + 1}`",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\ImageViewer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "copied ? '已复制 Markdown' : '复制决策链 Markdown'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "copied ? '已复制' : '复制全文'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "expanded.has(chunk.id) ? '收起' : '展开全文'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "isDb ? '引用溯源 · 数据查询' : '引用溯源 · 切片原文'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "playing ? '暂停' : '播放'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "sidebarOpen ? '折叠决策侧栏' : '展开决策侧栏'",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\ChatView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "上一张",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\ImageViewer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "上一步",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "上一页",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\BasePagination.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "上传文档",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\UploadModal.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "下一张",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\ImageViewer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "下一步",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "下一页",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\BasePagination.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "业务数据库",
+  "kinds": [
+   "literal",
+   "text"
+  ],
+  "files": [
+   "api\\admin.ts",
+   "views\\DatasourceView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "主导航",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "会话 ID",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\DecisionLogView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "关闭预览",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\ImageViewer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "决策",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "切换到亮色模式",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "切换到暗色模式",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "切换回放速度",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "切片",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "删除会话",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\SessionList.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "删除文档（先 ES 后 MySQL）",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\DocumentRow.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "发送",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "可选",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "回看本次问答的 Agent 决策链",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "基于上一问重新生成（重走完整 Agent 决策链）",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "失败",
+  "kinds": [
+   "literal",
+   "text"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue",
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "失败重试（从失败阶段续传）",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\DocumentRow.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "如：技术库 / 产品库 / 制度库",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "导出决策链 JSON",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "开始日期",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\DecisionLogView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "文档",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "文档不存在",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "新建知识库",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "未选择知识库",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\kb.ts",
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "查看切片明细（chunk_no / 章节路径 / 正文）",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\DocumentRow.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "查看引用出处",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MarkdownText.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "检索测试",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue",
+   "router\\index.ts"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "没有符合条件的决策日志",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\DecisionLogView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "流程",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue",
+   "utils\\decisionExport.ts"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "知识库",
+  "kinds": [
+   "literal",
+   "text"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue",
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "示例",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue",
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "移除",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\UploadModal.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "答案操作",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "结束日期",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\DecisionLogView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "耗时",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "该知识库暂无文档，点击右上角上传",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "请先选择或创建知识库",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "请输入知识库名称",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "轮次",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "输入查询并执行，观察三路召回与 RRF 融合过程",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "输入测试查询，如：ES 混合检索方案 / 信息安全制度要点 / 智能音箱销量",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "输入问题，Enter 发送 / Shift+Enter 换行，可附带或粘贴图片（试试：上季度哪个产品卖得最好？）",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "进行中",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "退出回放，回到实时决策流",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "重置回放",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "附带图片",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "附带图片（支持粘贴 / 拖拽，最多 4 张）",
+  "kinds": [
+   "attr",
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 2
+ },
+ {
+  "zh": "&lt; 5.0 不及格 → CRAG 纠正（≤2 轮）",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "**汇总**：总耗时 ${fmtMs(stats.elapsedMs)} · tokens ${tokens} · 检索轮次 ${stats.rounds}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "**问题**：${question}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "0 命中",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "5.0 ~ 7.0 部分相关 → 补充检索一次",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "<button type=\"button\" class=\"cite-mark\" data-n=\"${idx}\" title=\"查看引用出处\">[${idx}]</button>",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MarkdownText.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "> 由问答页决策侧栏导出，与 agent_decision_log.steps 同源",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "Agent 正在决策，过程见右侧…",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "ES BM25 match 精确匹配（ik_max_word 中文分词）",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\admin.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "ES dense_vector kNN 语义检索（text-embedding-v4 · 1024 维）",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\admin.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "ES 同集群双路（kNN + BM25），是常规知识问答的主力检索源",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\DatasourceView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "ES 的向量检索和 BM25 关键词检索怎么配合",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "FAIL · 进入 CRAG",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "MySQL 只读 NL2SQL 查询（SELECT 白名单 + LIMIT 截断）",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\admin.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "NL2SQL 只读查询",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "NL2SQL 生成的查询语句",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "PARTIAL · 补充检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "PASS · 直接生成",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "RAGent 知识库问答系统",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "router\\index.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "R·反思回流",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "R·纠正回流",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "SELECT 白名单 · LIMIT 20",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "SQL 实时结果",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "[{0}] 《{1}》{2}（切片#{3}）\\n{4}",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "[{0}] 业务数据库 sales 表查询结果（来自业务数据库）\\n{1}",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "\\n\\n参考最近对话（用于理解指代，不要从中引用答案）：\\n",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "\\n用户随问题附带 {0} 张图片（带图问题统一归 kb_qa：先检索知识库，再结合图片作答）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "chunk_size=500 字",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "k=60 · 截取 Top-8",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "overlap=50 字",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "| # | 环节 | 状态 | 耗时 | 说明 |",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "≥ 7.0 通过 → 生成",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "⚠ 告警",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "⚠️ 部分相关",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "✓ 完成",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "✓ 通过",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "✗ 不及格",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "《{0}》不存在切片 #{1}，可能文档已重新入库",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "上季度智能音箱卖得怎么样",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "业务数据",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "业务数据库 sales 表",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "业务数据行",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "产品研发中心下设哪几个组，各自负责什么",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "休假福利",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "会话",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\SessionList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "会话创建失败：${(e as Error).message}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "保留章节路径",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "入库状态",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "入库进度：${stageIdx + (status === 'failed' ? 0 : 1)}/4",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "关键词",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "关键词检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\admin.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "决策日志 #${logId}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\LogDetailDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "决策日志不存在",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "decision_logs.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "决策过程",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "决策链",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "切分中…",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\kb\\DocumentRow.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "切片中",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "切片明细 · ${doc?.file_name ?? ''}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "创建",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "单张图片不能超过 10MB",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "历史决策链",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "反思",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "取消",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "只读账号 + SELECT 白名单 + LIMIT 截断，服务 data_query 意图的 NL2SQL",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\DatasourceView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "名称（唯一）",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "向量",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "向量 + 关键词",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\DatasourceView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "向量化",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "向量检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\admin.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "图片不存在",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "chat.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "图片已失效",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "图片解析失败",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "复制全文",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "复制决策链 Markdown",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "完成",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "实时查询返回行",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "密钥仅存环境变量引用名，不入库不入仓",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\admin\\SourceCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "对比一下向量检索和 BM25 关键词检索的区别与适用场景",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "展开全文",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "展开决策侧栏",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\ChatView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "工作满十年的员工年假有几天",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "差旅报销",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "已复制",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "已复制 Markdown",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "已就绪",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "异常",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "异常中断",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "引用溯源 · 切片原文",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "引用溯源 · 数据查询",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\CitationChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "总结模式 · 未改写",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "总结（走生成侧，轻量检索）",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "执行检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "技术原理",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "折叠决策侧栏",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\ChatView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "拖拽文件到此处，或点击选择",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\kb\\UploadModal.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "描述",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "播放",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "操作",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "收起",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\ChunkDrawer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据库",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据恢复",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据旁路 · 不走纠正",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据查询 · 业务数据库 sales 表",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据查询 · 直达检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据查询（跳过改写，直达数据库检索）",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据源",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\layout\\TopNavBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "数据源配置",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "router\\index.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "文档尚未完成入库，暂无切片",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "时间线",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "昨天",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\SessionList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "普通员工去上海出差，住宿费报销上限是多少",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "暂停",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\logs\\StepPlayer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "暂无数据",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\BaseEmpty.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "更新时间",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "最多附带 ${MAX_IMAGES} 张图片",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "最多附带 ${MAX_IMAGES} 张图片，已忽略多余 ${list.length - room} 张",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "最近对话：\\n{0}\\n\\n当前用户问题：{1}{2}\\n\\n请输出 json",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "最近对话：\\n{0}\\n\\n当前问题：{1}\\n\\n请输出 json",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "未找到文档《{0}》：可能已被删除或未完成入库",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "未知数据源类型：{0}",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "datasources.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "未知检索源：{0}",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "retrieval_test.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "未知错误",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "未选择",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\UploadModal.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "未选择会话",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\ChatView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "本环节耗时 ${card.elapsedMs}ms",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "本轮完成",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "来源路",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "检索中…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在准备生成…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在多路并行检索…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在执行纠正策略…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在收尾统计…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在改写查询…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在整理引用出处…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在流式生成答案…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在流式生成答案（${streamingText.value.length} 字）…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "正在融合与评估检索结果…",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "stores\\chat.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "每路召回 top_k=${k}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "流程图",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionSidebar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "混合检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "溯源",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "片段",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "生成",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "生成答案",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "生效范围",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\DatasourceView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "用户问题：{0}\\n\\n请输出 json（仅含 sql 字段）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "知识库不存在",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "知识库名称「{0}」已存在（name 唯一约束）",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "知识库名称不能为空",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "kb.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "知识库管理",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "router\\index.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "知识问答",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "磁盘使用率超过多少会触发告警",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "移除图片${i + 1}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "第 ${card.round} 轮回流",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "等待融合完成…",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "答案生成完成（{0} 字）",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "精排",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionStepCard.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "纠正",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "组织架构",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "考勤制度",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "耗时分布",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "自我反思",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "utils\\decisionExport.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "自检 ${String(refl.payload.result)}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "融合结果为空",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "规划",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "解析中",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\kb\\StatusBadge.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "评估",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "评分达标 · 无需纠正",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "误删了数据表，还能恢复到误操作之前的状态吗",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "请分析这 ${images.value.length} 张图片",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "请分析这张图片",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "路由",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\StepTimingBar.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "运维告警",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\PlaygroundView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "迟到是怎么认定和处罚的",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "api\\samples.ts"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "重新生成",
+  "kinds": [
+   "text"
+  ],
+  "files": [
+   "components\\chat\\MessageActions.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "问题：{0}\\n\\n检索上下文：\\n{1}\\n\\n生成的答案：\\n{2}\\n\\n请输出 json 判定",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "问题：{0}\\n上一轮评估结论：{1}\\n\\n已检索到的片段：\\n{2}\\n\\n请输出 json 诊断",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "问题：{0}\\n子问题：{1}\\n\\n检索片段：\\n{2}\\n\\n请输出 json 评分",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "闲聊直答 · 无引用",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "闲聊直答 · 无需纠正",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "闲聊直答 · 跳过改写",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "闲聊直答 · 跳过检索",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "闲聊直答 · 跳过评估",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\DecisionPipeline.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "闲聊（前置拦截，不触发检索）",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "附件${i + 1}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\ChatInput.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "附件${ii + 1}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\chat\\MessageList.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "预览图 ${index + 1}",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "components\\ui\\ImageViewer.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（无历史对话，这是会话第一条问题）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（无检索上下文）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（无检索结果）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（暂无描述）",
+  "kinds": [
+   "literal"
+  ],
+  "files": [
+   "views\\KbManageView.vue"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（本次无可用检索结果）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（本次问答链路异常中断，未生成答案，详见决策日志）",
+  "kinds": [
+   "sse"
+  ],
+  "files": [
+   "orchestrator.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（检索结果为空）",
+  "kinds": [
+   "prompt"
+  ],
+  "files": [
+   "prompts.py"
+  ],
+  "count": 1
+ },
+ {
+  "zh": "（综合各路检索查询）",
+  "kinds": [
+   "api"
+  ],
+  "files": [
+   "retrieval_test.py"
+  ],
+  "count": 1
+ }
+]

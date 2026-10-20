@@ -1,0 +1,49 @@
+﻿# ===== 环境变量（含真实密钥，禁止入仓）=====
+.env
+.env.*
+*.env
+# 允许提交示例文件
+!.env.example
+!*.env.example
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+backend/.deps/
+backend/data/
+*.egg-info/
+.coverage
+coverage.xml
+htmlcov/
+
+# ===== Node / 前端 =====
+node_modules/
+dist/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+*.log
+
+# ===== 系统 =====
+.DS_Store
+Thumbs.db
+
+# ===== 设计/验收过程产物（含界面截图、问答内容，不入仓）=====
+.taste-skill/
+.superpowers/
+initial.yaml
+after-reload.yaml
+frontend/r16.txt
+
+# ===== 运行时输出 =====
+*_result.txt
+*_check_result.txt
+sse_check_result.txt
+data_query_check.txt

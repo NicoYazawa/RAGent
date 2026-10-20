@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+/* ============================================================
+   RAGent 设计系统 — Data terminal（深色诊断台）
+   方向：卡片比地面更暗，明度分层代替边框装饰；
+   颜色预算 <3%，accent 只作为 1px 选择线出现在最靠近标签的那条边上；
+   数字用等宽字体，正负号写在文字里而不是用颜色。
+   硬约束：无渐变、无发光、无玻璃模糊、无紫色。
+   ============================================================ */
+@theme {
+  /* 地面与表面（tone step，靠明度分层） */
+  --color-deep: #171719;
+  --color-panel: #131217;
+  --color-card: #1b1a1f;
+  --color-raise: #212023;
+
+  /* 分隔线 */
+  --color-edge: #222224;
+  --color-edge-bright: #3a3a3e;
+
+  /* 唯一 accent：1px 线，不外扩 */
+  --color-accent: #22d3ee;
+  --color-accent-soft: #7dd3fc;
+  --color-accent-dim: #1c6b7a;
+
+  /* 文本三级（全部 ≥4.5:1） */
+  --color-ink: #ffffff;
+  --color-ink-dim: #b9babf;
+  --color-ink-mute: #8a8c92;
+
+  /* 语义色 */
+  --color-warn: #d9a441;
+  --color-danger: #e5566f;
+  --color-ok: #44a282;
+
+  /* 检索源标识（数据色，非装饰） */
+  --color-src-vector: #4a8ad6;
+  --color-src-keyword: #22d3ee;
+  --color-src-db: #44a282;
+
+  /* 字体：正文 Public Sans，数字/ID 等宽 */
+  --font-sans: "Public Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+  /* 圆角收敛为三档：4 卡片内元素 / 6 卡片 / 8 浮层 */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+
+  --ease-out-tech: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- 全局基础 ---------- */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-deep);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.55;
+  /* 数字等宽：表格、时间、耗时逐位对齐 */
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.24);
+  color: #ffffff;
+}
+
+/* 细滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge-bright) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-edge-bright);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #4c4c52;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- 工具类 ---------- */
+
+/* 所有数字等宽，列对齐 */
+.num,
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 兼容旧调用：发光类退化为纯色，不再有阴影 */
+.glow-text {
+  color: var(--color-accent);
+}
+.glow-edge {
+  /* 旧呼吸光已移除，保留类名避免调用点报错 */
+  border-color: var(--color-edge-bright);
+}
+
+/* 旧顶部扫描线已移除 */
+.scanline::after {
+  content: none;
+}
+
+/* ---------- 过渡 ---------- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.anim-fade-up {
+  animation: fadeUp 0.24s var(--ease-out-tech) both;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.anim-slide-right {
+  animation: slideInRight 0.28s var(--ease-out-tech) both;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.anim-scale-in {
+  animation: scaleIn 0.2s var(--ease-out-tech) both;
+}
+
+/* 打字机光标 */
+.typing-caret::after {
+  content: "▌";
+  color: var(--color-accent);
+  animation: caretBlink 0.9s steps(1) infinite;
+  margin-left: 1px;
+}
+@keyframes caretBlink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 思考点 */
+@keyframes dotBounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+.thinking-dot {
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+
+/* ============================================================
+   亮色模式 — 同名变量覆盖（html.light）
+   地面/表面/分隔线取 §9.2 的亮色默认值，accent 加深保证 4.5:1
+   ============================================================ */
+html.light {
+  --color-deep: #f9fafb;
+  --color-panel: #ffffff;
+  --color-card: #ffffff;
+  --color-raise: #f2f3f5;
+
+  --color-edge: #e8e8e8;
+  --color-edge-bright: #d1d5db;
+
+  --color-accent: #0e7490;
+  --color-accent-soft: #0891b2;
+  --color-accent-dim: #a5f3fc;
+
+  --color-ink: #111111;
+  --color-ink-dim: #3a3b3b;
+  --color-ink-mute: #5f6368;
+
+  --color-warn: #b45309;
+  --color-danger: #c4242a;
+  --color-ok: #247b50;
+
+  --color-src-vector: #1d5f9e;
+  --color-src-keyword: #0e7490;
+  --color-src-db: #247b50;
+}
+
+html.light ::selection {
+  background: rgba(14, 116, 144, 0.16);
+  color: #111111;
+}
+
+html.light *::-webkit-scrollbar-thumb {
+  background: #c9cdd3;
+}
+
+/* 弹层阴影（仅浮层使用） */
+:root {
+  --shadow-overlay: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+html.light {
+  --shadow-overlay: 0 12px 28px rgba(17, 17, 17, 0.14);
+}
+
+/* ---------- 键盘可达性 ---------- */
+/* 只给"独立可点击元素"焦点环；输入类控件由自身或容器的边框变化表达焦点，
+   否则会和圆角容器边框叠出双层框 */
+:where(button, a, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+:where(input, textarea, select):focus-visible {
+  outline: none;
+}
+
+/* ---------- 无障碍：尊重系统减少动效偏好 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .thinking-dot,
+  .anim-fade-up,
+  .anim-slide-right,
+  .anim-scale-in {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+}
