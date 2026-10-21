@@ -12,7 +12,7 @@ import ChunkDrawer from '@/components/kb/ChunkDrawer.vue'
 import { useKbStore } from '@/stores/kb'
 import type { KbDocument, KnowledgeBase } from '@/api/types'
 
-/** 知识库管理页：库列表 → 文档列表 → 上传/状态监控/切片明细 */
+/** Knowledge-base page: list -> documents -> upload / status monitoring / chunk details */
 const { t } = useI18n()
 const store = useKbStore()
 const createOpen = ref(false)
@@ -40,7 +40,7 @@ async function confirmDelete(): Promise<void> {
   }
 }
 
-/** 当前库的切片总量（底部汇总用，由行数据求和） */
+/** Total chunks of the current base (footer summary, summed from the rows) */
 const totalChunks = computed(() => store.documents.reduce((sum, d) => sum + d.chunk_count, 0))
 const readyCount = computed(() => store.documents.filter((d) => d.status === 'ready').length)
 const failedCount = computed(() => store.documents.filter((d) => d.status === 'failed').length)
@@ -79,7 +79,7 @@ function onViewChunks(doc: KbDocument): void {
 
 <template>
   <div class="flex h-full">
-    <!-- 左：知识库列表 -->
+    <!-- Left: knowledge-base list -->
     <div class="flex w-[264px] shrink-0 flex-col border-r border-edge bg-panel">
       <div class="flex h-14 items-center justify-between border-b border-edge px-4">
         <span class="text-[13px] font-medium text-ink">{{ t('kb.list.title') }}</span>
@@ -104,8 +104,8 @@ function onViewChunks(doc: KbDocument): void {
           <span class="block truncate text-[13px] font-medium">{{ kb.name }}</span>
           <span class="mt-0.5 block truncate text-[11px] text-ink-mute">{{ kb.description }}</span>
           <span class="mt-1 flex items-center gap-3 font-mono text-[11px] text-ink-mute">
-            <span><span class="text-ink-dim">{{ kb.doc_count }}</span> {{ t('kb.list.docs') }}</span>
-            <span><span class="text-ink-dim">{{ kb.chunk_count }}</span> {{ t('kb.list.chunks') }}</span>
+            <span><span class="text-ink-dim">{{ kb.doc_count }}</span> {{ t('kb.list.docs', { count: kb.doc_count }) }}</span>
+            <span><span class="text-ink-dim">{{ kb.chunk_count }}</span> {{ t('kb.list.chunks', { count: kb.chunk_count }) }}</span>
           </span>
         </button>
       </div>
@@ -115,9 +115,9 @@ function onViewChunks(doc: KbDocument): void {
       </div>
     </div>
 
-    <!-- 右：文档管理 -->
+    <!-- Right: document management -->
     <div class="flex min-w-0 flex-1 flex-col">
-      <!-- 工具栏 -->
+      <!-- Toolbar -->
       <div class="flex min-h-14 items-center gap-3 border-b border-edge px-4 md:px-6">
         <h1 class="truncate text-[18px] font-semibold leading-tight text-ink">
           {{ store.selectedKb?.name ?? t('kb.noSelection') }}
@@ -140,7 +140,7 @@ function onViewChunks(doc: KbDocument): void {
         </BaseButton>
       </div>
 
-      <!-- 文档表头 -->
+      <!-- Document table header -->
       <div v-if="store.documents.length" class="grid grid-cols-[minmax(0,1fr)_100px_170px_110px_72px] gap-3 border-b border-edge px-4 py-2 text-[12px] text-ink-mute md:px-6">
         <span>{{ t('kb.col.doc') }}</span>
         <span>{{ t('kb.col.chunk') }}</span>
@@ -149,7 +149,7 @@ function onViewChunks(doc: KbDocument): void {
         <span class="text-right">{{ t('kb.col.actions') }}</span>
       </div>
 
-      <!-- 文档列表 -->
+      <!-- Document list -->
       <div class="flex-1 overflow-y-auto">
         <div v-if="store.loading" class="space-y-2 p-4">
           <div v-for="i in 4" :key="i" class="h-12 animate-pulse rounded-lg border border-edge bg-card/50" />
@@ -167,7 +167,7 @@ function onViewChunks(doc: KbDocument): void {
         <BaseEmpty v-else icon="book" :text="t('kb.pleaseSelect')" />
       </div>
 
-      <!-- 库概览：全部数字由行数据求和，不做估算 -->
+      <!-- Base overview: every number is summed from the rows, never estimated -->
       <div v-if="store.documents.length" class="grid grid-cols-2 gap-px border-t border-edge bg-edge md:grid-cols-4">
         <div class="bg-panel px-4 py-3">
           <div class="text-[11px] text-ink-mute">{{ t('kb.col.doc') }}</div>
@@ -190,7 +190,7 @@ function onViewChunks(doc: KbDocument): void {
       </div>
     </div>
 
-    <!-- 新建知识库弹窗 -->
+    <!-- New knowledge-base dialog -->
     <BaseModal :open="createOpen" :title="t('kb.createTitle')" width="420px" @close="createOpen = false">
       <div class="space-y-3.5">
         <div>
@@ -222,10 +222,10 @@ function onViewChunks(doc: KbDocument): void {
       </template>
     </BaseModal>
 
-    <!-- 上传弹窗 -->
+    <!-- Upload dialog -->
     <UploadModal :open="uploadOpen" @close="uploadOpen = false" />
 
-    <!-- 切片明细抽屉 -->
+    <!-- Chunk details drawer -->
     <ChunkDrawer :open="chunkDoc != null" :doc="chunkDoc" @close="chunkDoc = null" />
   </div>
 </template>

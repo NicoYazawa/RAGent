@@ -101,7 +101,7 @@ export default {
     store: { unknownError: 'Unknown error', sessionCreateFailed: 'Session creation failed: ' },
   },
   kb: {
-    list: { title: 'Knowledge Bases', docs: 'documents', chunks: 'chunks' },
+    list: { title: 'Knowledge Bases', docs: 'documents | document | documents', chunks: 'chunks | chunk | chunks' },
     archEs: 'ES kb_chunks — one index, per-KB isolation',
     archMysql: 'MySQL metadata is the single source of truth',
     nameRequired: 'Knowledge base name required',

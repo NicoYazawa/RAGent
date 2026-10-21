@@ -6,13 +6,29 @@ A RAG question-answering project with multiple knowledge bases, hybrid retrieval
 
 ## Features
 
-- **Knowledge base management**: Upload Markdown, TXT, PDF, and DOCX files for parsing, section-aware chunking, embedding, and indexing. Browse chunks, retry failed documents, and delete documents.
+- **Knowledge base management**: Upload Markdown, TXT, PDF, and DOCX files for parsing, section-aware chunking, embedding, and indexing. Browse chunks, retry failed documents, and delete individual documents or entire knowledge bases.
 - **Hybrid retrieval**: Combine Elasticsearch vector search and BM25 keyword search through application-level Reciprocal Rank Fusion (RRF), with optional reranking.
-- **Agent workflow**: Intent routing, query rewriting and HyDE, relevance grading, CRAG correction, and Self-RAG reflection, with separate paths for casual conversation and business data queries.
+- **Agent workflow**: Intent routing, query rewriting and HyDE, relevance grading, CRAG correction, and Self-RAG reflection, with separate paths for casual conversation and business data queries. Routing uses the connected business schemas; insufficiently relevant database results fall back to document retrieval.
 - **Source attribution**: Match citation numbers to their sources using document IDs and chunk UIDs, avoiding confusion between documents with the same name. Regeneration after reflection replaces the previous answer.
 - **Multimodal conversations**: Ask questions with images, maintain conversation context, regenerate answers, and stop streaming. Image understanding depends on the selected model's vision capabilities.
 - **Diagnostic tools**: Retrieval Playground, decision log replay and export, and dependency health checks.
 - **Chinese and English interfaces**: Switch the interface language; the answer language is determined from the question.
+
+## Feature Gallery
+
+These screenshots show the running application with the interface set to English. The demo knowledge base is loaded with the fictional policies in [test_docs/en/](test_docs/en): an attendance policy, a travel expenses policy, and an office equipment policy. Questions, answers, source text, and decision traces are in English. Click an image to open the original.
+
+| Knowledge Q&A and decision trace | Citations and source text |
+| --- | --- |
+| [![Policy Q&A with numbered citations and an agent decision trace replay](docs/images/en/chat.jpg)](docs/images/en/chat.jpg) | [![Document sections and original chunks opened from an answer citation](docs/images/en/citation.jpg)](docs/images/en/citation.jpg) |
+| Read sourced answers and replay routing, planning, retrieval, grading, and reflection. | Open a citation number or source card to locate the original document and chunk. |
+
+| Knowledge bases and documents | Decision log replay |
+| --- | --- |
+| [![Multiple knowledge bases, ingestion status, chunk counts, and deletion controls](docs/images/en/knowledge-bases.jpg)](docs/images/en/knowledge-bases.jpg) | [![Session-filtered decision logs and a replay of the processing steps](docs/images/en/decision-log.jpg)](docs/images/en/decision-log.jpg) |
+| Manage multiple libraries, upload files, inspect chunks, retry failed jobs, and delete a knowledge base. | Filter by session and date, then inspect step timings, retrieval results, and the final answer. |
+
+Deleting a knowledge base requires confirmation and is blocked while its documents are being processed. Cleanup is scoped by knowledge base ID and removes its documents, chunks, ES data, and upload directory. Independently uploaded copies in other knowledge bases remain intact, even when their names or contents match.
 
 ## Technology and Workflow
 
@@ -30,6 +46,67 @@ Document ingestion: `Upload → Parse → Chunk → Embed → Elasticsearch + My
 Knowledge Q&A: `Route intent → Plan query → Retrieve from both lanes → RRF / optional reranking → Grade / correct → Stream answer → Reflect → Attribute sources`.
 
 MySQL stores metadata and chunk text, Elasticsearch holds a rebuildable search index, and original uploads are stored in a separate data directory.
+
+### System Architecture
+
+```mermaid
+flowchart LR
+    UI["Vue 3 Web UI<br/>Chat / Knowledge bases / Playground / Logs"]
+    Nginx["Nginx<br/>Static files and API reverse proxy"]
+    subgraph Backend["FastAPI Backend"]
+        API["HTTP API / SSE"]
+        Ingest["Document ingestion<br/>Parse → Section-aware chunking → Embed"]
+        Agent["Agent orchestration<br/>Route / Plan / Retrieve / Grade / Generate / Reflect"]
+        Provider["Model adapters<br/>LLM / Embedding / Optional reranking"]
+        API --> Ingest
+        API --> Agent
+        Ingest --> Provider
+        Agent --> Provider
+    end
+    MySQL[("MySQL 8<br/>Documents and chunks / Chats / Settings / Logs / sales")]
+    ES[("Elasticsearch 8<br/>kb_chunks: kNN + BM25<br/>Scoped by kb_id")]
+    Files[("Upload volume<br/>Paths scoped by knowledge base and document IDs")]
+    Models["Configured model services<br/>Cloud APIs / Self-hosted endpoints"]
+    UI -->|HTTP| Nginx --> API
+    API -.->|SSE through Nginx| UI
+    Ingest -->|Original files| Files
+    Ingest -->|Metadata and chunk text| MySQL
+    Ingest -->|Text and vector index| ES
+    Agent -->|Context / Business queries / Persistence| MySQL
+    Agent -->|Vector and keyword retrieval| ES
+    Provider --> Models
+```
+
+FastAPI background tasks run document ingestion, while the frontend polls for document status. Q&A events stream through SSE. MySQL, Elasticsearch, and uploaded files use separate data volumes. `backend/app/agent/source_catalog.py` describes the business database query capability.
+
+### Question Processing Flow
+
+```mermaid
+flowchart TD
+    Q["Question + Conversation context + Optional images"] --> Router["Intent routing<br/>Uses enabled sources and business schemas"]
+    Router -->|Casual conversation| Chat["Stream a direct answer"]
+    Router -->|Business data query| SQL["NL2SQL → Business database"]
+    SQL --> DBGrade{"Database relevance passes?"}
+    DBGrade -->|Yes| Generate["Stream an evidence-based answer"]
+    DBGrade -->|No: discard unrelated SQL context| Plan
+    Router -->|Knowledge Q&A / Summary| Plan["Query planning<br/>Rewrite / Decompose / Optional HyDE; lighter path for summaries"]
+    Plan --> Retrieve["Retrieve within the knowledge base scope<br/>Vector kNN / BM25, subject to source settings"]
+    Retrieve --> Fuse["RRF fusion → Optional reranking"]
+    Fuse --> Grade{"Evidence relevance grade"}
+    Grade -->|Pass| Generate
+    Grade -->|Partial / Fail| Correct["Supplementary retrieval / CRAG diagnosis and rewriting<br/>Bounded retries"]
+    Correct -->|Retry retrieval| Retrieve
+    Correct -->|Stop correction| Note["Disclose insufficient evidence or missing coverage"]
+    Note --> Generate
+    Generate --> Reflect{"Self-RAG reflection"}
+    Reflect -->|Needs more evidence and rounds remain| Supplement["Targeted retrieval → Update evidence → Regenerate"]
+    Supplement --> Generate
+    Reflect -->|Pass or round limit reached| Cite["Extract citations<br/>Locate by document ID and chunk UID"]
+    Cite --> Save["Persist the answer and decision log"]
+    Chat --> Save
+```
+
+Summaries prefer vector retrieval. When reflection exhausts its rounds without passing, the answer includes a note. New citations resolve to the original document and chunk, preventing confusion between identically named documents across knowledge bases.
 
 ## Run with Docker Compose
 
@@ -179,8 +256,8 @@ RAGent/
 │   ├── scripts/          # Index backfill, rechunking, and retrieval benchmarks
 │   └── tests/
 ├── frontend/src/         # Views, components, stores, and API clients
-├── docs/                 # Internationalization and regression documentation
-├── test_docs/            # Demo documents
+├── docs/                 # Feature screenshots, internationalization, and regression documentation
+├── test_docs/            # Demo documents (test_docs/en holds the English set)
 ├── elasticsearch/        # Optional image build configuration for the IK plugin
 ├── docker-compose.yml
 └── ragent_init.sql       # Demo database schema and seed data

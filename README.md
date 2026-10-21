@@ -6,13 +6,29 @@
 
 ## 功能
 
-- **知识库管理**：上传 Markdown、TXT、PDF、DOCX，完成解析、章节切片、向量化与索引；支持查看切片、失败重试和删除文档。
+- **知识库管理**：上传 Markdown、TXT、PDF、DOCX，完成解析、章节切片、向量化与索引；支持查看切片、失败重试、删除文档和删除整个知识库。
 - **混合检索**：Elasticsearch 向量检索与 BM25 关键词检索，经应用层 RRF 融合，可选启用 Rerank 精排。
-- **Agent 问答**：意图识别、查询改写与 HyDE、相关度评分、CRAG 纠正、Self-RAG 反思；另有闲聊和业务数据查询路径。
+- **Agent 问答**：意图识别、查询改写与 HyDE、相关度评分、CRAG 纠正、Self-RAG 反思；另有闲聊和业务数据查询路径。路由参考已接入的业务表结构，数据库结果相关度不足时回退到文档知识库检索。
 - **答案溯源**：引用编号与原文对应，使用文档 ID 和切片 UID 定位，避免同名文档混淆；反思重生成会替换旧答案。
 - **多模态会话**：支持附图提问、多轮上下文、重新生成及停止输出。图片理解取决于当前模型的视觉能力。
 - **诊断工具**：检索 Playground、决策日志回放与导出、依赖健康状态检查。
 - **中英文界面**：支持切换界面语言；答案语言依据问题判断。
+
+## 功能演示
+
+以下截图来自本地运行的真实界面，问答与引用使用制度演示数据。英文版使用独立的英语界面与英文演示数据截图，演示文档见 `test_docs/en/`。点击图片可查看原图。
+
+| 智能问答与决策链 | 引用溯源与原文 |
+| --- | --- |
+| [![制度问答、引用编号与 Agent 决策链回放](docs/images/chat.jpg)](docs/images/chat.jpg) | [![通过答案引用查看文档章节与切片原文](docs/images/citation.jpg)](docs/images/citation.jpg) |
+| 查看带出处的答案，回放路由、规划、检索、评分和反思过程。 | 点击引用编号或出处卡片，按文档和切片身份定位原文。 |
+
+| 知识库与文档管理 | 决策日志回放 |
+| --- | --- |
+| [![多知识库列表、文档入库状态、切片数量和删除入口](docs/images/knowledge-bases.jpg)](docs/images/knowledge-bases.jpg) | [![按会话筛选的问答日志及决策步骤回放](docs/images/decision-log.jpg)](docs/images/decision-log.jpg) |
+| 管理多个库，上传文档、查看切片、重试失败任务及删除知识库。 | 按会话与日期筛选日志，查看每步耗时、检索结果及最终答案。 |
+
+删除知识库需要二次确认；有文档正在入库时会拒绝删除。删除按知识库 ID 清理文档、切片、ES 数据和上传目录，其他知识库中同名或同内容的独立副本不受影响。
 
 ## 技术栈与流程
 
@@ -30,6 +46,67 @@
 知识问答：`意图识别 → 查询规划 → 双路检索 → RRF / 可选精排 → 评分 / 纠正 → 流式生成 → 反思 → 引用溯源`。
 
 MySQL 保存元数据和切片正文，Elasticsearch 保存可重建的检索索引，原始上传文件保存在独立数据目录中。
+
+### 系统架构
+
+```mermaid
+flowchart LR
+    UI["Vue 3 Web 界面<br/>问答 / 知识库 / Playground / 日志"]
+    Nginx["Nginx<br/>静态资源与 API 反向代理"]
+    subgraph Backend["FastAPI 后端"]
+        API["HTTP API / SSE"]
+        Ingest["文档入库<br/>解析 → 章节切片 → 向量化"]
+        Agent["Agent 编排<br/>路由 / 规划 / 检索 / 评分 / 生成 / 反思"]
+        Provider["模型适配层<br/>LLM / Embedding / 可选 Rerank"]
+        API --> Ingest
+        API --> Agent
+        Ingest --> Provider
+        Agent --> Provider
+    end
+    MySQL[("MySQL 8<br/>文档与切片 / 会话 / 配置 / 日志 / sales")]
+    ES[("Elasticsearch 8<br/>kb_chunks：kNN + BM25<br/>按 kb_id 隔离")]
+    Files[("上传文件卷<br/>按知识库 ID 与文档 ID 存放")]
+    Models["已配置的模型服务<br/>云端 API / 自建服务"]
+    UI -->|HTTP| Nginx --> API
+    API -.->|SSE，经 Nginx 返回| UI
+    Ingest -->|原始文件| Files
+    Ingest -->|元数据与切片正文| MySQL
+    Ingest -->|文本与向量索引| ES
+    Agent -->|上下文 / 业务查询 / 持久化| MySQL
+    Agent -->|向量与关键词召回| ES
+    Provider --> Models
+```
+
+入库由 FastAPI 后台任务执行，前端通过轮询刷新文档状态；问答过程通过 SSE 推送。MySQL、ES 与上传文件分别使用独立数据卷，业务数据查询能力由 `backend/app/agent/source_catalog.py` 描述。
+
+### 一个问题的处理流程
+
+```mermaid
+flowchart TD
+    Q["问题 + 会话上下文 + 可选图片"] --> Router["意图路由<br/>参考数据源开关与业务表结构"]
+    Router -->|闲聊| Chat["直接流式回答"]
+    Router -->|业务数据查询| SQL["NL2SQL → 业务数据库"]
+    SQL --> DBGrade{"结果相关度通过？"}
+    DBGrade -->|是| Generate["基于证据流式生成答案"]
+    DBGrade -->|否：丢弃无关 SQL 上下文| Plan
+    Router -->|知识问答 / 总结| Plan["查询规划<br/>改写 / 拆解 / 按需 HyDE；总结使用轻量路径"]
+    Plan --> Retrieve["按知识库范围检索<br/>向量 kNN / BM25，依数据源开关启用"]
+    Retrieve --> Fuse["RRF 融合 → 可选 Rerank"]
+    Fuse --> Grade{"证据相关度评分"}
+    Grade -->|通过| Generate
+    Grade -->|部分覆盖 / 不通过| Correct["补检 / CRAG 诊断与改写<br/>受重试次数上限约束"]
+    Correct -->|继续检索| Retrieve
+    Correct -->|停止纠正| Note["标注证据不足或知识库未覆盖"]
+    Note --> Generate
+    Generate --> Reflect{"Self-RAG 反思"}
+    Reflect -->|需补充且有剩余轮次| Supplement["定向补检 → 更新证据 → 重新生成"]
+    Supplement --> Generate
+    Reflect -->|通过或达到轮次上限| Cite["提取引用<br/>文档 ID + 切片 UID 定位"]
+    Cite --> Save["保存答案与决策日志"]
+    Chat --> Save
+```
+
+总结路径优先使用向量检索；反思达到上限仍未通过时会附加说明。新引用定位到原始文档与切片，避免跨库同名文档串引。
 
 ## 使用 Docker Compose 启动
 
@@ -179,8 +256,8 @@ RAGent/
 │   ├── scripts/          # 索引回填、重切与检索评测
 │   └── tests/
 ├── frontend/src/         # 页面、组件、状态管理和 API 客户端
-├── docs/                 # 国际化与回归验证说明
-├── test_docs/            # 演示文档
+├── docs/                 # 功能截图、国际化与回归验证说明
+├── test_docs/            # 演示文档（test_docs/en 为英文演示集）
 ├── elasticsearch/        # 可选 IK 插件镜像构建配置
 ├── docker-compose.yml
 └── ragent_init.sql       # 演示数据库建表和种子数据
