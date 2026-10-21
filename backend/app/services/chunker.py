@@ -1,12 +1,14 @@
-"""切片器 — 整章优先：顶级章节聚合为单片（+20% 容差），超限章按句子边界带重叠切分"""
+"""Chunker — whole-chapter first: top-level chapters are aggregated into a single chunk (with a
+20% tolerance), and oversized chapters are split on sentence boundaries with overlap."""
 import re
 
 from ..config import settings
 
-# 章级标题：第X章/节/篇/部分（结构可信）；一、二、……须为短标题且不含句内标点（排除「一、上午工作时间：9:00…」类条目）
+# Chapter-level headings: 第X章/节/篇/部分 (trustworthy structure); 一、二、... must be short titles
+# without in-sentence punctuation (this excludes entries such as 「一、上午工作时间：9:00…」)
 _CH_RE = re.compile(r"^第[一二三四五六七八九十百千0-9]+[章节篇部分]")
 _CN_NUM_RE = re.compile(r"^[一二三四五六七八九十]+[、.．]")
-# 句子边界：中英文句末标点或换行
+# Sentence boundaries: Chinese and English end-of-sentence punctuation, plus newlines
 _SENTENCE_ENDS = "。！？；!?;\n"
 
 
@@ -20,8 +22,11 @@ def _is_chapter_title(section: str) -> bool:
 
 
 def _block_key(section: str, prev_key: str | None) -> str | None:
-    """块 → 章键：多段路径在前缀中找第一个章级标题段（md「标题/章/…」、pdf「章/小节」均适用），
-    无章级标记时退回第二段（md 文档标题后的第一段）；单段路径顶级标题开新章，其余沿用当前章"""
+    """Block -> chapter key: for multi-segment paths, find the first chapter-level heading segment
+    in the prefix (works for both md "title/chapter/..." and pdf "chapter/section"); without a
+    chapter marker fall back to the second segment (the first one after an md document title).
+    A single-segment path starts a new chapter when it is a top-level title, otherwise it keeps
+    the current chapter."""
     parts = [p for p in section.split("/") if p]
     if len(parts) >= 2:
         for p in parts[:-1]:
@@ -35,7 +40,8 @@ def _block_key(section: str, prev_key: str | None) -> str | None:
 
 
 def _find_cut(text: str, chunk_size: int) -> int:
-    """切点：chunk_size 窗口内最靠后的句子边界（含标点），过半即可用，否则硬切"""
+    """Cut point: the last sentence boundary inside the chunk_size window (punctuation included);
+    it is usable past the halfway point, otherwise the text is cut hard."""
     window = text[:chunk_size]
     best = max(window.rfind(c) for c in _SENTENCE_ENDS)
     if best >= chunk_size // 2:
@@ -48,13 +54,16 @@ def chunk_blocks(
     chunk_size: int | None = None,
     overlap: int | None = None,
 ) -> list[dict]:
-    """整章优先切片：同章小节全部聚合；总长 ≤ 上限（chunk_size×1.2）整章一片，超限章按句子边界切分并带重叠"""
+    """Whole-chapter-first chunking: all subsections of a chapter are aggregated; when the total
+    stays within the limit (chunk_size x 1.2) the chapter becomes one chunk, otherwise it is split
+    on sentence boundaries with overlap."""
     chunk_size = chunk_size or settings.chunk_size
     overlap = min(overlap if overlap else settings.chunk_overlap, chunk_size // 2)
-    max_keep = chunk_size + chunk_size // 5  # 整章单片上限（20% 容差，避免 505 字的章被切成两片）
+    max_keep = chunk_size + chunk_size // 5  # whole-chapter limit (20% tolerance so a 505-char chapter is not split)
 
-    # 1) 按章聚合：文首导语（标题/编号/日期）并入首章；识别不出章节的文档整体归为一组
-    chapters: list[list] = []  # [章级 section, [text, ...]]
+    # 1) Aggregate by chapter: the leading preamble (title/number/date) joins the first chapter;
+    #    a document with no detectable chapters becomes a single group
+    chapters: list[list] = []  # [chapter-level section, [text, ...]]
     preamble: list[str] = []
     key: str | None = None
     for section, text in blocks:
@@ -73,7 +82,7 @@ def chunk_blocks(
             return []
         chapters = [[blocks[0][0][:500], preamble]]
 
-    # 2) 逐章产出：整章单片或按句子边界切分
+    # 2) Emit chapter by chapter: one whole chunk or a split on sentence boundaries
     chunks: list[dict] = []
     for section, texts in chapters:
         cur = "\n".join(texts).strip()

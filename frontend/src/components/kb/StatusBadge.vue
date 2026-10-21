@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { DocStatus } from '@/api/types'
 
-/** 文档入库五态徽标 + 四步进度（parsing→chunking→embedding→ready） */
+/** Five-state ingestion badge plus the four-step progress (parsing->chunking->embedding->ready) */
 const props = defineProps<{ status: DocStatus }>()
 const { t } = useI18n()
 
@@ -19,7 +19,7 @@ const meta = computed(() => META[props.status])
 const isWorking = computed(() => ['parsing', 'chunking', 'embedding'].includes(props.status))
 const STAGES: DocStatus[] = ['parsing', 'chunking', 'embedding', 'ready']
 const stageIdx = computed(() => (props.status === 'failed' ? 2 : STAGES.indexOf(props.status)))
-/** 入库中与失败态都要展示四步进度（失败态用红色标记断点） */
+/** Both the in-flight and failed states show the four-step progress (the failure point is marked red) */
 const showProgress = computed(() => isWorking.value || props.status === 'failed')
 </script>
 
@@ -31,7 +31,7 @@ const showProgress = computed(() => isWorking.value || props.status === 'failed'
       {{ meta.label }}
     </span>
 
-    <!-- 四步进度点：仅在入库进行中显示，完成态不重复装饰 -->
+    <!-- Four-step progress dots: only while ingesting; the done state adds no decoration -->
     <div v-if="showProgress" class="hidden items-center gap-[3px] md:flex" :title="t('kb.progressTitle', { n: stageIdx + 1 })">
       <template v-for="(s, i) in STAGES" :key="s">
         <span

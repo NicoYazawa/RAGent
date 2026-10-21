@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 /**
- * 应用引导（main.ts）—— 挂载顺序契约：
+ * App bootstrap (main.ts) — mount order contract:
  *   createApp → use(Pinia) → use(i18n) → initLocale() → use(Router) → mount('#app')
  */
 

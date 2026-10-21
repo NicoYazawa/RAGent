@@ -4,9 +4,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { DecisionLog, DecisionStep } from '@/api/types'
 
 /**
- * 决策日志回放：
- *   - LogDetailDrawer：打开拉详情、Tab 切换（回放 / 最终答案）、元信息
- *   - StepPlayer：上一步 / 播放暂停 / 下一步 / 重置 / 倍速；steps → 决策卡（含回流轮次与告警态）
+ * Decision log replay:
+ *   - LogDetailDrawer: fetches details on open, tab switching (replay / final answer), metadata
+ *   - StepPlayer: previous / play-pause / next / reset / speed; steps become decision cards (with backflow rounds and warn state)
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -184,7 +184,7 @@ describe('StepPlayer', () => {
       await vi.advanceTimersByTimeAsync(1000)
       expect(w.text()).toContain('纠正')
       await vi.advanceTimersByTimeAsync(1000)
-      // 走完后自动暂停（按钮回到「播放」）
+      // auto-pauses at the end (the button returns to "Play")
       expect(w.find('button[aria-label="播放"]').exists()).toBe(true)
     } finally {
       vi.useRealTimers()

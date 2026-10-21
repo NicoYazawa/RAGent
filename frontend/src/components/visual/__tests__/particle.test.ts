@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 
 /**
- * 粒子背景（three.js）—— jsdom 无 WebGL，用替身 three 验证组件自身的
- * 生命周期契约：初始化、粒子/连线缓冲、指针视差、可见性暂停、资源释放。
+ * Particle background (three.js) — jsdom has no WebGL, so a three stub verifies the component's
+ * lifecycle contract: init, particle/line buffers, pointer parallax, visibility pause, resource release.
  */
 
 const threeState = vi.hoisted(() => ({
@@ -135,7 +135,7 @@ vi.mock('three', () => {
 
 import ParticleBackground from '../ParticleBackground.vue'
 
-/** jsdom 无 canvas 2D 实现，补最小替身 */
+/** jsdom has no canvas 2D implementation, so a minimal stub is installed. */
 function stubCanvas2D(): void {
   HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
     fillStyle: '',
@@ -146,7 +146,7 @@ function stubCanvas2D(): void {
 }
 
 beforeEach(() => {
-  // Vitest 默认不 fake requestAnimationFrame，这里显式接管，否则动画帧不会推进
+  // Vitest does not fake requestAnimationFrame by default, so it is taken over here or frames never advance
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame', 'Date'] })
   stubCanvas2D()
   threeState.rendered = 0
@@ -155,7 +155,7 @@ beforeEach(() => {
   threeState.positionBufferLength = 0
   threeState.pixelRatio = 0
   threeState.cameraAspect = 0
-  // jsdom 的 clientWidth 恒为 0，这里给出确定尺寸以便断言粒子规模
+  // jsdom reports clientWidth as 0, so a fixed size is set to assert the particle count
   Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 1200 })
   Object.defineProperty(HTMLElement.prototype, 'clientHeight', { configurable: true, value: 800 })
 })
@@ -172,7 +172,7 @@ describe('ParticleBackground', () => {
 
   it('按容器宽度决定粒子规模（宽屏 130 个粒子）', () => {
     mount(ParticleBackground)
-    // 位置缓冲 = COUNT * 3
+    // position buffer = COUNT * 3
     expect(threeState.positionBufferLength).toBe(130 * 3)
   })
 

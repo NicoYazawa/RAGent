@@ -1,4 +1,4 @@
-"""base.py 协议与数据结构 — runtime_checkable 断言"""
+"""Protocols and data structures in base.py — runtime_checkable assertions."""
 from collections.abc import AsyncIterator
 
 from app.providers.base import EmbeddingProvider, LLMCapabilities, LLMProvider, Message, Usage

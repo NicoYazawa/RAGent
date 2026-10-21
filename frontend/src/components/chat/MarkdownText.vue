@@ -5,9 +5,9 @@ import type { Citation } from '@/api/types'
 import { citationNumber } from '@/utils/citations'
 
 /**
- * 轻量 Markdown 渲染（自研，避免外部依赖）
- * 支持：标题 / 加粗 / 行内代码 / 围栏代码块 / 表格 / 列表 / 引用块 / 链接 / 分隔线 / [n] 引用角标
- * [n] 角标可点击（事件委托），由父组件联动引用卡片定位
+ * Lightweight Markdown rendering (in-house, to avoid external dependencies)
+ * Supports: headings / bold / inline code / fenced code / tables / lists / blockquotes / links / rules / [n] citation badges
+ * [n] badges are clickable (event delegation) and the parent locates the citation card
  */
 const props = defineProps<{ text: string; citations?: Citation[] }>()
 const emit = defineEmits<{ citeClick: [n: number] }>()
@@ -20,7 +20,7 @@ function escapeHtml(s: string): string {
 
 function inline(s: string): string {
   let out = escapeHtml(s)
-  // [n] 引用角标（仅当该序号存在于 citations 中才可点击）
+  // [n] citation badge (clickable only when the number exists in citations)
   out = out.replace(/\[(\d+)\]/g, (_m, n: string) => {
     const idx = Number(n)
     const exists = !props.citations || referenceNumbers.value.has(idx)
@@ -30,7 +30,7 @@ function inline(s: string): string {
   })
   out = out.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-ink">$1</strong>')
   out = out.replace(/`([^`]+)`/g, '<code class="mx-0.5 rounded bg-raise px-1.5 py-0.5 font-mono text-[12px] text-accent-soft">$1</code>')
-  // 链接（仅允许 http/https，防 javascript: 注入）
+  // links (http/https only, blocks javascript: injection)
   out = out.replace(
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
     '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent">$1</a>',
@@ -38,7 +38,7 @@ function inline(s: string): string {
   return out
 }
 
-// 标题层级样式（正文 13px 基准，层级递减，与气泡内排版协调）
+// heading styles (13px base, decreasing with level, harmonized with the bubble layout)
 const HEADING_CLASS: Record<number, string> = {
   1: 'mt-3 mb-1.5 text-[16px]',
   2: 'mt-3 mb-1 text-[15px]',
@@ -55,7 +55,7 @@ const html = computed(() => {
   while (i < lines.length) {
     const line = lines[i]
     if (line.trim().startsWith('```')) {
-      // 围栏代码块（流式未闭合时渲染到末尾，内容原样转义不做行内渲染）
+      // fenced code block (an unclosed fence while streaming renders to the end; content is escaped verbatim)
       const lang = line.trim().slice(3).trim()
       i++
       const buf: string[] = []
@@ -63,7 +63,7 @@ const html = computed(() => {
         buf.push(lines[i])
         i++
       }
-      i++ // 跳过收束 ```
+      i++ // skip the closing fence ```
       out.push(
         `<div class="my-2 overflow-hidden rounded-lg border border-edge bg-raise">` +
           (lang ? `<div class="border-b border-edge px-3 py-1 font-mono text-[11px] text-ink-mute">${escapeHtml(lang)}</div>` : '') +
@@ -71,17 +71,17 @@ const html = computed(() => {
           `</div>`,
       )
     } else if (/^#{1,6}\s*\S/.test(line.trim())) {
-      // 标题（# ~ ######，兼容中文模型省略空格的「###一、」写法）
+      // heading (# to ######, tolerating the "###一、" form Chinese models emit without a space)
       const m = line.trim().match(/^(#{1,6})\s*(.+)$/)!
       const lv = m[1].length
       out.push(`<h${lv} class="${HEADING_CLASS[lv]} font-semibold text-ink">${inline(m[2])}</h${lv}>`)
       i++
     } else if (/^(-{3,}|\*{3,})$/.test(line.trim())) {
-      // 分隔线（表头分隔行由表格分支先消费，不会走到这里）
+      // horizontal rule (table separator rows are consumed by the table branch first)
       out.push('<hr class="my-3 border-edge" />')
       i++
     } else if (line.trim().startsWith('|') && i + 1 < lines.length && /^\|[\s:|-]+\|?$/.test(lines[i + 1].trim())) {
-      // 表格块
+      // table block
       const header = line.split('|').slice(1, -1).map((c) => c.trim())
       i += 2
       const rows: string[][] = []
@@ -96,7 +96,7 @@ const html = computed(() => {
           `</table></div>`,
       )
     } else if (line.trimStart().startsWith('> ')) {
-      // 引用块（声明/警示）
+      // blockquote (notice/warning)
       const buf: string[] = []
       while (i < lines.length && lines[i].trimStart().startsWith('> ')) {
         buf.push(lines[i].trimStart().slice(2))
@@ -106,7 +106,7 @@ const html = computed(() => {
         `<div class="my-2 rounded-lg border border-edge border-l-2 border-l-warn bg-card px-3 py-2 text-[13px] leading-relaxed text-ink-dim"><div>${buf.map((b) => inline(b)).join('<br/>')}</div></div>`,
       )
     } else if (/^\d+\.\s/.test(line.trim())) {
-      // 有序列表
+      // ordered list
       const buf: string[] = []
       while (i < lines.length && /^\d+\.\s/.test(lines[i].trim())) {
         buf.push(lines[i].trim().replace(/^\d+\.\s/, ''))
@@ -114,7 +114,7 @@ const html = computed(() => {
       }
       out.push(`<ol class="my-1.5 ml-5 list-decimal space-y-1 text-[13px] leading-relaxed">${buf.map((b) => `<li>${inline(b)}</li>`).join('')}</ol>`)
     } else if (line.trim().startsWith('- ')) {
-      // 无序列表
+      // unordered list
       const buf: string[] = []
       while (i < lines.length && lines[i].trim().startsWith('- ')) {
         buf.push(lines[i].trim().slice(2))

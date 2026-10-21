@@ -3,10 +3,10 @@ import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 
 /**
- * 路由表与应用根组件：
- *   - 路由结构（布局 + 5 个业务子路由）、命名、标题 meta
- *   - afterEach 统一把浏览器标签页标题设为 RAGent
- *   - App.vue 渲染 router-view 并尊重系统的「减少动态效果」偏好
+ * Route table and the app root component:
+ *   - route structure (layout + 5 business child routes), names, title meta
+ *   - afterEach always sets the browser tab title to RAGent
+ *   - App.vue renders router-view and respects the system "reduce motion" preference
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

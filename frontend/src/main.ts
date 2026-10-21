@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-// 字体本地化：随包构建，避免外网 CDN 不可达时回落到系统字体
+// Self-hosted fonts: bundled at build time so an unreachable CDN never falls back to system fonts
 import '@fontsource/public-sans/400.css'
 import '@fontsource/public-sans/500.css'
 import '@fontsource/public-sans/600.css'

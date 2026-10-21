@@ -3,7 +3,7 @@ import Icon from '@/components/ui/Icon.vue'
 import { useI18n } from 'vue-i18n'
 import { useChatStore } from '@/stores/chat'
 
-/** 左栏：会话列表（新建/切换/删除） */
+/** Left column: session list (create / switch / delete) */
 const { t } = useI18n()
 const store = useChatStore()
 

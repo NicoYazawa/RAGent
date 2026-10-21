@@ -1,19 +1,19 @@
-"""DeepSeek 批量翻译 i18n 候选字符串（术语表强制，i18n 工作流第 3 步）
+"""Batch-translate i18n candidate strings with DeepSeek (glossary enforced; step 3 of the i18n workflow).
 
-输入：frontend/src/i18n/candidates/strings.json（i18n_extract_strings.py 产物）
-      docs/i18n/glossary.tsv（核心术语表，注入 system prompt 强制套用）
-输出：frontend/src/i18n/candidates/translations.json  { "中文": "English", ... }
-      frontend/src/i18n/candidates/review.csv        （人工评审用：zh, en, kinds, files）
+Input: frontend/src/i18n/candidates/strings.json (produced by i18n_extract_strings.py)
+       docs/i18n/glossary.tsv (core glossary, injected into the system prompt and enforced)
+Output: frontend/src/i18n/candidates/translations.json  { "Chinese": "English", ... }
+        frontend/src/i18n/candidates/review.csv        (for manual review: zh, en, kinds, files)
 
-规则：
-- 占位符 {0}/{1}…、%s/%d、[n] 引用序号必须原样保留且数量一致
-- 术语表优先于模型自由发挥
-- UI 文案风格：按钮/标签用祈使句或名词短语，简洁；Toast/错误消息完整句子
-- LLM 提示词（kind=prompt）按"系统指令语气"翻译，保持 Markdown 结构
+Rules:
+- placeholders {0}/{1}..., %s/%d and [n] citation markers must be preserved verbatim and keep their count
+- the glossary wins over whatever the model would prefer
+- UI copy style: imperative or noun phrases for buttons/labels, kept short; full sentences for toasts/errors
+- LLM prompts (kind=prompt) are translated as system instructions and keep the Markdown structure
 
-用法（backend 目录，.env 密钥有效）：
-  python scripts/i18n_translate.py            # 全量
-  python scripts/i18n_translate.py --limit 20 # 试跑 20 条
+Usage (from the backend directory, with a valid .env key):
+  python scripts/i18n_translate.py            # everything
+  python scripts/i18n_translate.py --limit 20 # trial run of 20 entries
 """
 import argparse
 import asyncio
@@ -28,7 +28,8 @@ BACKEND = HERE.parent
 
 
 def _find_root() -> Path:
-    """定位项目根：含 frontend/src/i18n/candidates 的目录（兼容容器内 /app 布局）"""
+    """Locate the project root: the directory containing frontend/src/i18n/candidates (also works
+    with the /app layout inside the container)."""
     for cand in (BACKEND.parent, BACKEND):
         if (cand / "frontend" / "src" / "i18n" / "candidates").is_dir():
             return cand
@@ -74,7 +75,7 @@ def placeholders(s: str) -> list[str]:
 
 
 def make_batches(items: list[dict]) -> list[list[dict]]:
-    """按字符预算分批，长 prompt 单独成批"""
+    """Split into batches by a character budget; a long prompt becomes its own batch."""
     batches, cur, budget = [], [], 0
     for it in items:
         cost = len(it["zh"])

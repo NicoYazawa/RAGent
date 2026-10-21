@@ -4,9 +4,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { ChatMessage, Citation } from '@/api/types'
 
 /**
- * 消息流 / 决策侧栏 —— 本项目两条主交互线：
- *   - MessageList：空态示例问题、用户气泡（含附图）、助手气泡与引用卡片联动、图片预览
- *   - DecisionSidebar：时间线/流程图双模式、历史回放、导出、异常与统计
+ * Message stream / decision sidebar — the two main interaction lines of this project:
+ *   - MessageList: empty-state sample questions, user bubbles (with images), assistant bubbles linked to citation cards, image preview
+ *   - DecisionSidebar: timeline/flowchart modes, history replay, export, errors and statistics
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

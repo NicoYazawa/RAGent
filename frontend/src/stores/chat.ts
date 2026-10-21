@@ -6,26 +6,26 @@ import * as chatApi from '@/api/chat'
 import { getDecisionLog } from '@/api/admin'
 
 /* ============================================================
- * 问答 Store — 会话管理 + SSE 事件 → 决策卡片状态机
- * 卡片四态：pending（转圈）/ done（完成）/ warn（告警）/ 回流缩进
+ * Chat store — session management plus the SSE event to decision-card state machine
+ * Four card states: pending (spinner) / done (settled) / warn (alert) / backflow indent
  * ============================================================ */
 
 export interface DecisionCard {
   uid: number
-  /** 决策点序号（0 = 汇总/异常） */
+  /** Decision point ordinal (0 = summary/error) */
   step: number
   type: SseEventType
   status: 'pending' | 'done' | 'warn'
   detail: string
   payload: Record<string, unknown>
   ts: number
-  /** 回流轮次（0 起，>0 时侧栏缩进一层） */
+  /** Backflow round (starts at 0; above 0 the sidebar indents one level) */
   round: number
-  /** 本环节耗时 ms（pending 未结算为 0；等待型过渡卡为 0） */
+  /** Stage duration in ms (0 while pending is unsettled; 0 for waiting transition cards) */
   elapsedMs: number
 }
 
-/** 历史决策链回看态（agent_decision_log → 卡片） */
+/** History replay state (agent_decision_log to cards) */
 export interface ViewingLog {
   id: number
   question: string
@@ -36,24 +36,24 @@ export interface ViewingLog {
 
 let uid = 1
 
-/** 事件完成后预测下一步的 pending 文案（走 i18n，chat.hint.*） */
+/** Predicts the next pending copy after an event (via i18n, chat.hint.*) */
 
 export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n()
-  /** 下一环节 pending 提示：按 SSE 事件类型取本地化文案 */
+  /** Next-stage pending hint: localized copy chosen by SSE event type */
   function hintOf(type: SseEventType): string {
     return t(`chat.hint.${type}`) || ''
   }
-  /* ---------- 会话 ---------- */
+  /* ---------- Sessions ---------- */
   const sessions = ref<ChatSession[]>([])
   const currentSessionId = ref<number | null>(null)
   const sessionsLoading = ref(false)
 
-  /* ---------- 消息 ---------- */
+  /* ---------- Messages ---------- */
   const messages = ref<ChatMessage[]>([])
   const messagesLoading = ref(false)
 
-  /* ---------- 决策侧栏 ---------- */
+  /* ---------- Decision sidebar ---------- */
   const cards = ref<DecisionCard[]>([])
   const pendingCard = ref<DecisionCard | null>(null)
   const streaming = ref(false)
@@ -61,23 +61,23 @@ export const useChatStore = defineStore('chat', () => {
   const streamError = ref<string | null>(null)
   const doneStats = ref<{ elapsed_ms: number; prompt: number; completion: number; rounds: number } | null>(null)
   const activeRound = ref(0)
-  /** 当前进行中的管线环节（1~7，0=空闲；供流程图模式点亮） */
+  /** The pipeline stage in progress (1-7, 0=idle; lights nodes in flowchart mode) */
   const activeStage = ref(0)
-  /** 历史决策链回看（非 null 时侧栏展示该日志而非实时流） */
+  /** History replay (when non-null the sidebar shows that log instead of the live stream) */
   const viewingLog = ref<ViewingLog | null>(null)
   const viewingLoading = ref(false)
 
   let abortController: AbortController | null = null
 
-  /* 单步计时：上一事件 ts（事件卡耗时 = 本事件 ts - lastTs） */
+  /* Per-step timing: the previous event ts (card duration = this ts - lastTs) */
   let lastTs = 0
-  /* 生成卡（流式答案）首 token 时刻与卡片 uid */
+  /* First-token time and card uid of the generation card (streamed answer) */
   let generateStartTs: number | null = null
   let generateCardUid: number | null = null
 
   const currentSession = computed(() => sessions.value.find((s) => s.id === currentSessionId.value) ?? null)
 
-  /* ---------- 会话操作 ---------- */
+  /* ---------- Session operations ---------- */
 
   async function loadSessions(): Promise<void> {
     sessionsLoading.value = true
@@ -118,7 +118,7 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  /* ---------- 决策卡片状态机 ---------- */
+  /* ---------- Decision card state machine ---------- */
 
   function resetDecision(): void {
     cards.value = []
@@ -141,11 +141,11 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  /** 结算生成卡耗时（首个 generate 事件 → 结算事件），需在 settlePending 前调用 */
+  /** Settle the generation card timing (first generate event to the settle event); call before settlePending */
   function settleGenerate(settleTs: number): void {
     if (pendingCard.value && generateCardUid !== null && pendingCard.value.uid === generateCardUid) {
       pendingCard.value.elapsedMs = Math.max(0, settleTs - (generateStartTs ?? settleTs))
-      // 回填本次生成的字数（供流程图模式/决策链展示，与日志 steps 的 payload.chars 同构）
+      // fill in the generated char count (for flowchart/decision-chain display, matching payload.chars in the log steps)
       pendingCard.value.payload = { chars: streamingText.value.length }
       generateCardUid = null
       generateStartTs = null
@@ -165,11 +165,11 @@ export const useChatStore = defineStore('chat', () => {
     return false
   }
 
-  /** 事件完成后推进管线环节（供流程图模式点亮下一节点） */
+  /** Advance the pipeline stage after an event (lights the next node in flowchart mode) */
   function nextStage(event: SseEvent): number {
     switch (event.type) {
       case 'router':
-        // 闲聊直接进入生成；数据查询跳过改写直达检索
+        // chitchat goes straight to generation; data queries skip rewriting and go to retrieval
         return event.intent === 'chitchat' ? 6 : event.intent === 'data_query' ? 3 : 2
       case 'rewrite':
         return 3
@@ -196,7 +196,7 @@ export const useChatStore = defineStore('chat', () => {
       case 'correct':
       case 'reflect':
       case 'citation': {
-        // 生成中的 pending 归档为「答案生成完成」
+        // the in-flight generation pending is archived as "answer generation complete"
         if (pendingCard.value && event.type === 'reflect') {
           settleGenerate(event.ts)
           settlePending('done')
@@ -262,9 +262,9 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  /* ---------- 历史决策链回看 ---------- */
+  /* ---------- History replay ---------- */
 
-  /** DecisionStep[]（日志落库）→ 决策卡（含回流轮次推算，与实时流同构） */
+  /** DecisionStep[] (as persisted) to decision cards (backflow rounds derived, same shape as the live stream) */
   function stepsToCards(steps: DecisionStep[]): DecisionCard[] {
     const out: DecisionCard[] = []
     let round = 0
@@ -314,15 +314,15 @@ export const useChatStore = defineStore('chat', () => {
     viewingLog.value = null
   }
 
-  /* ---------- 重新生成 ---------- */
+  /* ---------- Regeneration ---------- */
 
-  /** 重答最后一问：清理旧答案（本地 + 后端落库）后重走 SSE 流（图片以站内 URL 重传复用） */
+  /** Re-ask the last question: clear the old answer (locally and in the backend) then replay the SSE stream (images re-sent as in-app URLs) */
   async function regenerate(): Promise<void> {
     if (!currentSessionId.value || streaming.value) return
     const lastAssistant = [...messages.value].reverse().find((m) => m.role === 'assistant')
     const lastUser = [...messages.value].reverse().find((m) => m.role === 'user')
     if (!lastAssistant || !lastUser) return
-    // 本地移除旧答案，并同步清理后端落库的消息与决策日志
+    // remove the old answer locally and clear the persisted message and decision log in the backend
     const idx = messages.value.map((m) => m.id).lastIndexOf(lastAssistant.id)
     if (idx !== -1) messages.value.splice(idx, 1)
     await chatApi.purgeLastAssistant(currentSessionId.value)
@@ -331,11 +331,11 @@ export const useChatStore = defineStore('chat', () => {
     await runStream(lastUser.content, true, lastUser.images)
   }
 
-  /* ---------- 问答主流程 ---------- */
+  /* ---------- Main Q&A flow ---------- */
 
   async function send(question: string, images?: string[]): Promise<void> {
     if (streaming.value) return
-    // 无选中会话（如全新环境首次提问）时自动创建，避免发送被静默拦截
+    // create a session automatically when none is selected (e.g. the first question in a fresh setup) so sending is not silently blocked
     if (!currentSessionId.value) {
       try {
         await newSession()
@@ -359,7 +359,7 @@ export const useChatStore = defineStore('chat', () => {
     await runStream(question, false, images)
   }
 
-  /** SSE 流主体（send / regenerate 共用）；skipUserPersist=true 时不重复落用户消息 */
+  /** The SSE stream body (shared by send and regenerate); skipUserPersist=true avoids storing the user message twice */
   async function runStream(question: string, skipUserPersist: boolean, images?: string[]): Promise<void> {
     streaming.value = true
     let finalText = ''
@@ -394,13 +394,13 @@ export const useChatStore = defineStore('chat', () => {
       await loadSessions()
       const cur = sessions.value.find((s) => s.id === currentSessionId.value)
       if (cur) cur.id = cur.id // touch reactive
-      // 流结束后拉取落库消息，回填真实 message_id / citations / decision_log_id
-      // （中断场景后端未落库 assistant，保留本地部分答案展示）
+      // after the stream, fetch the persisted messages to fill in the real message_id / citations / decision_log_id
+      // (on interruption the backend stored no assistant message, so the partial local answer stays visible)
       if (!aborted && currentSessionId.value) {
         try {
           messages.value = await chatApi.getMessages(currentSessionId.value)
         } catch {
-          /* 保留本地状态 */
+          /* keep the local state */
         }
       }
     }

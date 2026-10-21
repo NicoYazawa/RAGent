@@ -1,6 +1,7 @@
-"""检索测试 Playground 路由 — 单路召回 + 应用层 RRF 融合 + 真实 Grader 评分
+"""Retrieval test playground router — per-lane recall + application-level RRF fusion + the real grader.
 
-与 Q3/Q4 链路同构：复用检索适配层与 Grader，用于管理端直观验证。
+Mirrors the Q3/Q4 pipeline: it reuses the retrieval adapters and the grader so the admin UI can
+verify behavior directly.
 """
 import logging
 import time
@@ -36,7 +37,8 @@ async def test_lane(body: LaneRequest) -> dict:
     elif body.source == "keyword":
         results = await keyword_retriever.search(body.query, body.kb_ids, body.top_k)
     elif body.source == "database":
-        # 非数据类查询 NL2SQL 可能生成无法执行/不合法的 SQL：降级为空命中，不阻断其余路
+        # For non-data questions NL2SQL may emit invalid or non-executable SQL: degrade to zero
+        # hits instead of failing the other lanes
         try:
             _, results = await db_retriever.search(body.query, body.top_k, current_locale())
         except Exception as e:
@@ -66,7 +68,8 @@ async def test_fuse(body: FuseRequest) -> dict:
             for h in lane.hits
         ]
     query = body.query.strip() or "（综合各路检索查询）"
-    # 与 orchestrator.rerank_params() 一致：开精排时扩大候选池（显式传 True，provider 不可用时由 _apply_rerank 降级）
+    # Same as orchestrator.rerank_params(): widen the candidate pool when reranking is on (pass
+    # True explicitly; _apply_rerank degrades when the provider is unavailable)
     candidates = settings.fused_top_n
     if body.rerank and settings.rerank_enabled:
         _, candidates = orchestrator.rerank_params(True)

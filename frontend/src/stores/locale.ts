@@ -6,7 +6,7 @@ const STORAGE_KEY = 'ragent-locale'
 
 function normalize(v: string | null): Locale {
   if (v && (SUPPORTED_LOCALES as readonly string[]).includes(v)) return v as Locale
-  // 浏览器语言前缀匹配（zh-* → zh-CN，en-* → en-US）
+  // browser language prefix matching (zh-* -> zh-CN, en-* -> en-US)
   if (v) {
     const lower = v.toLowerCase()
     if (lower.startsWith('zh')) return 'zh-CN'

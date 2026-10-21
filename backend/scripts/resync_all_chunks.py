@@ -1,4 +1,5 @@
-"""重切全部已入库文档：用章级感知切片器重建 kb_chunk 与 ES 索引（幂等，可重复执行）"""
+"""Re-chunk every ingested document: rebuild kb_chunk and the ES index with the
+chapter-aware chunker (idempotent and repeatable)."""
 import asyncio
 import sys
 from pathlib import Path

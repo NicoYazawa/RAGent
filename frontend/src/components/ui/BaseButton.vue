@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * 统一按钮 — primary(反白实心)/ghost(描边)/danger(负向)/soft(底色)
- * 圆角统一为胶囊，颜色预算只留给状态，primary 用反白而不是彩色填充
+ * Unified button — primary (inverted solid), ghost (outlined), danger (negative), soft (tinted)
+ * Corners are always pill-shaped, colour is reserved for state, and primary uses inversion rather than a colour fill
  */
 withDefaults(
   defineProps<{

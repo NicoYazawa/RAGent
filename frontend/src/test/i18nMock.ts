@@ -1,8 +1,8 @@
 import zhCN from '@/i18n/locales/zh-CN'
 
 /**
- * 测试用翻译器：直接查真实的 zh-CN 语言包，
- * 保证断言命中的是真实文案（而不是把 key 当翻译的假翻译）。
+ * Test translator: queries the real zh-CN bundle directly,
+ * so assertions hit real copy instead of a fake translator that returns the key.
  */
 
 type Messages = Record<string, unknown>
@@ -16,7 +16,7 @@ function lookup(messages: Messages, key: string): unknown {
   return cur
 }
 
-/** 解析 'a.b.c' 路径并做 {param} 插值；缺失时回退为 key 本身（与 vue-i18n 行为一致） */
+/** Resolve an 'a.b.c' path and interpolate {param}; a missing key falls back to the key itself (same as vue-i18n) */
 export function translate(key: string, params?: Record<string, unknown>): string {
   const raw = lookup(zhCN as Messages, key)
   if (typeof raw !== 'string') return key
@@ -24,7 +24,7 @@ export function translate(key: string, params?: Record<string, unknown>): string
   return raw.replace(/\{(\w+)\}/g, (m, name: string) => (name in params ? String(params[name]) : m))
 }
 
-/** 供 vi.mock('vue-i18n') 使用的工厂：保留真实导出，仅替换 useI18n */
+/** Factory for vi.mock('vue-i18n'): keeps the real exports and replaces only useI18n */
 export async function createI18nMock(importOriginal: () => Promise<unknown>): Promise<Record<string, unknown>> {
   const actual = (await importOriginal()) as Record<string, unknown>
   return {

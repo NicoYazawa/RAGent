@@ -10,7 +10,7 @@ import { useChatStore } from '@/stores/chat'
 import type { DecisionCard } from '@/stores/chat'
 import { copyText, downloadDecisionJson, fmtMs, toDecisionMarkdown, type DecisionExportStats } from '@/utils/decisionExport'
 
-/** 决策过程侧栏 — 时间线 / 管线流程图双模式 + 历史回放 + 耗时分布与导出（可折叠由父级控制） */
+/** Decision sidebar — timeline / pipeline flowchart modes, history replay, timing distribution and export (collapsing is controlled by the parent) */
 const { t } = useI18n()
 const store = useChatStore()
 const listRef = ref<HTMLDivElement>()
@@ -18,12 +18,12 @@ const listRef = ref<HTMLDivElement>()
 const mode = ref<'timeline' | 'pipeline'>('timeline')
 const copied = ref(false)
 
-/** 回看态优先：卡片流 / 统计均切换为历史日志 */
+/** Replay state wins: both the card stream and the stats switch to the historical log */
 const viewing = computed(() => store.viewingLog)
 const activeCards = computed<DecisionCard[]>(() => viewing.value?.cards ?? store.cards)
 const exportable = computed(() => activeCards.value.length > 0)
 
-/** 导出用问题文本：回看取日志问题，实时取会话最后一问 */
+/** Question text for export: the log question in replay, the session's last question live */
 const exportQuestion = computed(() => viewing.value?.question ?? [...store.messages].reverse().find((m) => m.role === 'user')?.content ?? '')
 
 const exportStats = computed<DecisionExportStats | null>(() => {
@@ -58,7 +58,7 @@ const gradeCard = computed(() => [...activeCards.value].reverse().find((c) => c.
 
 <template>
   <div class="flex h-full w-[328px] shrink-0 flex-col border-l border-edge bg-panel">
-    <!-- 头部 -->
+    <!-- Header -->
     <div class="border-b border-edge px-4 pt-3">
       <div class="flex items-center gap-2">
         <h2 class="text-[13px] font-medium text-ink">{{ t('chat.sidebar.title') }}</h2>
@@ -71,7 +71,7 @@ const gradeCard = computed(() => [...activeCards.value].reverse().find((c) => c.
         </span>
       </div>
 
-      <!-- 模式切换 + 导出 -->
+      <!-- Mode switch + export -->
       <div class="mt-2.5 flex items-center gap-1 pb-2.5">
         <div class="flex items-center gap-3">
           <button
@@ -109,7 +109,7 @@ const gradeCard = computed(() => [...activeCards.value].reverse().find((c) => c.
       </div>
     </div>
 
-    <!-- 历史回放横幅 -->
+    <!-- History replay banner -->
     <div v-if="viewing" class="flex items-center gap-2 border-b border-edge bg-card px-4 py-2">
       <Icon name="play" :size="12" class="shrink-0 text-ok" />
       <div class="min-w-0 flex-1">
@@ -126,7 +126,7 @@ const gradeCard = computed(() => [...activeCards.value].reverse().find((c) => c.
       </button>
     </div>
 
-    <!-- 卡片流 / 流程图 -->
+    <!-- Card stream / flowchart -->
     <div v-show="mode === 'timeline'" ref="listRef" class="flex-1 space-y-2 overflow-y-auto px-3 py-3">
       <div v-if="activeCards.length === 0 && !store.pendingCard" class="flex flex-col items-center gap-3 px-4 pt-10 text-center">
         <Icon name="route" :size="22" class="text-ink-mute" />
@@ -141,7 +141,7 @@ const gradeCard = computed(() => [...activeCards.value].reverse().find((c) => c.
         <DecisionStepCard v-if="store.pendingCard && !viewing" :card="store.pendingCard" />
       </template>
 
-      <!-- 异常 -->
+      <!-- Errors -->
       <div v-if="store.streamError && !viewing" class="anim-fade-up rounded-lg border border-danger/40 bg-danger/5 px-3 py-2.5">
         <div class="flex items-center gap-2 text-[13px] font-medium text-danger">
           <Icon name="alert" :size="14" />
@@ -160,7 +160,7 @@ const gradeCard = computed(() => [...activeCards.value].reverse().find((c) => c.
       />
     </div>
 
-    <!-- 底部统计 -->
+    <!-- Footer statistics -->
     <div class="space-y-2.5 border-t border-edge px-4 py-3">
       <StepTimingBar v-if="!store.streaming || viewing" :cards="activeCards" />
 

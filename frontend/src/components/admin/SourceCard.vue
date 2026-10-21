@@ -9,7 +9,7 @@ import { sourceMeta } from '@/api/admin'
 
 const { t } = useI18n()
 
-/** 数据源卡片：开关 + 连接配置表单 */
+/** Data-source card: toggle plus connection settings form */
 const props = defineProps<{ item: DatasourceItem }>()
 const emit = defineEmits<{ toggle: [enabled: boolean]; updateConfig: [key: string, value: string] }>()
 
@@ -19,7 +19,7 @@ const configEntries = computed(() => Object.entries(props.item.config))
 
 <template>
   <div class="flex flex-col rounded-lg border bg-card p-4" :class="item.enabled ? 'border-edge-bright' : 'border-edge'">
-    <!-- 头部：图标 + 名称 + 开关 -->
+    <!-- Header: icon + name + toggle -->
     <div class="flex items-start justify-between gap-3">
       <div class="flex min-w-0 items-start gap-2.5">
         <Icon :name="meta?.icon ?? 'info'" :size="16" class="mt-0.5 shrink-0 text-ink-mute" />
@@ -39,7 +39,7 @@ const configEntries = computed(() => Object.entries(props.item.config))
       </div>
     </div>
 
-    <!-- 连接配置 -->
+    <!-- Connection settings -->
     <div class="mt-4 flex-1 space-y-2 border-t border-edge pt-3.5" :class="{ 'pointer-events-none opacity-50': !item.enabled }">
       <div v-for="[key, value] in configEntries" :key="key" class="flex items-center gap-2.5">
         <label class="w-32 shrink-0 truncate text-right font-mono text-[11px] text-ink-mute" :title="key">{{ key }}</label>

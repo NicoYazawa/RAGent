@@ -3,7 +3,7 @@ import datetime
 
 
 def test_query_decision_logs_returns_page(api, fake_db):
-    """基础分页返回 items / total / page / page_size"""
+    """Basic pagination returns items / total / page / page_size."""
     fake_db.route("FROM agent_decision_log", [{"id": 1, "question": "迟到怎么认定"}])
     fake_db.route("COUNT(*) AS n FROM agent_decision_log", {"n": 12})
 
@@ -17,7 +17,7 @@ def test_query_decision_logs_returns_page(api, fake_db):
 
 
 def test_query_decision_logs_filters_by_session(api, fake_db):
-    """按 session_id 过滤"""
+    """Filtering by session_id."""
     fake_db.route("SELECT COUNT(*) AS n FROM agent_decision_log", {"n": 1})
     fake_db.route("FROM agent_decision_log", [])
     api.get("/api/admin/decision-logs?session_id=7")
@@ -27,7 +27,7 @@ def test_query_decision_logs_filters_by_session(api, fake_db):
 
 
 def test_query_decision_logs_applies_time_range(api, fake_db):
-    """start / end 生成时间区间条件"""
+    """start / end produce the time-range conditions."""
     fake_db.route("SELECT COUNT(*) AS n FROM agent_decision_log", {"n": 0})
     fake_db.route("FROM agent_decision_log", [])
     api.get("/api/admin/decision-logs?start=2026-10-01&end=2026-10-20")
@@ -40,7 +40,7 @@ def test_query_decision_logs_applies_time_range(api, fake_db):
 
 
 def test_query_decision_logs_ignores_invalid_date(api, fake_db):
-    """非法日期被忽略（不报错、不加条件）"""
+    """An invalid date is ignored (no error, no condition)."""
     fake_db.route("SELECT COUNT(*) AS n FROM agent_decision_log", {"n": 0})
     fake_db.route("FROM agent_decision_log", [])
     r = api.get("/api/admin/decision-logs?start=not-a-date")
@@ -49,7 +49,7 @@ def test_query_decision_logs_ignores_invalid_date(api, fake_db):
 
 
 def test_query_decision_logs_ignores_invalid_end_date(api, fake_db):
-    """非法 end 日期同样被忽略（不抛异常）"""
+    """An invalid end date is ignored as well (no exception)."""
     fake_db.route("SELECT COUNT(*) AS n FROM agent_decision_log", {"n": 0})
     fake_db.route("FROM agent_decision_log", [])
     r = api.get("/api/admin/decision-logs?end=2026-13-45")
@@ -58,7 +58,7 @@ def test_query_decision_logs_ignores_invalid_end_date(api, fake_db):
 
 
 def test_query_decision_logs_clamps_pagination(api, fake_db):
-    """分页参数越界被夹紧"""
+    """Out-of-range pagination parameters are clamped."""
     fake_db.route("SELECT COUNT(*) AS n FROM agent_decision_log", {"n": 0})
     fake_db.route("FROM agent_decision_log", [])
     body = api.get("/api/admin/decision-logs?page=0&page_size=999").json()
@@ -67,14 +67,14 @@ def test_query_decision_logs_clamps_pagination(api, fake_db):
 
 
 def test_get_decision_log_404(api, fake_db):
-    """日志不存在 → 404"""
+    """Missing log -> 404."""
     fake_db.route("FROM agent_decision_log WHERE id=%s", None)
     r = api.get("/api/admin/decision-logs/99")
     assert r.status_code == 404
 
 
 def test_get_decision_log_returns_row(api, fake_db):
-    """单条日志回放"""
+    """Replay of a single log."""
     fake_db.route("FROM agent_decision_log WHERE id=%s", {"id": 5, "steps": [{"step": 1}]})
     r = api.get("/api/admin/decision-logs/5")
     assert r.status_code == 200

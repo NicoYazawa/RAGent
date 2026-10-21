@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""端到端验证：带图 ask → SSE 流 → 图片落盘 → 消息 images 字段 → 静态路由"""
+"""End-to-end check: image ask -> SSE stream -> image stored on disk -> message images field
+-> static route."""
 import base64
 import io
 import json
@@ -16,7 +17,8 @@ BASE = "http://127.0.0.1:8001"
 
 
 def make_png_b64() -> str:
-    """Pillow 生成含中文问题的图片（复现用户场景：语义在图中，文字仅"回答这个问题"）"""
+    """Build an image with a Chinese question via Pillow (reproducing the user scenario where the
+    semantics live in the image and the text is only "回答这个问题")."""
     img = Image.new("RGB", (420, 120), (246, 248, 252))
     d = ImageDraw.Draw(img)
     font = None
@@ -39,19 +41,20 @@ def req(path, method="GET", body=None):
         return resp.read().decode("utf-8")
 
 
-# 1. 创建会话
+# 1. Create a session
 sess = json.loads(req("/api/chat/sessions", "POST"))
 sid = sess["id"]
 print("session:", sid)
 
-# 2. 带图提问（SSE 流）
+# 2. Ask with an image (SSE stream)
 raw = req(
     f"/api/chat/sessions/{sid}/ask",
     "POST",
     {"question": "回答这个问题", "images": [f"data:image/png;base64,{make_png_b64()}"]},
 )
 
-# SSE 块解析：event: 行定类型，紧随 data: 行为 JSON（type 不在 payload 内）
+# Parse SSE blocks: the event: line sets the type and the following data: line is JSON
+# (type is not part of the payload)
 events: list[dict] = []
 for block in raw.split("\n\n"):
     etype, data = "", ""
@@ -74,16 +77,16 @@ print("grades:", grades)
 print("answer[:160]:", answer_delta[:160].replace("\n", " "))
 print("done message_id:", done["message_id"])
 
-# 3. 消息落库验证
+# 3. Verify the persisted message
 msgs = json.loads(req(f"/api/chat/sessions/{sid}/messages"))
 user_msg = next(m for m in msgs if m["role"] == "user")
 print("user images persisted:", user_msg.get("images"))
 
-# 4. 静态图片路由
+# 4. Static image route
 img_url = user_msg["images"][0]
 with urllib.request.urlopen(BASE + img_url, timeout=10) as resp:
     print("image route:", resp.status, resp.headers["Content-Type"], len(resp.read()), "bytes")
 
-# 5. 清理测试会话
+# 5. Clean up the test session
 print("cleanup:", req(f"/api/chat/sessions/{sid}", "DELETE"))
 print("ALL PASS" if user_msg.get("images") and done["message_id"] else "CHECK FAILED")

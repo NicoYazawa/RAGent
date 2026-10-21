@@ -9,7 +9,7 @@ from app.agent import retrievers
 from app.agent.retrievers import enabled_sources, gather_lanes, validate_select
 from app.agent.rrf import RetrieverResult
 
-# ---------- validate_select：白名单 ----------
+# ---------- validate_select: allowlist ----------
 
 @pytest.mark.parametrize(
     "sql",
@@ -24,25 +24,25 @@ from app.agent.rrf import RetrieverResult
     ],
 )
 def test_validate_select_rejects_write_statements(sql):
-    """非 SELECT / 写操作一律拒绝"""
+    """Anything other than SELECT, and every write, is rejected."""
     with pytest.raises(ValueError):
         validate_select(sql)
 
 
 def test_validate_select_rejects_non_select_prefix():
-    """必须以 SELECT 开头"""
+    """The statement must start with SELECT."""
     with pytest.raises(ValueError, match="仅允许 SELECT"):
         validate_select("SHOW TABLES")
 
 
 def test_validate_select_rejects_statement_separator():
-    """多语句拼接必须拦截 —— 只读账号的防线"""
+    """Statement chaining must be blocked — the read-only account's defense."""
     with pytest.raises(ValueError):
         validate_select("SELECT * FROM sales; DROP TABLE sales")
 
 
 def test_validate_select_rejects_comment_injection():
-    """注释注入（-- 与 /*）必须拦截"""
+    """Comment injection (-- and /*) must be blocked."""
     with pytest.raises(ValueError):
         validate_select("SELECT * FROM sales -- x")
     with pytest.raises(ValueError):
@@ -50,39 +50,39 @@ def test_validate_select_rejects_comment_injection():
 
 
 def test_validate_select_allows_common_column_names():
-    """常见审计列名不得被关键字黑名单误伤（updated_at / created_at / deleted_at）"""
+    """Common audit column names must not trip the keyword blacklist (updated_at / created_at / deleted_at)."""
     sql = "SELECT id, product, created_at, updated_at, deleted_at FROM sales"
     out = validate_select(sql)
     assert out.startswith("SELECT id, product, created_at, updated_at, deleted_at FROM sales")
 
 
-# ---------- validate_select：LIMIT 截断 ----------
+# ---------- validate_select: LIMIT truncation ----------
 
 def test_validate_select_appends_limit_when_absent():
-    """无 LIMIT 时自动补 LIMIT 20"""
+    """No LIMIT -> append LIMIT 20."""
     assert validate_select("SELECT * FROM sales") == "SELECT * FROM sales LIMIT 20"
 
 
 def test_validate_select_caps_oversized_limit():
-    """LIMIT 超过 20 必须被压到 20（防大结果集打爆上下文）"""
+    """A LIMIT above 20 is clamped to 20 (a huge result set would blow up the context)."""
     out = validate_select("SELECT * FROM sales LIMIT 100")
     assert out == "SELECT * FROM sales LIMIT 20"
     assert "100" not in out
 
 
 def test_validate_select_keeps_limit_within_cap():
-    """LIMIT 在 20 以内保持原样"""
+    """A LIMIT within 20 is left untouched."""
     out = validate_select("SELECT * FROM sales LIMIT 5")
     assert out == "SELECT * FROM sales LIMIT 5"
 
 
 def test_validate_select_strips_trailing_semicolon():
-    """尾部多余分号先剥离再补 LIMIT"""
+    """A trailing semicolon is stripped before LIMIT is appended."""
     out = validate_select("SELECT * FROM sales;")
     assert out == "SELECT * FROM sales LIMIT 20"
 
 
-# ---------- DBRetriever（NL2SQL 路） ----------
+# ---------- DBRetriever (NL2SQL lane) ----------
 
 def _patch_judge(monkeypatch, sql: str):
     async def _judge(schema, system, user, usage=None, attempts=2, images=None):
@@ -92,7 +92,7 @@ def _patch_judge(monkeypatch, sql: str):
 
 
 async def test_db_retriever_returns_sql_and_results(monkeypatch, fake_db):
-    """NL2SQL：生成 SELECT → 执行 → 返回 (sql, results)"""
+    """NL2SQL: generate a SELECT -> execute -> return (sql, results)."""
     _patch_judge(monkeypatch, "SELECT product, quarter FROM sales")
     fake_db.route("FROM sales", [{"id": 1, "product": "A", "quarter": "Q1", "region": "east"}])
 
@@ -108,7 +108,7 @@ async def test_db_retriever_returns_sql_and_results(monkeypatch, fake_db):
 
 
 async def test_db_retriever_english_content(monkeypatch, fake_db):
-    """英文 locale 下 DB 结果文案走英文分支"""
+    """Under the English locale the DB result copy takes the English branch."""
     _patch_judge(monkeypatch, "SELECT product FROM sales")
     fake_db.route("FROM sales", [{"id": 1, "product": "A"}])
 
@@ -117,7 +117,7 @@ async def test_db_retriever_english_content(monkeypatch, fake_db):
 
 
 async def test_db_retriever_caps_rows_at_20(monkeypatch, fake_db):
-    """结果行数硬上限 20（SQL 已限 20，结果侧再兜一层）"""
+    """A hard cap of 20 rows (the SQL is already limited; the result side guards again)."""
     _patch_judge(monkeypatch, "SELECT id FROM sales")
     fake_db.route("FROM sales", [{"id": i, "product": f"P{i}"} for i in range(25)])
 
@@ -126,22 +126,22 @@ async def test_db_retriever_caps_rows_at_20(monkeypatch, fake_db):
 
 
 async def test_db_retriever_rejects_non_select(monkeypatch, fake_db):
-    """LLM 生成非 SELECT → validate_select 抛错（不得执行）"""
+    """A non-SELECT from the LLM -> validate_select raises (never executed)."""
     _patch_judge(monkeypatch, "DROP TABLE sales")
     with pytest.raises(ValueError):
         await retrievers.db_retriever.search("drop it")
 
 
-# ---------- ES 两路 ----------
+# ---------- The two ES lanes ----------
 
 async def test_vector_retriever_maps_hits(monkeypatch):
-    """向量路：embed → kNN → RetrieverResult 映射"""
+    """Vector lane: embed -> kNN -> RetrieverResult mapping."""
     async def _embed(text):
         return [0.1, 0.2]
 
     async def _knn(vector, kb_ids, k=5):
         assert vector == [0.1, 0.2]
-        # ES 层已把 _score 归一为 score（见 app/es.py knn_search）
+        # the ES layer already renames _score to score (see knn_search in app/es.py)
         return [{"score": 0.8, "doc_name": "考勤制度", "section_path": "第二章",
                  "chunk_no": 3, "content": "迟到认定标准", "doc_id": 7, "kb_id": 2, "chunk_uid": "original-7"}]
 
@@ -162,7 +162,7 @@ async def test_vector_retriever_maps_hits(monkeypatch):
 
 
 async def test_keyword_retriever_maps_hits(monkeypatch):
-    """关键词路：BM25 → RetrieverResult 映射（无 section_path 时标题只有文档名）"""
+    """Keyword lane: BM25 -> RetrieverResult mapping (without section_path the title is just the doc name)."""
     async def _match(query, kb_ids, k=5):
         return [{"score": 0.5, "doc_name": "手册", "section_path": "", "chunk_no": 0,
                  "content": "c", "doc_id": 1}]
@@ -175,7 +175,7 @@ async def test_keyword_retriever_maps_hits(monkeypatch):
 
 
 async def test_es_hit_defaults_when_fields_missing(monkeypatch):
-    """ES hit 缺字段时用默认值（score 0、chunk_no 0、空标题）"""
+    """A hit missing fields uses defaults (score 0, chunk_no 0, empty title)."""
     async def _match(query, kb_ids, k=5):
         return [{}]
 
@@ -187,7 +187,7 @@ async def test_es_hit_defaults_when_fields_missing(monkeypatch):
 
 
 async def test_es_hit_null_score_is_tolerated(monkeypatch):
-    """score 为 null 时按 0 处理（畸形 hit 不得让整路检索 500）"""
+    """A null score counts as 0 (a malformed hit must not 500 the whole lane)."""
     async def _match(query, kb_ids, k=5):
         return [{"score": None, "doc_name": "d"}]
 
@@ -199,7 +199,7 @@ async def test_es_hit_null_score_is_tolerated(monkeypatch):
 # ---------- enabled_sources / gather_lanes ----------
 
 async def test_enabled_sources_reads_config_table(fake_db):
-    """检索源开关来自 datasource_config 表"""
+    """The lane switches come from the datasource_config table."""
     fake_db.route("datasource_config", [
         {"source_type": "vector", "enabled": True},
         {"source_type": "keyword", "enabled": False},
@@ -209,14 +209,14 @@ async def test_enabled_sources_reads_config_table(fake_db):
 
 
 async def test_enabled_sources_defaults_true_when_missing(fake_db):
-    """配置表里没有该源 → 默认启用（database 缺省为 True）"""
+    """A source absent from the config table is enabled by default (database defaults to True)."""
     fake_db.route("datasource_config", [])
     srcs = await enabled_sources()
     assert srcs == {"vector": True, "keyword": True, "database": True}
 
 
 async def test_gather_lanes_collects_both_sources(monkeypatch):
-    """按启用的源并行召回并按 source 分组"""
+    """Recall in parallel across the enabled sources and group the results by source."""
     async def _vec(query, kb_ids, top_k=5):
         return [RetrieverResult(source="vector", score=1.0, title="v", content="vc")]
 
@@ -233,7 +233,7 @@ async def test_gather_lanes_collects_both_sources(monkeypatch):
 
 
 async def test_gather_lanes_skips_disabled_source(monkeypatch):
-    """未启用的源不参与召回"""
+    """A disabled source takes no part in retrieval."""
     called = {"n": 0}
 
     async def _vec(query, kb_ids, top_k=5):
@@ -243,7 +243,7 @@ async def test_gather_lanes_skips_disabled_source(monkeypatch):
     async def _kw(query, kb_ids, top_k=5):
         return [RetrieverResult(source="keyword", score=0.5, title="k", content="kc")]
 
-    # 两路都替换为替身：不依赖真实 ES（CI 环境无 ES 时也能跑）
+    # both lanes are doubled: no real ES needed (tests run in CI without ES)
     monkeypatch.setattr(retrievers.vector_retriever, "search", _vec)
     monkeypatch.setattr(retrievers.keyword_retriever, "search", _kw)
     lanes, errors = await gather_lanes("q", None, 5, ["keyword"])

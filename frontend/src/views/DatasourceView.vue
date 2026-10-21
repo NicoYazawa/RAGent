@@ -8,7 +8,7 @@ import { useDatasourceStore } from '@/stores/datasource'
 
 const { t } = useI18n()
 
-/** 数据源配置页：三类检索源开关卡片 + 连接配置 */
+/** Data-source page: toggle cards for the three retrieval sources plus connection settings */
 const store = useDatasourceStore()
 
 onMounted(() => void store.load())
@@ -27,7 +27,7 @@ const enabledCount = () => store.items.filter((i) => i.enabled).length
 <template>
   <div class="h-full overflow-y-auto">
     <div class="mx-auto max-w-5xl px-4 py-6 md:px-8">
-      <!-- 页头 -->
+      <!-- Page header -->
       <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 class="text-[24px] font-semibold leading-tight text-ink">
@@ -45,7 +45,7 @@ const enabledCount = () => store.items.filter((i) => i.enabled).length
         </div>
       </div>
 
-      <!-- 卡片网格：三个数据源固定三列，不留空位 -->
+      <!-- Card grid: three fixed columns for the three sources, no gaps -->
       <div v-if="store.loading" class="grid gap-4 md:grid-cols-3">
         <div v-for="i in 3" :key="i" class="h-[190px] animate-pulse rounded-lg border border-edge bg-card" />
       </div>
@@ -60,7 +60,7 @@ const enabledCount = () => store.items.filter((i) => i.enabled).length
         />
       </div>
 
-      <!-- 说明区 -->
+      <!-- Notes area -->
       <div class="mt-6 grid gap-3 rounded-xl border border-edge bg-panel/70 p-4 text-[13px] leading-relaxed text-ink-dim md:grid-cols-2">
         <div class="flex gap-2">
           <Icon name="info" :size="14" class="mt-0.5 shrink-0 text-ink-mute" />

@@ -1,12 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-/** 主题 Store — dark（默认）/ light 双模式，localStorage 持久化 */
+/** Theme store — dark (default) and light modes persisted in localStorage */
 export type ThemeMode = 'dark' | 'light'
 const STORAGE_KEY = 'ragent-theme'
 
 function readInitial(): ThemeMode {
-  // index.html 防闪脚本可能已设置 class；否则读 localStorage
+  // the anti-flash script in index.html may have set the class; otherwise read localStorage
   if (typeof document !== 'undefined' && document.documentElement.classList.contains('light')) return 'light'
   try {
     return localStorage.getItem(STORAGE_KEY) === 'light' ? 'light' : 'dark'
@@ -23,7 +23,7 @@ export const useThemeStore = defineStore('theme', () => {
     try {
       localStorage.setItem(STORAGE_KEY, m)
     } catch {
-      /* 隐私模式下忽略 */
+      /* ignored in private mode */
     }
   }
 

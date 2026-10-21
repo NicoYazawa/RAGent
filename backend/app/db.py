@@ -1,10 +1,11 @@
-"""MySQL 数据访问层 — pymysql + asyncio.to_thread，全链路 utf8mb4
+"""MySQL data access layer — pymysql + asyncio.to_thread, utf8mb4 end to end.
 
-MySQL 为元数据唯一事实源：
+MySQL is the single source of truth for metadata:
 kb_database / kb_document / kb_chunk / chat_session / chat_message /
-agent_decision_log / datasource_config + sales 业务演示表
+agent_decision_log / datasource_config plus the sales demo business table.
 
-库表结构由项目根目录 ragent_init.sql 前置导入，本层不负责建表。
+The schema is imported beforehand from ragent_init.sql at the project root; this layer does
+not create tables.
 """
 import asyncio
 import datetime
@@ -22,7 +23,7 @@ _JSON_FIELDS = {"citations", "steps", "config", "images"}
 
 
 def get_conn(database: str | None = None) -> pymysql.connections.Connection:
-    # database=None → 默认库 ragent_db → 指定库
+    # database=None -> default database ragent_db; otherwise the given database
     return pymysql.connect(
         host=settings.mysql_host,
         port=settings.mysql_port,
@@ -54,7 +55,7 @@ def _serialize(row: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
-# ---------- 同步原语（供 asyncio.to_thread 调用） ----------
+# ---------- Synchronous primitives (called through asyncio.to_thread) ----------
 
 def query_all(sql: str, params: tuple | dict | None = None) -> list[dict[str, Any]]:
     with get_conn() as conn, conn.cursor() as cur:
@@ -79,7 +80,7 @@ def execute_many(sql: str, seq: list[tuple]) -> int:
         return cur.rowcount
 
 
-# ---------- 异步包装 ----------
+# ---------- Async wrappers ----------
 
 async def aquery_all(sql: str, params: tuple | dict | None = None) -> list[dict[str, Any]]:
     return await asyncio.to_thread(query_all, sql, params)
@@ -116,7 +117,8 @@ async def aexecute_transaction(statements: list[tuple[str, tuple]]) -> None:
 
 @asynccontextmanager
 async def kb_write_lock(kb_id: int):
-    """跨进程协调知识库写入；独立连接持锁，关闭连接自动释放 MySQL advisory lock。"""
+    """Coordinate knowledge-base writes across processes; a dedicated connection holds the lock,
+and closing it releases the MySQL advisory lock automatically."""
     import hashlib
 
     name = f"ragent:{hashlib.sha256(settings.mysql_db.encode()).hexdigest()[:16]}:kb:{kb_id}"

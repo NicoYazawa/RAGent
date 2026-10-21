@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 开关 — 开启态青色发光 */
+/** Toggle — the on state glows teal */
 const props = withDefaults(defineProps<{ modelValue: boolean; disabled?: boolean }>(), { disabled: false })
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 

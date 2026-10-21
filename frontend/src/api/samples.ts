@@ -1,6 +1,6 @@
 /* ============================================================
- * 示例问题（静态） — 供输入框快捷填充
- * 知识点全部对齐 test_docs 文档集（01 企业行政制度库 / 02 产品与技术文档库 / 03 IT 运维与安全知识库）
+ * Sample questions (static) — quick-fill entries for the input box
+ * Topics map onto the test_docs corpus (01 corporate administration / 02 product and technical docs / 03 IT operations and security)
  * ============================================================ */
 
 export interface SampleQuestion {

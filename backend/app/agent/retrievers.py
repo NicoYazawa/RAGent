@@ -1,7 +1,8 @@
-"""检索适配层 — 三类 Retriever 实现统一 search(query, top_k) -> list[RetrieverResult]
+"""Retrieval adapter layer — three Retriever implementations share
+search(query, top_k) -> list[RetrieverResult].
 
-新增数据源零侵入：VectorRetriever / KeywordRetriever 走 ES，
-DBRetriever 走 NL2SQL 只读查询。
+Adding a data source is non-invasive: VectorRetriever / KeywordRetriever go through ES and
+DBRetriever goes through read-only NL2SQL queries.
 """
 import asyncio
 import logging
@@ -45,7 +46,7 @@ def _es_hit_to_result(source: str, hit: dict) -> RetrieverResult:
 
 
 class VectorRetriever:
-    """语义检索：百炼向量化（query 侧）→ ES 顶层 kNN"""
+    """Semantic retrieval: Bailian embeddings (query side) -> ES top-level kNN."""
 
     async def search(self, query: str, kb_ids: list[int] | None, top_k: int = 5) -> list[RetrieverResult]:
         vector = await embed_query(query)
@@ -54,7 +55,7 @@ class VectorRetriever:
 
 
 class KeywordRetriever:
-    """关键词检索：ES BM25 multi_match（content + section_path 加权）"""
+    """Keyword retrieval: ES BM25 multi_match (content plus weighted section_path)."""
 
     async def search(self, query: str, kb_ids: list[int] | None, top_k: int = 5) -> list[RetrieverResult]:
         hits = await elastic.match_search(query, kb_ids, k=top_k)
@@ -65,14 +66,15 @@ _FORBIDDEN = re.compile(
     r"\b(insert|update|delete|drop|alter|create|truncate|grant|revoke|replace|merge|call|lock)\b",
     re.IGNORECASE,
 )
-# 语句分隔与注释注入 —— 真正的注入向量，独立于关键字黑名单。
-# 关键字黑名单必须用 \b 词边界，否则 updated_at / created_at / deleted_at
-# 这类常见列名里的子串（update/create/delete）会被误判为写操作。
+# Statement separators and comment injection — the real injection vector, independent of
+# the keyword blacklist. The keyword blacklist needs \b word boundaries, otherwise
+# substrings such as update/create/delete inside common column names (updated_at /
+# created_at / deleted_at) would be mistaken for write operations.
 _FORBIDDEN_PUNCT = re.compile(r"(;|--|/\*)")
 
 
 def validate_select(sql: str) -> str:
-    """SELECT 白名单校验 + LIMIT 20 截断"""
+    """SELECT allowlist validation plus LIMIT 20 truncation."""
     sql = sql.strip().rstrip(";").strip()
     if not re.match(r"^select\s", sql, re.IGNORECASE):
         raise ValueError("仅允许 SELECT 查询")
@@ -88,7 +90,8 @@ def validate_select(sql: str) -> str:
 
 
 class DBRetriever:
-    """业务数据查询：LLM 按 sales Schema 生成 SELECT → 只读账号执行（行数 ≤20）"""
+    """Business data query: the LLM generates a SELECT from the sales schema -> executed by
+    the read-only account (at most 20 rows)."""
 
     async def search(
         self, natural_question: str, top_k: int = 5, locale: str = "zh-CN"
@@ -120,7 +123,8 @@ class DBRetriever:
                     score=round(1.0 - i * 0.01, 2),
                     title=f"{product} · {quarter}".strip(" ·"),
                     content=content,
-                    # 引用溯源需要 SQL + 原始行作为证据（rows 已过 _serialize，可 JSON 落库）
+                    # Citation attribution needs the SQL plus the raw rows as evidence
+                    # (rows already went through _serialize and are JSON safe)
                     metadata={"db": True, "sql": sql, "rows": rows[:20]},
                 )
             )
@@ -133,7 +137,7 @@ db_retriever = DBRetriever()
 
 
 async def enabled_sources() -> dict[str, bool]:
-    """读取 datasource_config 生效的检索源集合（M2 → Q3 裁剪）"""
+    """Read the enabled retrieval sources from datasource_config (M2 -> Q3 trimming)."""
     rows = await db.aquery_all("SELECT source_type, enabled FROM datasource_config")
     mapping = {r["source_type"]: bool(r["enabled"]) for r in rows}
     return {
@@ -146,10 +150,12 @@ async def enabled_sources() -> dict[str, bool]:
 async def gather_lanes(
     query: str, kb_ids: list[int] | None, top_k: int, sources: list[str]
 ) -> tuple[dict[str, list[RetrieverResult]], dict[str, str]]:
-    """按启用的检索源并行召回，返回 (lanes, errors)
+    """Recall in parallel across the enabled sources; returns (lanes, errors).
 
-    errors: source -> 错误摘要。单路异常不再静默变空路——由调用方（orchestrator）
-    决定如何暴露：SSE degraded 事件 + 决策日志 + 生成侧声明，与「知识库未覆盖」区分。
+    errors: source -> error summary. A failing lane no longer silently becomes an empty
+    lane — the caller (orchestrator) decides how to surface it: an SSE degraded event, the
+    decision log and a generation-side disclaimer, kept distinct from "not covered by the
+    knowledge base".
     """
     runners: dict[str, Any] = {}
     if "vector" in sources:

@@ -1,8 +1,8 @@
-"""RAGent 编排层 — 六大决策点驱动的 SSE 问答主流程
+"""RAGent orchestration layer — the main SSE Q&A flow driven by six decision points.
 
-事件协议严格对齐前端 types.ts：router / rewrite / retrieve / grade / correct /
-generate / reflect / citation / done / error 十类事件；
-决策链 steps 与 SSE 事件同源落库 agent_decision_log（M3）。
+The event protocol matches frontend types.ts exactly: the ten event types router / rewrite /
+retrieve / grade / correct / generate / reflect / citation / done / error. Decision-chain
+steps and SSE events are persisted to agent_decision_log from the same source (M3).
 """
 import asyncio
 import json
@@ -29,21 +29,21 @@ VALID_INTENTS = ("chitchat", "kb_qa", "data_query", "summarize")
 
 
 def intent_label(intent: str, locale: str | None = None) -> str:
-    """意图 → 展示文案（随语言切换）"""
+    """Intent -> display copy (follows the active language)."""
     return t(f"intent.{intent}", locale)
 
 
 def verdict_icon(verdict: str, locale: str | None = None) -> str:
-    """评分判定 → 徽标文案（随语言切换）"""
+    """Grade verdict -> badge copy (follows the active language)."""
     return t(f"sse.grade.icon.{verdict}", locale)
 
 
-# ---------- 结构化输出 Schema ----------
+# ---------- Structured output schemas ----------
 
 class RouterOut(BaseModel):
     intent: str = "kb_qa"
     confidence: float = 0.8
-    image_note: str = ""  # 带图时由 Router 视觉提取的图中内容要点（供检索/评估使用）
+    image_note: str = ""  # Key points the Router extracts from an attached image (used for retrieval/grading)
 
 
 class PlannerOut(BaseModel):
@@ -72,7 +72,7 @@ class ReflectOut(BaseModel):
 async def _judge_retry(
     schema: type[BaseModel], system: str, user: str, usage: dict, attempts: int = 2, images: list[str] | None = None
 ):
-    """LLM 判定调用，失败重试 1 次；images 供视觉判定（Router 读图）"""
+    """LLM decision call, retried once on failure; images feed the vision decision (Router image reading)."""
     last_err: Exception | None = None
     for _ in range(attempts):
         try:
@@ -84,30 +84,30 @@ async def _judge_retry(
 
 
 def sse(etype: str, step: int, detail: str = "", **fields) -> str:
-    """构造 SSE 事件文本（event:/data: 行，\n\n 结尾，与前端 SseParser 协议一致）"""
+    """Build the SSE event text (event:/data: lines terminated by \n\n, matching the frontend SseParser)."""
     payload = {"step": step, "ts": int(time.time() * 1000), "detail": detail, **fields}
     return f"event: {etype}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
 
-# ---------- 运行态（事件与日志同源） ----------
+# ---------- Run state (events and log share one source) ----------
 
 class RunState:
     def __init__(self, session_id: int, question: str, image_urls: list[str] | None = None) -> None:
         self.session_id = session_id
         self.question = question
-        self.locale = current_locale()  # UI/请求语言（SSE 文案与 API 错误跟随；答案语言跟随提问）
-        self.lang = detect_lang(question)  # 提问语言 → LLM 提示词语言
-        self.image_urls = image_urls or []  # 站内 URL（落库 chat_message.images）
-        self.image_data_urls = to_data_urls(self.image_urls)  # base64 data URL（喂给视觉模型）
-        self.vision_note = ""  # Router 视觉提取的图中内容要点（纯文本决策点的图片语义来源）
+        self.locale = current_locale()  # UI/request language (SSE copy and API errors follow it; answers follow the question)
+        self.lang = detect_lang(question)  # question language -> LLM prompt language
+        self.image_urls = image_urls or []  # in-app URLs (persisted in chat_message.images)
+        self.image_data_urls = to_data_urls(self.image_urls)  # base64 data URLs (fed to the vision model)
+        self.vision_note = ""  # Image key points extracted by the Router (the image semantics for text-only decisions)
         self.usage: dict[str, int] = {"prompt": 0, "completion": 0}
         self.steps: list[dict] = []
         self.answer = ""
         self.citations: list[dict] = []
         self.correct_count = 0
         self.reflect_fail_count = 0
-        self.retrieval_errors: dict[str, str] = {}  # 检索路异常累积（source -> 摘要），与「知识库未覆盖」区分
-        # rerank 运行态（_run 开篇按 settings 计算；反思回流期复用同一组参数）
+        self.retrieval_errors: dict[str, str] = {}  # accumulated lane errors (source -> summary), kept apart from "not covered"
+        # rerank run state (computed from settings at the start of _run; reused during reflect backflow)
         self.rerank_on: bool = False
         self.lane_top_k: int = settings.retrieval_top_k
         self.fused_candidates: int = settings.fused_top_n
@@ -152,11 +152,13 @@ class RunState:
 
     @property
     def question_full(self) -> str:
-        """规划/评估/纠正用完整问题：带图时并入 Router 视觉提取的图中要点
+        """Full question used by planning/grading/correction: with an image, the Router's
+        extracted key points are merged in.
 
-        用户文字可能只是"回答这个问题"，真正语义在图中——纯文本决策点
-        （Planner/Grader/CRAG/Reflect）必须基于 question_full 才能检索与评估到位；
-        生成侧仍用原 question（模型可直接看图）。
+        The user text may be nothing but "answer this question" while the real semantics live
+        in the image, so the text-only decision points (Planner/Grader/CRAG/Reflect) must work
+        from question_full to retrieve and grade properly. The generation side keeps the plain
+        question (the model can look at the image directly).
         """
         if self.vision_note:
             if self.lang == "zh-CN":
@@ -165,7 +167,7 @@ class RunState:
         return self.question
 
     async def persist(self) -> tuple[int, int]:
-        """落库：assistant 消息 + 决策日志"""
+        """Persist the assistant message and the decision log."""
         rounds = max(1, self.correct_count + self.reflect_fail_count)
         content = self.answer or t("error.no_answer_persisted", self.locale)
         msg_id = await db.aexecute(
@@ -190,7 +192,7 @@ class RunState:
         return msg_id, log_id
 
 
-# ---------- 上下文与引用 ----------
+# ---------- Context and citations ----------
 
 def build_context(items: list[RetrieverResult], locale: str = "zh-CN") -> list[str]:
     zh = locale == "zh-CN"
@@ -214,7 +216,7 @@ def build_context(items: list[RetrieverResult], locale: str = "zh-CN") -> list[s
 
 
 def extract_citations(answer: str, items: list[RetrieverResult], locale: str | None = None) -> list[dict]:
-    """句尾 [n] 序号 → 片段元数据映射，非法序号剔除"""
+    """Map trailing [n] markers to chunk metadata, dropping invalid indices."""
     seen: set[int] = set()
     out: list[dict] = []
     for m in re.finditer(r"\[(\d+)\]", answer):
@@ -224,7 +226,8 @@ def extract_citations(answer: str, items: list[RetrieverResult], locale: str | N
         seen.add(idx)
         meta = items[idx - 1].metadata
         if meta.get("db"):
-            # NL2SQL 引用无文档切片可定位：携带 SQL + 结果行，前端改走「数据查询证据」视图
+            # An NL2SQL citation has no document chunk to locate: it carries the SQL plus the result rows
+            # and the frontend switches to the "data query evidence" view
             out.append(
                 {
                     "ref_id": idx,
@@ -250,7 +253,7 @@ def extract_citations(answer: str, items: list[RetrieverResult], locale: str | N
 
 
 def strip_invalid_refs(answer: str, items: list[RetrieverResult]) -> str:
-    """剔除答案中未映射到合法片段的 [n] 序号（避免渲染为残留明文）"""
+    """Strip [n] markers from the answer that map to no valid chunk (so they are not rendered as plain text)."""
     valid = {i + 1 for i in range(len(items))}
 
     def _repl(m: re.Match) -> str:
@@ -259,17 +262,18 @@ def strip_invalid_refs(answer: str, items: list[RetrieverResult]) -> str:
     return re.sub(r"\[(\d+)\]", _repl, answer)
 
 
-# ---------- 检索降级声明（与「知识库未覆盖」区分，2026-10-19 事故改进） ----------
+# ---------- Retrieval degradation notices (distinct from "not covered"; incident follow-up, 2026-10-19) ----------
 
 def degraded_note(errors: dict[str, str], locale: str | None = None) -> str:
-    """检索路异常时的生成侧声明：提示可能是服务故障而非知识库缺失"""
+    """Generation-side notice for a lane error: suggests a service failure rather than a knowledge gap."""
     sep = "；" if (locale or current_locale()) == "zh-CN" else "; "
     parts = sep.join(f"{src}（{msg[:80]}）" for src, msg in errors.items())
     return t("disclaimer.degraded", locale, parts=parts)
 
 
 def give_up_disclaimer(errors: dict[str, str], locale: str | None = None) -> str:
-    """CRAG give_up 的生成侧声明：有检索路异常时前置降级说明，再附知识库未覆盖说明"""
+    """Generation-side notice for a CRAG give_up: a degradation note first when a lane failed, then the
+    knowledge-gap notice."""
     base = t("disclaimer.give_up_base", locale)
     if errors:
         return degraded_note(errors, locale) + "\n\n" + base
@@ -277,7 +281,7 @@ def give_up_disclaimer(errors: dict[str, str], locale: str | None = None) -> str
 
 
 async def _emit_lane_errors(st: RunState, errors: dict[str, str], prefix: str = "") -> AsyncGenerator[str, None]:
-    """检索路异常 → SSE degraded 事件 + 决策日志同源落库（无异常时静默）"""
+    """A lane error -> an SSE degraded event plus a decision-log step from the same source (silent when clean)."""
     if not errors:
         return
     st.retrieval_errors.update(errors)
@@ -288,10 +292,11 @@ async def _emit_lane_errors(st: RunState, errors: dict[str, str], prefix: str = 
     st.mark(3, "retrieve", detail, {"degraded": True, "errors": errors})
 
 
-# ---------- Rerank 精排（先粗排后精排；失败降级保留粗排序） ----------
+# ---------- Rerank (coarse then fine; a failure degrades to the coarse order) ----------
 
 def _rerank_ready() -> bool:
-    """rerank 开关前置校验：provider 可构建才算启用（否则本次走粗排）"""
+    """Pre-check the rerank switch: it counts as enabled only when the provider can be built
+    (otherwise this run stays coarse)."""
     try:
         get_rerank()
         return True
@@ -301,23 +306,26 @@ def _rerank_ready() -> bool:
 
 
 def rerank_params(rerank_on: bool | None = None) -> tuple[int, int]:
-    """按 rerank 开关返回 (单路召回深度, RRF 候选数)；关闭时即现行默认值
+    """Return (per-lane recall depth, RRF candidate count) for the rerank switch; when off these
+    are the current defaults.
 
-    rerank_on 缺省时跟随 settings.rerank_enabled；调用方已做 provider 可用性校验时
-    应显式传入（避免 provider 不可用时候选深度被无意义加深）。
+    rerank_on defaults to settings.rerank_enabled; a caller that already validated provider
+    availability should pass it explicitly (so candidate depth is not needlessly widened when
+    the provider is unavailable).
     """
     if rerank_on is None:
         rerank_on = settings.rerank_enabled
     if not rerank_on:
         return settings.retrieval_top_k, settings.fused_top_n
-    # 先粗排后精排：单路加深召回，RRF 出候选池，再精排截 top_n
+    # Coarse then fine: deepen per-lane recall, let RRF build the candidate pool, then rerank down to top_n
     return max(settings.retrieval_top_k, (settings.rerank_candidates + 1) // 2), settings.rerank_candidates
 
 
 async def _apply_rerank(
     query: str, items: list[RetrieverResult], locale: str | None = None
 ) -> tuple[list[RetrieverResult], dict | None, str]:
-    """精排：返回 (重排后 items, info, 失败详情)；任一失败都保留粗排序，不中断链路"""
+    """Rerank: returns (reordered items, info, failure detail); any failure keeps the coarse order and
+    never breaks the chain."""
     try:
         provider = get_rerank()
     except Exception as e:
@@ -345,9 +353,10 @@ async def _apply_rerank(
 async def _run_rerank(
     st: RunState, query: str, items: list[RetrieverResult], prefix: str = ""
 ) -> tuple[list[RetrieverResult], dict | None, str, list[str]]:
-    """精排 + 构造 SSE 事件与决策日志步骤；返回 (items, info, err, events)
+    """Rerank and build the SSE events plus decision-log steps; returns (items, info, err, events).
 
-    events 为待 yield 的 SSE 字符串（调用方 for 循环 yield），保持 _run 的事件流式语义。
+    events are the SSE strings to yield (the caller loops over them), preserving the streaming
+    semantics of _run.
     """
     items, info, err = await _apply_rerank(query, items, st.locale)
     events: list[str] = []
@@ -373,7 +382,7 @@ async def _run_rerank(
 async def do_grade(
     question: str, sub_queries: list[str], ctx_blocks: list[str], usage: dict, locale: str | None = None
 ) -> tuple[float, str, str]:
-    """④ Grader：0-10 打分 + 阈值判定（≥7 pass / ≥5 partial / <5 fail）"""
+    """(4) Grader: 0-10 score plus threshold verdict (>=7 pass / >=5 partial / <5 fail)."""
     if not ctx_blocks:
         return 0.0, "fail", t("sse.grade.no_hits", locale)
     g = await _judge_retry(
@@ -387,7 +396,7 @@ async def do_grade(
     return score, verdict, g.reason or t("sse.grade.reason_none", locale)
 
 
-# ---------- 生成 + Self-RAG + 引用 + done 收尾 ----------
+# ---------- Generation + Self-RAG + citations + done wrap-up ----------
 
 async def _generate_and_finish(
     st: RunState,
@@ -398,7 +407,7 @@ async def _generate_and_finish(
     disclaimer: str = "",
     supp_db: bool = False,
 ) -> AsyncGenerator[dict, None]:
-    # ⑥ 生成（流式；带图时末条 human 消息为视觉多模态 content 块）
+    # (6) Generation (streaming; with an image the last human message holds multimodal content blocks)
     gen_user = prompts.generate_user(st.question, ctx_blocks, history, disclaimer, st.lang)
     msgs = chat_messages(prompts.get_prompt("generate_sys", st.lang), history, gen_user, st.image_data_urls)
     st.gen_start()
@@ -407,7 +416,8 @@ async def _generate_and_finish(
         yield sse("generate", 6, "", delta=delta)
     st.gen_end()
 
-    # ⑥ Self-RAG 反思（不达标回流补检，≤2 次；基于 question_full 评估，带图语义完整）
+    # (6) Self-RAG reflection (failing answers flow back for supplementary retrieval, at most 2 rounds;
+    # graded on question_full so image semantics are complete)
     round_i = 0
     reflect_passed = False
     while round_i < settings.reflect_max_rounds:
@@ -432,7 +442,8 @@ async def _generate_and_finish(
         st.mark(6, "reflect", detail, {"result": "fail", "round": round_i, "missing_info": rf.missing_info})
         if round_i >= settings.reflect_max_rounds:
             break
-        # 反思回流：定向补检（缺失信息并入查询；data_query 场景回数据库，其余回知识库）→ 重新评估 → 重新生成
+        # Reflect backflow: targeted supplementary retrieval (missing info merged into the query; data_query
+        # goes back to the database, everything else to the knowledge base) -> re-grade -> regenerate
         supp_q = f"{st.question_full} {rf.missing_info}".strip()
         if supp_db:
             sql, db_rows = await db_retriever.search(supp_q, locale=st.lang)
@@ -458,7 +469,7 @@ async def _generate_and_finish(
             for ev in rr_events:
                 yield ev
             if rr_err:
-                st.rerank_on = False  # 熔断：后续回流不再调用
+                st.rerank_on = False  # circuit break: later backflow rounds stop calling it
         ctx_blocks = build_context(items, st.lang)
         score, verdict, reason = await do_grade(st.question_full, [], ctx_blocks, st.usage, st.locale)
         detail = t(
@@ -472,7 +483,8 @@ async def _generate_and_finish(
         st.mark(4, "grade", detail, {"score": score, "verdict": verdict, "reason": reason})
         gen_user = prompts.generate_user(st.question, ctx_blocks, history, disclaimer, st.lang)
         msgs = chat_messages(prompts.get_prompt("generate_sys", st.lang), history, gen_user, st.image_data_urls)
-        # 新轮次的序号只对应新上下文；旧答案不得保留或按新片段解释。
+        # Citation numbers of a new round map only to the new context; the old answer must not survive
+        # or be interpreted against the new chunks.
         st.answer = ""
         yield sse("generate", 6, "", delta="", replace=True)
         st.gen_start()
@@ -483,7 +495,7 @@ async def _generate_and_finish(
     if not reflect_passed and round_i >= settings.reflect_max_rounds:
         st.answer += t("sse.reflect.exhausted_note", st.locale)
 
-    # ⑦ 引用溯源（非法序号已从答案剔除）
+    # (7) Citation attribution (invalid markers were already stripped from the answer)
     st.answer = strip_invalid_refs(st.answer, items)
     st.citations = extract_citations(st.answer, items, st.locale)
     cite_detail = (
@@ -491,7 +503,8 @@ async def _generate_and_finish(
         if st.citations
         else t("sse.citation.without", st.locale)
     )
-    # 同步清理非法引用后的正文及自检警示，确保流式显示与落库一致。
+    # Send the answer after invalid citations are stripped, together with the self-check note, so the
+    # streamed display matches what is persisted.
     yield sse("citation", 7, cite_detail, citations=st.citations, answer=st.answer)
     st.mark(7, "citation", cite_detail, {"citations": st.citations})
 
@@ -506,13 +519,14 @@ async def _generate_and_finish(
     )
 
 
-# ---------- 问答主流程 ----------
+# ---------- Main Q&A flow ----------
 
 async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) -> AsyncGenerator[dict, None]:
     session_id = st.session_id
     question = st.question
 
-    # Q8 多轮上下文（取历史先于落用户消息，避免把当前问题算进历史；images 供附图标记）
+    # Q8 multi-turn context (history is read before the user message is stored so the current question
+    # is not part of it; images feed the attachment markers)
     history = list(
         reversed(
             await db.aquery_all(
@@ -535,9 +549,11 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
             (question[:18] + ("…" if len(question) > 18 else ""), session_id),
         )
 
-    # 以当前启用的数据源能力约束路由，而不是让模型猜测有哪些业务表。
+    # Constrain routing with the currently enabled data-source capabilities instead of letting the model
+    # guess which business tables exist.
     src_enabled = await enabled_sources()
-    # ① Router 意图路由（带图时直接读图提取图中要点；带图问题一律 kb_qa：先检索知识库，再结合图片回答）
+    # (1) Router intent routing (with an image it reads the image for key points; image questions are
+    # always kb_qa: retrieve the knowledge base first, then answer with the image)
     r = await _judge_retry(
         RouterOut,
         prompts.get_prompt("router_sys", st.lang),
@@ -549,7 +565,8 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
         r.intent = "kb_qa"
     if r.intent == "data_query" and not src_enabled["database"]:
         r.intent = "kb_qa"
-    # 代码层兜底强制：附图消息不走闲聊/数据查询旁路，统一主链检索 + 视觉生成
+    # Code-level override: messages with images never take the chitchat/data-query bypass; they always
+    # use the main retrieval chain plus vision generation
     if st.image_data_urls:
         r.intent = "kb_qa"
         st.vision_note = (r.image_note or "").strip()
@@ -566,7 +583,7 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
         {"intent": r.intent, "confidence": r.confidence, "has_images": bool(st.image_data_urls), "vision_note": st.vision_note},
     )
 
-    # ---- 闲聊旁路：直接流式回答（不检索） ----
+    # ---- Chitchat bypass: stream a direct answer (no retrieval) ----
     if r.intent == "chitchat":
         st.gen_start()
         msgs = chat_messages(prompts.get_prompt("chat_sys", st.lang), history, question, st.image_data_urls)
@@ -585,7 +602,7 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
         )
         return
 
-    # ---- 数据查询旁路：NL2SQL 直达 DBRetriever（跳过改写） ----
+    # ---- Data-query bypass: NL2SQL straight to DBRetriever (rewriting skipped) ----
     if r.intent == "data_query":
         sql, rows = await db_retriever.search(st.question_full, locale=st.lang)
         n = len(rows)
@@ -605,18 +622,20 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
             async for ev in _generate_and_finish(st, history, kb_ids, ctx_blocks, items, disclaimer, supp_db=True):
                 yield ev
             return
-        # 数据库无关或证据不足不能证明文档库缺失；回到完整知识库链路，
-        # 不把无关 SQL 结果带入生成上下文或最终引用。
+        # Irrelevant or insufficient database evidence does not prove the document library lacks the
+        # answer; fall back to the full knowledge-base chain and keep the unrelated SQL results out of
+        # the generation context and the final citations.
         r.intent = "kb_qa"
         detail = t("sse.router.db_fallback", st.locale)
         payload = {"intent": r.intent, "confidence": r.confidence, "fallback_from": "data_query", "reason": reason}
         yield sse("router", 1, detail, **payload)
         st.mark(1, "router", detail, payload)
 
-    # ---- 知识问答 / 总结主链路 ----
+    # ---- Knowledge Q&A / summarization main chain ----
     rerank_on = settings.rerank_enabled and _rerank_ready()
     st.rerank_on = rerank_on
-    # provider 不可用时 rerank_on=False，候选深度保持默认（Important 1 修复）
+    # When the provider is unavailable rerank_on=False and the candidate depth stays at its default
+    # (Important 1 fix)
     st.lane_top_k, st.fused_candidates = rerank_params(rerank_on)
     top_k = st.lane_top_k
     candidates = st.fused_candidates
@@ -625,7 +644,8 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
     vector_query = st.question_full
 
     if r.intent == "kb_qa":
-        # ② Planner 查询规划（改写 / 拆解 / HyDE；带图时基于图中要点改写，检索才有语义）
+        # (2) Planner query planning (rewrite / decompose / HyDE; with an image it rewrites from the
+        # extracted key points so retrieval carries the semantics)
         p = await _judge_retry(
             PlannerOut,
             prompts.get_prompt("planner_sys", st.lang),
@@ -650,12 +670,12 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
     else:
         main_query = question
 
-    # kb 检索源集合（summarize 走轻量语义检索，只开向量路）
+    # Knowledge-base source set (summarize takes the lightweight semantic path, vector lane only)
     kb_sources = [s for s in ("vector", "keyword") if src_enabled.get(s)]
     if r.intent == "summarize":
         kb_sources = ["vector"] if src_enabled.get("vector") else kb_sources[:1]
 
-    # ③④⑤ 检索 → 融合 → 评估（partial 补检 / CRAG 纠正 ≤2 轮）
+    # (3)(4)(5) Retrieve -> fuse -> grade (one supplementary retrieval for partial / CRAG correction up to 2 rounds)
     retrieval_round = 0
     supplemented = False
     crag_round = 0
@@ -688,7 +708,8 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
             for ev in rr_events:
                 yield ev
             if rr_err:
-                # 熔断：本轮后续（CRAG 重查/反思回流）不再调用已失败的 provider
+                # Circuit break: later steps in this run (CRAG re-query / reflect backflow) stop calling
+                # the failed provider
                 rerank_on = False
                 st.rerank_on = False
         ctx_blocks = build_context(items, st.lang)
@@ -702,7 +723,7 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
         if verdict == "pass":
             break
 
-        # partial：补充检索一次（仅一次）
+        # partial: run one supplementary retrieval (once only)
         if verdict == "partial" and not supplemented and kb_sources:
             supplemented = True
             st.correct_count += 1
@@ -712,7 +733,7 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
             vector_query = main_query
             continue
 
-        # fail（或 partial 补检后仍不通过）→ CRAG 纠正
+        # fail (or still failing after the partial supplement) -> CRAG correction
         if crag_round >= settings.crag_max_rounds:
             st.correct_count += 1
             final_round = max(crag_round, 1)
@@ -743,7 +764,7 @@ async def _run(st: RunState, kb_ids: list[int] | None, skip_user_persist: bool) 
             items = []
             break
 
-        # rewrite_retry：CRAG 改写查询重查
+        # rewrite_retry: CRAG rewrites the query and re-retrieves
         st.correct_count += 1
         c_detail = t("sse.correct.rewrite_retry", st.locale, reason=diag.failure_reason, n=crag_round)
         yield sse("correct", 5, c_detail, action="rewrite_retry", round=crag_round)
@@ -767,10 +788,13 @@ async def run_ask(
     image_urls: list[str] | None = None,
     locale: str | None = None,
 ) -> AsyncGenerator[dict, None]:
-    """SSE 问答流入口：整体受 overall_timeout（120s）约束，异常推 error 事件
+    """SSE Q&A flow entry point: the whole run is bounded by overall_timeout (120s); failures emit an
+    error event.
 
-    image_urls：站内图片 URL（chat_images.save_images 产物），随消息落库并转 data URL 喂给视觉模型。
-    locale：UI/请求语言（None → ContextVar 缺省 zh-CN）；只影响 SSE 文案与 API 错误，答案语言跟随提问。
+    image_urls: in-app image URLs (output of chat_images.save_images), persisted with the message
+    and converted to data URLs for the vision model.
+    locale: UI/request language (None -> the ContextVar default zh-CN); it only affects SSE copy and
+    API errors, while the answer language follows the question.
     """
     st = RunState(session_id, question, image_urls)
     if locale:

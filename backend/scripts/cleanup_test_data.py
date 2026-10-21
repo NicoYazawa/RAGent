@@ -1,4 +1,4 @@
-"""清理验证测试残留：空「新会话」与验证用知识库"""
+"""Clean up leftovers from verification runs: empty "新会话" sessions and test knowledge bases."""
 import sys
 from pathlib import Path
 

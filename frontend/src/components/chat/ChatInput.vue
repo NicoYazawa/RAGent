@@ -7,7 +7,7 @@ import { useChatStore } from '@/stores/chat'
 import { useI18n } from 'vue-i18n'
 import { SAMPLE_QUESTIONS } from '@/api/samples'
 
-/** 底部输入区：Enter 发送 / Shift+Enter 换行 / 流式时可中断 + 示例问题条 + 多模态图片（选择/粘贴/拖拽） */
+/** Bottom input: Enter sends / Shift+Enter inserts a newline / interruptible while streaming, plus the sample strip and multimodal images (pick/paste/drop) */
 const store = useChatStore()
 const { t } = useI18n()
 const draft = ref('')
@@ -18,7 +18,7 @@ const dragging = ref(false)
 const imageWarn = ref('')
 
 const MAX_IMAGES = 4
-const MAX_SIDE = 1280 // 大图压缩目标最长边
+const MAX_SIDE = 1280 // target long edge when compressing large images
 const MAX_FILE_BYTES = 10 * 1024 * 1024
 
 function autosize(): void {
@@ -28,7 +28,7 @@ function autosize(): void {
   el.style.height = `${Math.min(el.scrollHeight, 132)}px`
 }
 
-/* ---------- 图片附件：选择 / 粘贴 / 拖拽 / 压缩 ---------- */
+/* ---------- Image attachments: pick / paste / drop / compress ---------- */
 
 function warn(msg: string): void {
   imageWarn.value = msg
@@ -44,7 +44,7 @@ function readAsDataURL(file: File): Promise<string> {
   })
 }
 
-/** 小图与 gif 原样读入（保留动画），大图 canvas 等比缩放转 JPEG 控制体积 */
+/** Small images and gifs are read as-is (animation kept); large ones are scaled on a canvas and re-encoded as JPEG to bound the size */
 async function toDataUrl(file: File): Promise<string> {
   if (file.size <= 600 * 1024 || file.type === 'image/gif') return readAsDataURL(file)
   const url = URL.createObjectURL(file)
@@ -112,7 +112,7 @@ function removeImage(i: number): void {
   if (previewIndex.value >= images.value.length) previewIndex.value = Math.max(0, images.value.length - 1)
 }
 
-/* 缩略图点击预览（页内 Lightbox） */
+/* Click a thumbnail to preview (in-page lightbox) */
 const previewOpen = ref(false)
 const previewIndex = ref(0)
 
@@ -121,7 +121,7 @@ function openPreview(i: number): void {
   previewOpen.value = true
 }
 
-/* ---------- 发送 ---------- */
+/* ---------- Sending ---------- */
 
 const canSend = computed(() => !!(draft.value.trim() || images.value.length))
 
@@ -151,7 +151,7 @@ function useSample(q: string): void {
 
 <template>
   <div class="border-t border-edge bg-panel px-4 py-3 md:px-6">
-    <!-- 示例问题条 -->
+    <!-- Sample question strip -->
     <div class="mb-2 hidden items-center gap-1.5 overflow-x-auto pb-0.5 sm:flex">
       <span class="shrink-0 text-[11px] text-ink-mute">{{ t('chat.input.sampleLabel') }}</span>
       <button
@@ -173,7 +173,7 @@ function useSample(q: string): void {
         @dragleave="dragging = false"
         @drop.prevent="onDrop"
       >
-        <!-- 图片预览条 -->
+        <!-- Image preview strip -->
         <div v-if="images.length" class="flex items-start gap-2 px-3 pt-2.5">
           <div v-for="(img, i) in images" :key="i" class="group/img relative">
             <img
@@ -209,7 +209,7 @@ function useSample(q: string): void {
         />
       </div>
 
-      <!-- 图片附件按钮 -->
+      <!-- Attach-image button -->
       <BaseTooltip :content="t('chat.input.attachTitle')">
         <button
           type="button"
@@ -244,16 +244,16 @@ function useSample(q: string): void {
       </button>
     </div>
 
-    <!-- 图片数量/大小告警行（自动消失） -->
+    <!-- Image count/size warning line (disappears automatically) -->
     <div v-if="imageWarn" class="mt-1.5 flex items-center gap-1.5 text-[11px] text-danger">
       <Icon name="alert" :size="11" />
       {{ imageWarn }}
     </div>
 
-    <!-- 隐藏文件选择器 -->
+    <!-- Hidden file input -->
     <input ref="fileRef" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple class="hidden" @change="onFileChange" />
 
-    <!-- 缩略图预览弹窗 -->
+    <!-- Thumbnail preview dialog -->
     <ImageViewer :open="previewOpen" :images="images" v-model:index="previewIndex" @close="previewOpen = false" />
   </div>
 </template>

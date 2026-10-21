@@ -1,11 +1,13 @@
-"""一次性脚本：从 MySQL kb_chunk 全量回填 ES 索引
+"""One-off script: backfill the ES index from MySQL kb_chunk.
 
-场景：Docker 栈重建后 ES 卷丢失（索引 0 文档），上传源文件也不在，
-但 MySQL kb_chunk 的切片内容完整。经 app 自身的 embedding / bulk_index 重建，
-chunk_uid 作 _id，幂等可重跑。
+Scenario: after the Docker stack is rebuilt the ES volume is gone (index with 0 docs) and
+the uploaded source files are gone too, but the chunk text in MySQL kb_chunk is intact.
+Rebuild through the app's own embedding / bulk_index with chunk_uid as _id, which is
+idempotent and re-runnable.
 
-选型：源文件还在时优先用同目录 resync_all_chunks.py（走完整入库流水线）；
-本脚本仅用于源文件丢失、但 MySQL 切片完好的场景。
+Choice of tool: when the source files still exist prefer resync_all_chunks.py in the same
+directory (it runs the full ingestion pipeline); this script covers the case where the
+source files are lost but the MySQL chunks are healthy.
 """
 import asyncio
 from datetime import datetime, timezone

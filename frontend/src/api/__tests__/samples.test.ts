@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { SAMPLE_QUESTIONS } from '@/api/samples'
 
 /**
- * 示例问题（静态数据）—— 数据完整性契约：
- *   id 唯一、标签与问题非空、覆盖三大文档域
+ * Sample questions (static data) — data integrity contract:
+ *   unique ids, non-empty labels and questions, all three document domains covered
  */
 
 describe('SAMPLE_QUESTIONS', () => {

@@ -37,22 +37,22 @@ def _item(doc_name="手册", section="第一章", chunk_no=1, content="内容", 
                            title=doc_name, content=content, metadata=m)
 
 
-# ---------- 文案映射 ----------
+# ---------- Copy mapping ----------
 
 def test_intent_label_localized():
-    """意图标签随语言切换"""
+    """Intent labels follow the language."""
     assert "知识问答" in intent_label("kb_qa", "zh-CN")
     assert "Knowledge" in intent_label("kb_qa", "en-US")
 
 
 def test_verdict_icon_localized():
-    """评分徽标随语言切换"""
+    """Grade badges follow the language."""
     assert verdict_icon("pass", "zh-CN") != verdict_icon("pass", "en-US")
     assert "通过" in verdict_icon("pass", "zh-CN")
 
 
 def test_sse_event_format():
-    """SSE 文本格式：event 行 + data 行 + 空行结尾"""
+    """SSE text format: event line + data line + trailing blank line."""
     raw = sse("retrieve", 3, "命中 2 条", source="vector", hit_count=2)
     lines = raw.strip().split("\n")
     assert lines[0] == "event: retrieve"
@@ -67,13 +67,13 @@ def test_sse_event_format():
 # ---------- RunState ----------
 
 def test_run_state_question_full_without_vision_note():
-    """无图注时 question_full == 原问题"""
+    """Without an image note question_full equals the original question."""
     st = RunState(1, "迟到怎么认定")
     assert st.question_full == "迟到怎么认定"
 
 
 def test_run_state_question_full_appends_vision_note_zh():
-    """中文提问 + 图注 → 中文合并格式"""
+    """Chinese question plus image note -> the Chinese merged format."""
     st = RunState(1, "回答这个问题")
     st.vision_note = "一张考勤表"
     assert "用户附图" in st.question_full
@@ -81,7 +81,7 @@ def test_run_state_question_full_appends_vision_note_zh():
 
 
 def test_run_state_question_full_appends_vision_note_en():
-    """英文提问 + 图注 → 英文合并格式"""
+    """English question plus image note -> the English merged format."""
     st = RunState(1, "Answer this")
     st.lang = "en-US"
     st.vision_note = "a form"
@@ -89,7 +89,7 @@ def test_run_state_question_full_appends_vision_note_en():
 
 
 def test_run_state_mark_records_steps():
-    """mark 记录步骤与耗时"""
+    """mark records a step and its elapsed time."""
     st = RunState(1, "q")
     st.mark(1, "router", "判定", {"intent": "kb_qa"})
     assert len(st.steps) == 1
@@ -99,7 +99,7 @@ def test_run_state_mark_records_steps():
 
 
 def test_run_state_gen_end_appends_generate_step():
-    """生成结束记录 generate 步骤（无答案时不记录）"""
+    """gen_end records the generate step (nothing when there is no answer)."""
     st = RunState(1, "q")
     st.gen_start()
     st.answer = "答案内容"
@@ -109,7 +109,7 @@ def test_run_state_gen_end_appends_generate_step():
 
 
 def test_run_state_gen_end_skipped_without_answer():
-    """没有答案时 gen_end 不产生步骤"""
+    """Without an answer gen_end produces no step."""
     st = RunState(1, "q")
     st.gen_start()
     st.gen_end()
@@ -117,7 +117,7 @@ def test_run_state_gen_end_skipped_without_answer():
 
 
 def test_run_state_elapsed_ms_non_negative():
-    """elapsed_ms 不为负"""
+    """elapsed_ms is never negative."""
     st = RunState(1, "q")
     assert st.elapsed_ms >= 0
 
@@ -125,7 +125,7 @@ def test_run_state_elapsed_ms_non_negative():
 # ---------- build_context ----------
 
 def test_build_context_zh_header():
-    """中文上下文头部含文档名 / 章节 / 切片号"""
+    """The Chinese context header carries doc name / section / chunk number."""
     blocks = build_context([_item()], "zh-CN")
     assert len(blocks) == 1
     assert "《手册》" in blocks[0]
@@ -134,21 +134,21 @@ def test_build_context_zh_header():
 
 
 def test_build_context_en_header():
-    """英文上下文头部"""
+    """The English context header."""
     blocks = build_context([_item()], "en-US")
     assert '"手册"' in blocks[0]
     assert "chunk #1" in blocks[0]
 
 
 def test_build_context_db_branch():
-    """db 来源的片段走业务数据库头部"""
+    """A chunk from the db source uses the business-database header."""
     blocks = build_context([_item(db=True)], "zh-CN")
     assert "业务数据库" in blocks[0]
     assert "sales 表查询结果" in blocks[0]
 
 
 def test_build_context_truncates_long_content():
-    """超长片段正文被截断（控制上下文体积）"""
+    """Over-long chunk bodies are truncated to bound the context size."""
     long = "字" * 900
     blocks = build_context([_item(content=long)], "zh-CN")
     body = blocks[0].split("\n", 1)[1]
@@ -156,14 +156,14 @@ def test_build_context_truncates_long_content():
 
 
 def test_build_context_empty_items():
-    """无片段 → 空上下文"""
+    """No chunks -> empty context."""
     assert build_context([], "zh-CN") == []
 
 
-# ---------- 引用抽取 ----------
+# ---------- Citation extraction ----------
 
 def test_extract_citations_maps_valid_refs():
-    """合法序号 → 片段元数据"""
+    """A valid marker -> chunk metadata."""
     items = [_item(doc_name="手册", chunk_no=1), _item(doc_name="制度", chunk_no=2)]
     cites = extract_citations("依据[1]和[2]", items, "zh-CN")
     assert len(cites) == 2
@@ -172,20 +172,20 @@ def test_extract_citations_maps_valid_refs():
 
 
 def test_extract_citations_skips_out_of_range():
-    """越界序号被剔除"""
+    """Out-of-range markers are dropped."""
     items = [_item()]
     assert extract_citations("见[5]", items, "zh-CN") == []
 
 
 def test_extract_citations_dedupes_repeated_refs():
-    """重复序号只保留一次"""
+    """A repeated marker is kept only once."""
     items = [_item(), _item(doc_name="制度", chunk_no=2)]
     cites = extract_citations("[1] [1] [2]", items, "zh-CN")
     assert len(cites) == 2
 
 
 def test_extract_citations_db_branch_carries_sql_and_rows():
-    """db 引用携带 SQL 与原始行（前端走数据查询证据视图）"""
+    """A db citation carries the SQL and raw rows (the frontend shows the data-query evidence view)."""
     cites = extract_citations("[1]", [_item(db=True)], "zh-CN")
     assert cites[0]["source_type"] == "db"
     assert cites[0]["sql"] == "SELECT 1"
@@ -193,7 +193,7 @@ def test_extract_citations_db_branch_carries_sql_and_rows():
 
 
 def test_extract_citations_no_refs():
-    """答案无引用 → 空列表"""
+    """An answer without citations -> empty list."""
     assert extract_citations("没有引用", [_item()], "zh-CN") == []
 
 
@@ -212,55 +212,55 @@ def test_database_citation_preserves_reference_number():
     assert cites[0]["ref_id"] == 2
 
 
-# ---------- 非法序号剔除 ----------
+# ---------- Stripping invalid markers ----------
 
 def test_strip_invalid_refs_removes_out_of_range():
-    """越界序号从答案正文剔除（不留残文明文）"""
+    """Out-of-range markers are removed from the answer body (no leftover plain text)."""
     assert strip_invalid_refs("看[1]和[3]", [_item()]) == "看[1]和"
 
 
 def test_strip_invalid_refs_keeps_valid():
-    """合法序号保留"""
+    """Valid markers are kept."""
     assert strip_invalid_refs("看[1]", [_item()]) == "看[1]"
 
 
 def test_strip_invalid_refs_without_items():
-    """无片段时所有序号被剔除"""
+    """Without chunks every marker is stripped."""
     assert strip_invalid_refs("看[1]", []) == "看"
 
 
-# ---------- 降级声明 ----------
+# ---------- Degradation notices ----------
 
 def test_degraded_note_lists_sources():
-    """降级声明列出失败路"""
+    """The degradation notice lists the failing lanes."""
     note = degraded_note({"vector": "401", "keyword": "ConnectError"}, "zh-CN")
     assert "检索服务异常" in note
     assert "vector" in note and "keyword" in note
 
 
 def test_degraded_note_english():
-    """英文降级声明"""
+    """The English degradation notice."""
     note = degraded_note({"vector": "401"}, "en-US")
     assert "Retrieval service error" in note
 
 
 def test_give_up_disclaimer_only_kb_when_no_errors():
-    """无检索异常 → 只有知识库未覆盖声明"""
+    """No lane error -> only the knowledge-gap notice."""
     d = give_up_disclaimer({}, "zh-CN")
     assert "知识库未覆盖" in d
     assert "检索服务异常" not in d
 
 
 def test_give_up_disclaimer_prepends_degraded():
-    """有检索异常 → 降级声明在前"""
+    """A lane error -> the degradation notice comes first."""
     d = give_up_disclaimer({"vector": "401"}, "zh-CN")
     assert d.index("检索服务异常") < d.index("知识库未覆盖")
 
 
-# ---------- 精排参数 ----------
+# ---------- Rerank parameters ----------
 
 def test_rerank_params_disabled(monkeypatch):
-    """关闭时 → 默认深度"""
+    """Off -> default depth."""
     monkeypatch.setattr(orchestrator.settings, "rerank_enabled", False, raising=False)
     top_k, candidates = rerank_params()
     assert top_k == orchestrator.settings.retrieval_top_k
@@ -268,7 +268,7 @@ def test_rerank_params_disabled(monkeypatch):
 
 
 def test_rerank_params_enabled_expands_depth(monkeypatch):
-    """开启时 → 单路加深、候选池扩大"""
+    """On -> deeper per-lane recall and a wider candidate pool."""
     monkeypatch.setattr(orchestrator.settings, "rerank_enabled", True, raising=False)
     top_k, candidates = rerank_params()
     assert candidates == orchestrator.settings.rerank_candidates
@@ -277,14 +277,14 @@ def test_rerank_params_enabled_expands_depth(monkeypatch):
 
 
 def test_rerank_params_explicit_override(monkeypatch):
-    """显式传参优先于 settings"""
+    """An explicit argument wins over settings."""
     monkeypatch.setattr(orchestrator.settings, "rerank_enabled", True, raising=False)
     top_k, candidates = rerank_params(False)
     assert top_k == orchestrator.settings.retrieval_top_k
 
 
 def test_rerank_ready_false_when_provider_unavailable(monkeypatch):
-    """provider 不可构建 → 未就绪"""
+    """The provider cannot be built -> not ready."""
     def _boom():
         raise RuntimeError("未配置 rerank")
 
@@ -293,7 +293,7 @@ def test_rerank_ready_false_when_provider_unavailable(monkeypatch):
 
 
 def test_rerank_ready_true_when_provider_builds(monkeypatch):
-    """provider 可构建 → 就绪"""
+    """The provider can be built -> ready."""
     monkeypatch.setattr(orchestrator, "get_rerank", lambda: object())
     assert _rerank_ready() is True
 
@@ -301,7 +301,7 @@ def test_rerank_ready_true_when_provider_builds(monkeypatch):
 # ---------- _apply_rerank ----------
 
 async def test_apply_rerank_reorders_items(monkeypatch):
-    """精排按返回顺序重排片段"""
+    """Rerank reorders the chunks by the returned order."""
 
     class _P:
         name, model = "qwen", "gte-rerank-v2"
@@ -319,7 +319,7 @@ async def test_apply_rerank_reorders_items(monkeypatch):
 
 
 async def test_apply_rerank_filters_out_of_range_index(monkeypatch):
-    """越界索引被过滤（不抛异常）"""
+    """Out-of-range indices are filtered out without raising."""
 
     class _P:
         name, model = "qwen", "m"
@@ -334,7 +334,7 @@ async def test_apply_rerank_filters_out_of_range_index(monkeypatch):
 
 
 async def test_apply_rerank_unavailable_keeps_order(monkeypatch):
-    """provider 不可用 → 保留原顺序 + 错误信息"""
+    """Provider unavailable -> keep the original order plus an error message."""
 
     def _boom():
         raise RuntimeError("no provider")
@@ -348,7 +348,7 @@ async def test_apply_rerank_unavailable_keeps_order(monkeypatch):
 
 
 async def test_apply_rerank_failure_keeps_order(monkeypatch):
-    """精排调用失败 → 保留原顺序 + 错误信息"""
+    """The rerank call fails -> keep the original order plus an error message."""
 
     class _P:
         name, model = "qwen", "m"
@@ -364,7 +364,7 @@ async def test_apply_rerank_failure_keeps_order(monkeypatch):
 
 
 async def test_apply_rerank_empty_result_keeps_order(monkeypatch):
-    """精排返回空 → 保留原顺序"""
+    """Rerank returns nothing -> keep the original order."""
 
     class _P:
         name, model = "qwen", "m"
@@ -382,7 +382,7 @@ async def test_apply_rerank_empty_result_keeps_order(monkeypatch):
 # ---------- Grader ----------
 
 async def test_do_grade_without_context_fails(monkeypatch):
-    """无上下文 → 直接 fail（不调用 LLM）"""
+    """No context -> fail immediately (no LLM call)."""
 
     async def _boom(*a, **k):
         raise AssertionError("不应调用 LLM")
@@ -395,7 +395,7 @@ async def test_do_grade_without_context_fails(monkeypatch):
 
 
 async def test_do_grade_thresholds(monkeypatch):
-    """评分阈值：≥7 pass / ≥5 partial / <5 fail"""
+    """Score thresholds: >=7 pass / >=5 partial / <5 fail."""
 
     async def _judge(schema, system, user, usage, attempts=2, images=None):
         return GraderOut(score=score, reason="r")
@@ -414,7 +414,7 @@ async def test_do_grade_thresholds(monkeypatch):
 
 
 async def test_do_grade_clamps_score_range(monkeypatch):
-    """评分被夹到 0..10"""
+    """The score is clamped to 0..10."""
 
     async def _judge(schema, system, user, usage, attempts=2, images=None):
         return GraderOut(score=99.0, reason="r")
@@ -426,7 +426,7 @@ async def test_do_grade_clamps_score_range(monkeypatch):
 
 
 async def test_do_grade_uses_default_reason(monkeypatch):
-    """LLM 未给 reason → 用默认文案"""
+    """The LLM gave no reason -> use the default copy."""
 
     async def _judge(schema, system, user, usage, attempts=2, images=None):
         return GraderOut(score=8.0, reason="")
@@ -439,7 +439,7 @@ async def test_do_grade_uses_default_reason(monkeypatch):
 # ---------- _judge_retry ----------
 
 async def test_judge_retry_succeeds_on_second_attempt(monkeypatch):
-    """首次失败后重试成功"""
+    """The first attempt fails and the retry succeeds."""
     calls = {"n": 0}
 
     async def _judge(schema, system, user, usage, attempts=2, images=None):
@@ -455,7 +455,7 @@ async def test_judge_retry_succeeds_on_second_attempt(monkeypatch):
 
 
 async def test_judge_retry_raises_after_all_attempts(monkeypatch):
-    """全部尝试失败 → 抛出最后一次异常"""
+    """All attempts fail -> the last exception is raised."""
 
     async def _judge(schema, system, user, usage, attempts=2, images=None):
         raise RuntimeError("持续故障")

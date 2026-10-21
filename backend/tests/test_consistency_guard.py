@@ -10,7 +10,7 @@ from app import startup_check
 
 
 class _FakeEs:
-    """可控的 ES 替身（index_dims / count）"""
+    """Controllable ES double (index_dims / count)."""
 
     def __init__(self, dims: int | None = 1024, count: int = 156, count_error: bool = False, dims_error: bool = False):
         self._dims = dims
@@ -50,7 +50,7 @@ async def test_status_match(monkeypatch):
 
 
 async def test_status_zero_zero_is_ok(monkeypatch):
-    """全新环境（无文档）两边都是 0，属一致，不应告警"""
+    """A fresh environment with no documents has 0 on both sides: consistent, so no warning."""
     _patch_mysql(monkeypatch, 0)
     monkeypatch.setattr(startup_check, "elastic", _FakeEs(dims=1024, count=0))
     st = await startup_check.consistency_status()
@@ -58,13 +58,13 @@ async def test_status_zero_zero_is_ok(monkeypatch):
 
 
 async def test_status_mismatch_incident_scenario(monkeypatch):
-    """事故场景：MySQL 156 ready vs ES 0 文档"""
+    """Incident scenario: MySQL 156 ready chunks vs 0 ES documents."""
     _patch_mysql(monkeypatch, 156)
     monkeypatch.setattr(startup_check, "elastic", _FakeEs(dims=1024, count=0))
     st = await startup_check.consistency_status()
     assert st["match"] is False
     assert "156" in st["detail"] and "0" in st["detail"]
-    assert "恢复" in st["detail"]  # 必须给出恢复脚本指引
+    assert "恢复" in st["detail"]  # must point at the recovery script
 
 
 async def test_status_mysql_error(monkeypatch):
@@ -76,7 +76,7 @@ async def test_status_mysql_error(monkeypatch):
 
 
 async def test_status_index_missing_skips(monkeypatch):
-    """索引不存在（尚未创建）→ 跳过比对，不算不一致"""
+    """The index does not exist yet -> skip the comparison instead of reporting a mismatch."""
     _patch_mysql(monkeypatch, 156)
     monkeypatch.setattr(startup_check, "elastic", _FakeEs(dims=None))
     st = await startup_check.consistency_status()
@@ -92,7 +92,7 @@ async def test_status_es_count_error(monkeypatch):
     assert "ES" in st["detail"]
 
 
-# ---------- check_es_mysql_consistency（启动自检入口） ----------
+# ---------- check_es_mysql_consistency (startup self-check entry) ----------
 
 async def test_check_ok_on_match(monkeypatch):
     _patch_mysql(monkeypatch, 156)
@@ -111,7 +111,7 @@ async def test_check_fail_on_mismatch(monkeypatch):
 
 
 async def test_status_es_dims_query_error(monkeypatch):
-    """ES 宕机：index_dims 抛错必须降级为跳过（health 不得 500）"""
+    """ES is down: an index_dims error must degrade to skipped (health must not return 500)."""
     _patch_mysql(monkeypatch, 156)
     monkeypatch.setattr(startup_check, "elastic", _FakeEs(dims_error=True))
     st = await startup_check.consistency_status()
@@ -120,7 +120,7 @@ async def test_status_es_dims_query_error(monkeypatch):
 
 
 async def test_check_ok_when_skipped(monkeypatch):
-    """跳过态（MySQL 挂了 / 索引不存在 / ES 不可达）不打 FAIL，返回 None（[SKIP]）"""
+    """Skipped states (MySQL down / index missing / ES unreachable) are not FAIL but None ([SKIP])."""
     _patch_mysql(monkeypatch, error=True)
     monkeypatch.setattr(startup_check, "elastic", _FakeEs())
     ok, detail = await startup_check.check_es_mysql_consistency()
@@ -134,7 +134,7 @@ async def test_check_ok_when_skipped(monkeypatch):
     assert "ES" in detail2
 
 
-# ---------- run_startup_checks 接线 ----------
+# ---------- run_startup_checks wiring ----------
 
 async def test_startup_checks_include_consistency(monkeypatch):
     captured = {}
@@ -154,11 +154,11 @@ async def test_startup_checks_include_consistency(monkeypatch):
     await startup_check.run_startup_checks()
 
     assert "ES/MySQL 数据一致性" in captured["text"]
-    assert captured["text"].count("[OK]") == 5  # 五项检查全部出现在摘要中
+    assert captured["text"].count("[OK]") == 5  # all five checks appear in the summary
 
 
 async def test_startup_checks_survives_single_check_exception(monkeypatch):
-    """单项检查自身异常不吞掉其余四项诊断（gather return_exceptions=True）"""
+    """An exception in one check does not swallow the other four diagnostics (gather return_exceptions=True)."""
     captured = {}
 
     async def _ok(*a, **k):
@@ -184,7 +184,7 @@ async def test_startup_checks_survives_single_check_exception(monkeypatch):
 
 
 async def test_startup_checks_skip_badge(monkeypatch):
-    """跳过态打 [SKIP] 而非 [OK]/[FAIL]，不计入 problems"""
+    """A skipped state prints [SKIP] instead of [OK]/[FAIL] and is not counted in problems."""
     captured = {}
 
     async def _ok(*a, **k):
@@ -206,4 +206,4 @@ async def test_startup_checks_skip_badge(monkeypatch):
 
     assert "[SKIP]" in captured["text"]
     assert "[FAIL]" not in captured["text"]
-    assert "全部依赖正常" in captured["text"]  # 跳过不算异常
+    assert "全部依赖正常" in captured["text"]  # a skip is not an error

@@ -1,4 +1,4 @@
-"""知识库管理路由"""
+"""Knowledge base management router."""
 import asyncio
 
 from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
@@ -129,14 +129,15 @@ async def get_chunk_by_citation(
     kb_id: int | None = None,
     chunk_uid: str | None = None,
 ) -> dict:
-    """新引用按文档 ID 定位；旧引用仅在文件名唯一时回退，禁止猜测同名文档。"""
+    """New citations resolve by document ID; legacy citations fall back only when the file name
+    is unique, never guessing between identically named documents."""
     fields = "id, kb_id, file_name, file_type, status, chunk_count, error_msg, created_at, updated_at"
     if doc_id is not None:
         doc = await db.aquery_one(f"SELECT {fields} FROM kb_document WHERE id=%s", (doc_id,))
         if doc and (doc["status"] != "ready" or (kb_id is not None and doc["kb_id"] != kb_id)):
             doc = None
     else:
-        # 按最后一个点去扩展名，与入库时 rsplit('.', 1) 的语义相同。
+        # Strip the extension at the last dot, matching the rsplit('.', 1) semantics used at ingestion.
         condition = "status='ready' AND LEFT(file_name, CHAR_LENGTH(file_name) - LOCATE('.', REVERSE(file_name)))=%s"
         params: tuple = (doc_name,)
         if kb_id is not None:

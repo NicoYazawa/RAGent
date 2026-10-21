@@ -12,7 +12,7 @@ import { useDecisionLogStore } from '@/stores/decisionLog'
 
 const { t } = useI18n()
 
-/** 决策日志面板：过滤（会话/时间范围）+ 时间轴分页列表 + 单条回放 */
+/** Decision log panel: filters (session/time range), paginated timeline and single-entry replay */
 const store = useDecisionLogStore()
 const drawerOpen = ref(false)
 const activeLogId = ref<number | null>(null)
@@ -35,7 +35,7 @@ function fmt(iso: string): string {
 
 <template>
   <div class="flex h-full flex-col">
-    <!-- 过滤栏 -->
+    <!-- Filter bar -->
     <div class="flex min-h-14 flex-wrap items-center gap-3 border-b border-edge px-4 py-2 md:px-6">
       <h1 class="text-[18px] font-semibold leading-tight text-ink">{{ t('logs.title') }}</h1>
       <span class="font-mono text-[11px] text-ink-mute">agent_decision_log</span>
@@ -63,7 +63,7 @@ function fmt(iso: string): string {
       </div>
     </div>
 
-    <!-- 时间轴列表 -->
+    <!-- Timeline list -->
     <div class="flex-1 overflow-y-auto px-6 py-5">
       <div v-if="store.loading" class="relative ml-3 space-y-4 border-l border-edge pl-6">
         <div v-for="i in 5" :key="i" class="h-[72px] animate-pulse rounded-lg border border-edge bg-card/50" />
@@ -79,7 +79,7 @@ function fmt(iso: string): string {
           class="group relative mb-4 w-full rounded-lg border border-edge bg-card px-4 py-3.5 text-left transition-colors duration-150 hover:border-edge-bright"
           @click="openDetail(log.id)"
         >
-          <!-- 时间轴节点 -->
+          <!-- Timeline node -->
           <span
             class="absolute -left-[1.9rem] top-5 flex h-3 w-3 items-center justify-center rounded-full border-2 border-panel transition-colors group-hover:border-accent"
             :class="log.total_rounds > 1 ? 'bg-warn' : 'bg-accent'"
@@ -105,7 +105,7 @@ function fmt(iso: string): string {
         </button>
       </div>
 
-      <!-- 分页 -->
+      <!-- Pagination -->
       <div v-if="!store.loading && store.total > 0" class="mt-2 flex justify-center">
         <BasePagination :page="store.page" :page-size="store.pageSize" :total="store.total" @change="(p) => store.query(p)" />
       </div>

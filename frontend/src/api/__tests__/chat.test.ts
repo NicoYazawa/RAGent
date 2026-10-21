@@ -2,12 +2,12 @@
 import { createPinia, setActivePinia } from 'pinia'
 
 /**
- * 问答端 API —— SSE 流式问答是本项目的核心链路。
- * 关键契约：
- *   - 非 2xx / 无 body 时抛后端 detail（而不是裸状态码）
- *   - 事件按到达顺序逐个回调
- *   - AbortError（用户中断）被吸收，不上抛
- *   - 事件必须以空行（\n\n）结束才会被投递（后端 sse() 恒以 \n\n 结尾）
+ * Chat API — SSE streaming Q&A is the core flow of this project.
+ * Key contracts:
+ *   - a non-2xx or bodyless response throws the backend detail (not a bare status code)
+ *   - events are delivered one by one in arrival order
+ *   - AbortError (user interruption) is absorbed and not rethrown
+ *   - an event is only delivered when terminated by a blank line (\n\n); backend sse() always ends with \n\n
  */
 vi.mock('../http', async () => {
   const actual = await vi.importActual<typeof import('../http')>('../http')

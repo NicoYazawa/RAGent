@@ -1,19 +1,20 @@
-"""检索回归基准 — 金标准集 A/B 对比（rerank 前后）
+"""Retrieval regression benchmark — A/B comparison over the gold question set (before/after rerank).
 
-度量「检索排序质量」与「分阶段延迟」，不经过 LLM（便宜、可反复跑）：
-  - chunk 级 / doc 级 Recall@5 / Recall@8 / MRR / nDCG@8（对 goldset.json 人工标注）
-  - vector / keyword / rerank / 全链路耗时（avg / p50 / p95）
-  - 诊断：gold 是否在各召回路原始结果中（判断精排该保留哪路）
+Measures retrieval ranking quality and per-stage latency without calling an LLM (cheap and
+repeatable):
+  - chunk-level / doc-level Recall@5 / Recall@8 / MRR / nDCG@8 (against the manual labels in goldset.json)
+  - vector / keyword / rerank / end-to-end latency (avg / p50 / p95)
+  - diagnostics: whether the gold chunk is in each lane's raw results (shows which lane rerank should keep)
 
-A/B 工作流（先基线后对比）：
-  # 1) 改动前存基线
+A/B workflow (baseline first, then compare):
+  # 1) save the baseline before the change
   python scripts/benchmark_retrieval.py --save reports/baseline-2026-10-19.json
-  # 2) 改动后对比（自动打印 Δ 表 + 逐题进退步名单）
+  # 2) compare after the change (prints the delta table plus the per-question gains/losses)
   python scripts/benchmark_retrieval.py --diff reports/baseline-2026-10-19.json
 
-rerank 开关：--rerank / --no-rerank 强制覆盖；缺省跟随 settings.rerank_enabled
-（该字段尚不存在时视为关闭）。精排 hook 自动探测 app.providers.get_rerank，
-rerank 实现后本脚本零改动即可纳入对比。
+rerank switch: --rerank / --no-rerank force the setting; otherwise settings.rerank_enabled
+wins (a missing field counts as off). The rerank hook probes app.providers.get_rerank, so
+once rerank is implemented this script takes part in the comparison with no changes.
 """
 import argparse
 import json
@@ -23,7 +24,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # 允许在 backend/ 外直接运行
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # allow running from outside backend/
 
 from app.agent.retrievers import keyword_retriever, vector_retriever  # noqa: E402
 from app.agent.rrf import item_key, rrf_fuse  # noqa: E402
@@ -32,7 +33,7 @@ from app.config import settings  # noqa: E402
 GOLDSET = Path(__file__).parent / "goldset.json"
 
 
-# ---------- 指标 ----------
+# ---------- Metrics ----------
 
 def recall_at_k(ranked: list[str], gold: set[str], k: int) -> float:
     return 1.0 if set(ranked[:k]) & gold else 0.0
@@ -63,7 +64,7 @@ def pct(values: list[float], p: float) -> float:
     return ordered[min(len(ordered) - 1, int(p * (len(ordered) - 1)))]
 
 
-# ---------- 金标准集 ----------
+# ---------- Gold question set ----------
 
 def load_goldset() -> list[dict]:
     data = json.loads(GOLDSET.read_text(encoding="utf-8"))
@@ -74,27 +75,29 @@ def load_goldset() -> list[dict]:
     return data["questions"]
 
 
-# ---------- 精排 hook（rerank 实现后自动生效） ----------
+# ---------- Rerank hook (kicks in once rerank is implemented) ----------
 
 async def apply_rerank(query: str, items: list, top_n: int):
-    """返回 (重排后 items, info)。未实现 / 未配置时原样返回（基准以 --rerank 显式要求时 loud fail）。"""
+    """Return (reordered items, info). Returns the input unchanged when rerank is missing or
+    unconfigured (a run that explicitly asks for --rerank fails loudly)."""
     try:
-        from app.providers import get_rerank  # rerank 实现后存在
+        from app.providers import get_rerank  # exists once rerank is implemented
     except ImportError:
         return items, None
     provider = get_rerank()
     t0 = time.perf_counter()
     scored = await provider.rerank(query, [it.content for it in items], top_n)
     elapsed = (time.perf_counter() - t0) * 1000
-    # 与 orchestrator._apply_rerank 一致：越界索引过滤
+    # Same as orchestrator._apply_rerank: drop out-of-range indices
     reordered = [items[i] for i, _ in scored if 0 <= i < len(items)]
     return reordered, {"model": getattr(provider, "model", "?"), "ms": round(elapsed, 1), "in": len(items), "out": len(reordered)}
 
 
-# ---------- 单题执行 ----------
+# ---------- Per-question run ----------
 
 async def run_question(q: dict, top_k: int, use_rerank: bool) -> dict:
-    # 与 orchestrator.rerank_params() 保持一致：开启精排时加深单路召回、扩大候选池
+    # Matches orchestrator.rerank_params(): with rerank on, deepen per-lane recall and widen the
+    # candidate pool
     if use_rerank:
         lane_top_k = max(top_k, (settings.rerank_candidates + 1) // 2)
         candidates = settings.rerank_candidates
@@ -130,7 +133,7 @@ async def run_question(q: dict, top_k: int, use_rerank: bool) -> dict:
         "q": q["q"],
         "tags": q["tags"],
         "gold": sorted(q["gold_chunk_keys"]),
-        "gold_rank": gold_rank,  # None = 未命中
+        "gold_rank": gold_rank,  # None = not retrieved
         "chunk_keys": chunk_keys,
         "doc_keys": doc_keys,
         "metrics": {
@@ -156,7 +159,7 @@ async def run_question(q: dict, top_k: int, use_rerank: bool) -> dict:
     }
 
 
-# ---------- 汇总与报告 ----------
+# ---------- Summary and report ----------
 
 def summarize(results: list[dict]) -> dict:
     keys = ["recall@5", "recall@8", "mrr", "ndcg@8", "doc_recall@5", "doc_recall@8", "doc_mrr"]
@@ -204,7 +207,7 @@ def print_diff(baseline: dict, current: dict) -> None:
         flag = " ✅" if delta > 0.005 else (" ❌" if delta < -0.005 else "")
         print(f"  {key:<16} {b[key]:>8.4f} {c[key]:>8.4f} {delta:>+8.4f}{flag}")
     print(f"  {'total avg(ms)':<16} {b['total_ms_avg']:>8.1f} {c['total_ms_avg']:>8.1f} {c['total_ms_avg'] - b['total_ms_avg']:>+8.1f}")
-    # 逐题进退步
+    # Per-question gains and regressions
     b_ranks = {r["id"]: r["gold_rank"] for r in baseline["results"]}
     improved, regressed = [], []
     for r in current["results"]:

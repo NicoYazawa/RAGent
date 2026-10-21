@@ -5,7 +5,7 @@ import Icon from '@/components/ui/Icon.vue'
 import type { DecisionCard } from '@/stores/chat'
 import { fmtMs } from '@/utils/decisionExport'
 
-/** 决策步骤卡片 — 四态（pending 转圈 / done / warn）+ 回流轮次缩进 + 单步耗时 */
+/** Decision step card — four states (pending spinner / done / warn), backflow indent and per-step timing */
 const props = defineProps<{ card: DecisionCard }>()
 
 const { t } = useI18n()
@@ -28,11 +28,11 @@ const label = computed(() => (props.card.step === 0 ? t('chat.step.flow') : t(st
 const icon = computed(() => TYPE_ICON[props.card.type] ?? 'info')
 const isPending = computed(() => props.card.status === 'pending')
 const isWarn = computed(() => props.card.status === 'warn')
-/** ts 为真实毫秒时间戳时才展示时钟（回放/日志卡片 ts=0 只看耗时） */
+/** A clock is shown only for a real millisecond timestamp (replay/log cards have ts=0 and show duration only) */
 const hasClock = computed(() => props.card.ts > 1e12)
 const showElapsed = computed(() => !isPending.value && props.card.elapsedMs > 0)
 
-/** 检索来源 → 本地化 */
+/** Retrieval source to localized text */
 const sourceLabel = computed(() => {
   const s = props.card.payload.source as string | undefined
   return s ? t(`chat.source.${s}`) : null
@@ -47,14 +47,14 @@ const sourceLabel = computed(() => {
       card.round > 0 ? 'ml-5' : '',
     ]"
   >
-    <!-- 回流轮次标签 -->
+    <!-- Backflow round tag -->
     <span
       v-if="card.round > 0"
       class="absolute -left-1.5 top-1/2 h-[calc(100%-0.75rem)] w-1 -translate-y-1/2 rounded-full bg-warn/50"
       :title="t('chat.step.round', { n: card.round })"
     />
     <div class="flex items-start gap-2.5">
-      <!-- 状态图标 -->
+      <!-- Status icon -->
       <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
         <span
           v-if="isPending"
@@ -88,7 +88,7 @@ const sourceLabel = computed(() => {
           {{ card.detail }}
         </p>
 
-        <!-- 关键指标 -->
+        <!-- Key metrics -->
         <div v-if="!isPending && card.type !== 'error'" class="mt-1.5 flex flex-wrap items-center gap-1.5">
           <template v-if="card.type === 'router'">
             <span class="rounded border border-edge-bright bg-raise px-1.5 py-0.5 font-mono text-[11px] text-accent">{{ card.payload.intent }}</span>

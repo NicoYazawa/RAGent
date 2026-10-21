@@ -7,7 +7,7 @@ from app.providers.registry import UnknownProviderError
 
 
 def _clear_overrides(monkeypatch):
-    """清空模型/维度/rerank 覆盖字段，使 resolved_* 回退目录默认值"""
+    """Clear the model/dims/rerank overrides so resolved_* falls back to the catalog defaults."""
     for name in ("llm_model", "embed_model", "embed_dims", "rerank_model", "rerank_base_url"):
         monkeypatch.setattr(settings, name, "" if name != "embed_dims" else 0, raising=False)
 
@@ -16,7 +16,7 @@ def _clear_overrides(monkeypatch):
 
 def test_rerank_defaults_preserve_catalog():
     s = Settings(_env_file=None)
-    assert s.rerank_enabled is False  # 默认关，灰度开启
+    assert s.rerank_enabled is False  # off by default, enabled gradually
     assert s.rerank_provider == "qwen"
     assert s.rerank_top_n == 8
     assert s.rerank_candidates == 20
@@ -32,7 +32,7 @@ def test_rerank_overrides():
     assert (s.rerank_top_n, s.rerank_candidates, s.rerank_enabled) == (5, 30, True)
 
 
-# ---------- 门面 ----------
+# ---------- Facade ----------
 
 def test_get_rerank_from_qwen_spec(monkeypatch):
     _clear_overrides(monkeypatch)
@@ -74,6 +74,6 @@ def test_get_rerank_after_reset_reflects_new_provider(monkeypatch):
 async def test_close_providers_closes_rerank_too(monkeypatch):
     _clear_overrides(monkeypatch)
     monkeypatch.setattr(settings, "rerank_provider", "qwen", raising=False)
-    providers.get_rerank()  # 构建单例
-    await providers.close_providers()  # 不得抛异常
+    providers.get_rerank()  # build the singleton
+    await providers.close_providers()  # must not raise
     assert providers._rerank_singleton is None

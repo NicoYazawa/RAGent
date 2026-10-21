@@ -5,10 +5,10 @@ import type { ChatSession } from '@/api/types'
 import type { DecisionCard } from '@/stores/chat'
 
 /**
- * 决策步骤卡 / 会话列表 —— 展示层契约：
- *   - 卡片按 step 选标题、按状态切样式、回流轮次缩进、仅在有真实时间戳时显示时钟
- *   - 不同事件类型展示对应关键指标（置信度 / 命中数 / 评分 / 纠正动作 / 反思结果 / 引用数）
- *   - 会话列表：加载骨架 / 空态 / 当前项高亮 / 新建 / 切换 / 删除
+ * Decision step card / session list — presentation contracts:
+ *   - cards pick a title by step, style by status, indent backflow rounds and show a clock only with a real timestamp
+ *   - each event type shows its key metric (confidence / hits / grade / correction action / reflection result / citations)
+ *   - session list: loading skeleton / empty state / active highlight / create / switch / delete
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

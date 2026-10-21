@@ -3,10 +3,10 @@
 from app.agent import orchestrator
 from app.agent.rrf import RetrieverResult
 
-# ---------- 单路召回 ----------
+# ---------- Per-lane recall ----------
 
 async def test_lane_vector_returns_hits(api, monkeypatch):
-    """向量路召回：返回 hits 与延迟"""
+    """Vector-lane recall returns hits and latency."""
     from app.agent import retrievers
 
     async def _search(query, kb_ids, top_k=5):
@@ -21,13 +21,13 @@ async def test_lane_vector_returns_hits(api, monkeypatch):
     assert body["source"] == "vector"
     assert len(body["hits"]) == 1
     assert body["hits"][0]["snippet"] == "迟到认定"
-    # doc_id 不外泄到前端
+    # doc_id is not exposed to the frontend
     assert body["hits"][0]["meta"]["doc_id"] == 3
     assert body["latency_ms"] >= 0
 
 
 async def test_lane_keyword_returns_hits(api, monkeypatch):
-    """关键词路召回"""
+    """Keyword-lane recall."""
     from app.agent import retrievers
 
     async def _search(query, kb_ids, top_k=5):
@@ -41,7 +41,7 @@ async def test_lane_keyword_returns_hits(api, monkeypatch):
 
 
 async def test_lane_database_degrades_on_error(api, monkeypatch):
-    """database 路出错 → 降级为空命中，不阻断其余路"""
+    """A database-lane error -> degrade to zero hits without blocking the other lanes."""
     from app.agent import retrievers
 
     async def _boom(*a, **k):
@@ -55,15 +55,15 @@ async def test_lane_database_degrades_on_error(api, monkeypatch):
 
 
 def test_lane_rejects_unknown_source(api):
-    """未知源类型 → 400"""
+    """An unknown source type -> 400."""
     r = api.post("/api/admin/retrieval-test/lane", json={"query": "x", "source": "web"})
     assert r.status_code == 400
 
 
-# ---------- 融合 + 评分 ----------
+# ---------- Fusion and grading ----------
 
 async def test_fuse_merges_lanes_and_grades(api, monkeypatch):
-    """多路融合 + Grader 评分：返回 rrf / from_lanes / grade"""
+    """Multi-lane fusion plus grading: returns rrf / from_lanes / grade."""
     async def _grade(question, sub_queries, ctx_blocks, usage, locale=None):
         return 8.5, "pass", "内容相关"
 
@@ -90,7 +90,7 @@ async def test_fuse_merges_lanes_and_grades(api, monkeypatch):
 
 
 def test_fuse_with_empty_query_uses_default_query(api, monkeypatch):
-    """空 query → 用占位查询串（Grader 仍能评估）"""
+    """An empty query -> a placeholder query string (the grader can still evaluate)."""
     seen = {}
 
     async def _grade(question, sub_queries, ctx_blocks, usage, locale=None):
@@ -104,7 +104,7 @@ def test_fuse_with_empty_query_uses_default_query(api, monkeypatch):
 
 
 def test_fuse_rerank_failure_is_reported(api, monkeypatch):
-    """精排失败 → rerank 字段带 error，其余流程不中断"""
+    """Rerank fails -> the rerank field carries the error and the rest of the flow continues."""
     async def _grade(question, sub_queries, ctx_blocks, usage, locale=None):
         return 5.0, "partial", "部分相关"
 
@@ -124,4 +124,4 @@ def test_fuse_rerank_failure_is_reported(api, monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert body["rerank"] == {"error": "精排失败（RuntimeError）"}
-    assert body["fused"]  # 粗排结果仍在
+    assert body["fused"]  # the coarse results are still there

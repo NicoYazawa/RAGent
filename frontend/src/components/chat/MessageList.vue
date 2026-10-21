@@ -11,14 +11,14 @@ import { SAMPLE_QUESTIONS } from '@/api/samples'
 import type { Citation } from '@/api/types'
 import { citationNumber } from '@/utils/citations'
 
-/** 中栏：对话气泡流 + 流式渲染 + 引用溯源联动 + 答案操作条 */
+/** Middle column: message bubbles, streaming rendering, citation linking and the answer action bar */
 const { t } = useI18n()
 const store = useChatStore()
 const listRef = ref<HTMLDivElement>()
 const highlightCite = ref<number | null>(null)
 let highlightTimer: ReturnType<typeof setTimeout> | null = null
 
-/** 最后一条助手消息（重新生成按钮仅它可见） */
+/** The last assistant message (only it shows the regenerate button) */
 const lastAssistantIdx = computed(() => {
   for (let i = store.messages.length - 1; i >= 0; i--) {
     if (store.messages[i].role === 'assistant') return i
@@ -43,7 +43,7 @@ function onCiteClick(msgIndex: number, n: number): void {
   })
 }
 
-/* 引用切片抽屉（知识库引用 → 定位切片原文；NL2SQL 引用 → 数据查询证据视图） */
+/* Citation drawer (knowledge-base citation -> chunk text; NL2SQL citation -> data-query evidence view) */
 const drawerOpen = ref(false)
 const drawerCite = ref<Citation | null>(null)
 
@@ -57,7 +57,7 @@ function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
-/* 图片预览弹窗（页内 Lightbox，多图可切换） */
+/* Image preview dialog (in-page lightbox, switchable across images) */
 const viewerOpen = ref(false)
 const viewerImages = ref<string[]>([])
 const viewerIndex = ref(0)
@@ -68,7 +68,7 @@ function openViewer(images: string[], i: number): void {
   viewerOpen.value = true
 }
 
-/* 附图加载失败（如历史消息的图片文件已不存在）时显示占位，避免破图图标 */
+/* Show a placeholder when an image fails to load (e.g. an old message whose file is gone) instead of a broken icon */
 const imgErr = ref<Record<string, boolean>>({})
 function imgErrKey(msgId: number | string, ii: number): string {
   return `${msgId}:${ii}`
@@ -92,7 +92,7 @@ function fillSample(q: string): void {
 
 <template>
   <div ref="listRef" class="flex-1 overflow-y-auto px-4 py-6 md:px-8">
-    <!-- 空状态：首次进入要问的第一个问题 -->
+    <!-- Empty state: the first question of a fresh session -->
     <div v-if="store.messages.length === 0 && !store.streaming" class="mx-auto flex h-full max-w-[720px] flex-col justify-center gap-7">
       <div class="flex items-center gap-3">
         <img src="/logo.png" alt="RAGent" class="h-10 w-10 shrink-0 rounded-lg object-cover" />
@@ -118,10 +118,10 @@ function fillSample(q: string): void {
       </div>
     </div>
 
-    <!-- 消息流 -->
+    <!-- Message stream -->
     <div v-else class="mx-auto max-w-[720px] space-y-6">
       <template v-for="(msg, i) in store.messages" :key="msg.id">
-        <!-- 用户气泡（多模态：附图缩略图 + 文本） -->
+        <!-- User bubble (multimodal: image thumbnails plus text) -->
         <div v-if="msg.role === 'user'" class="flex justify-end">
           <div class="max-w-[82%] rounded-lg bg-raise px-4 py-2.5 text-[13.5px] leading-relaxed text-ink">
             <div v-if="msg.images?.length" class="mb-2 flex flex-wrap justify-end gap-1.5">
@@ -148,14 +148,14 @@ function fillSample(q: string): void {
           </div>
         </div>
 
-        <!-- 助手气泡 -->
+        <!-- Assistant bubble -->
         <div v-else class="group/msg flex gap-3">
           <img src="/logo.png" alt="RAGent" class="mt-0.5 h-6 w-6 shrink-0 rounded object-cover" />
           <div class="min-w-0 flex-1">
             <div class="rounded-lg border border-edge bg-card px-4 py-3 text-[13.5px] leading-relaxed">
               <MarkdownText :text="msg.content" :citations="msg.citations" @cite-click="(n) => onCiteClick(i, n)" />
             </div>
-            <!-- 引用卡片列表 -->
+            <!-- Citation card list -->
             <div v-if="msg.citations?.length" class="mt-2 flex flex-wrap gap-1.5">
               <button
                 v-for="(c, ci) in msg.citations"
@@ -185,7 +185,7 @@ function fillSample(q: string): void {
             <div class="mt-1.5 flex items-center gap-2">
               <span class="font-mono text-[11px] text-ink-mute">{{ fmtTime(msg.created_at) }}</span>
             </div>
-            <!-- 操作条：复制 / 决策链 / 重新生成（末条）/ 反馈 -->
+            <!-- Action bar: copy / decision chain / regenerate (last message) / feedback -->
             <MessageActions
               :message="msg"
               :can-regenerate="i === lastAssistantIdx && !store.streaming"
@@ -196,7 +196,7 @@ function fillSample(q: string): void {
         </div>
       </template>
 
-      <!-- 流式助手气泡 -->
+      <!-- Streaming assistant bubble -->
       <div v-if="store.streaming" class="flex gap-3">
         <img src="/logo.png" alt="RAGent" class="mt-0.5 h-6 w-6 shrink-0 rounded object-cover" />
         <div class="min-w-0 flex-1">
@@ -219,10 +219,10 @@ function fillSample(q: string): void {
       </div>
     </div>
 
-    <!-- 引用切片抽屉 -->
+    <!-- Citation drawer -->
     <CitationChunkDrawer :open="drawerOpen" :citation="drawerCite" @close="drawerOpen = false" />
 
-    <!-- 图片预览弹窗 -->
+    <!-- Image preview dialog -->
     <ImageViewer :open="viewerOpen" :images="viewerImages" v-model:index="viewerIndex" @close="viewerOpen = false" />
   </div>
 </template>

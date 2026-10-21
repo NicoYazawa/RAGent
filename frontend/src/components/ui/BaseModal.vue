@@ -25,7 +25,7 @@ watch(
   },
 )
 
-// 组件在开启状态下被卸载时，避免 body 永久锁滚动
+// avoid leaving body scroll locked when the component unmounts while open
 onUnmounted(() => {
   document.body.style.overflow = ''
 })
@@ -34,7 +34,7 @@ function onOverlay(): void {
   if (props.closeOnOverlay) emit('close')
 }
 
-/** 打开时优先聚焦首个输入控件，而不是头部的关闭按钮 */
+/** On open, focus the first input rather than the close button in the header */
 function onMountAutoFocus(e: Event): void {
   const container = e.target as HTMLElement | null
   const preferred = container?.querySelector<HTMLElement>('[data-autofocus], input:not([type="hidden"]), textarea, select')
@@ -58,7 +58,7 @@ function onMountAutoFocus(e: Event): void {
         @keydown.esc="emit('close')"
       >
         <div class="absolute inset-0 bg-deep/80" @click="onOverlay" />
-        <!-- FocusScope：焦点陷阱 + 关闭后焦点归还触发元素 -->
+        <!-- FocusScope: focus trap plus focus returning to the trigger on close -->
         <FocusScope as-child :trapped="open" @mount-auto-focus="onMountAutoFocus">
           <motion.div
             class="scanline relative flex max-h-[85vh] w-full flex-col overflow-hidden rounded-xl border border-edge-bright bg-panel shadow-[var(--shadow-overlay)]"

@@ -11,7 +11,7 @@ from app.providers.openai_compat import OpenAICompatEmbedder, OpenAICompatLLM
 
 
 def test_full_decision_chain_with_mock_supplier():
-    """一次 ainvoke(judge) + 一次 astream(generate) + 一次 embed_query，验证协议闭环"""
+    """One ainvoke (judge) + one astream (generate) + one embed_query, verifying the protocol loop."""
     chat_calls = {"n": 0}
 
     def chat_handler(request: httpx.Request) -> httpx.Response:

@@ -1,13 +1,13 @@
 import type { SseEvent } from './types'
 
 /* ============================================================
- * SSE 文本流解析器 — 支持 POST JSON 的 fetch/ReadableStream 消费
+ * SSE text-stream parser — consumes fetch/ReadableStream from a POST JSON request
  * ============================================================ */
 
 export class SseParser {
   private buffer = ''
 
-  /** 喂入增量文本，返回完整解析出的事件数组（跨 chunk 缓存；\r\n 归一为 \n） */
+  /** Feed incremental text and return the fully parsed events (buffers across chunks; \r\n is normalized to \n) */
   feed(text: string): SseEvent[] {
     this.buffer += text.replace(/\r\n/g, '\n')
     const events: SseEvent[] = []

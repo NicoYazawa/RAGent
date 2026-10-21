@@ -5,12 +5,12 @@ import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
 /**
- * 测试质量元测试（前端版，与后端 tests/test_test_quality.py 同构）
- * 防止"虚假数据通过"回归：
- *   1. 恒真断言：expect(true) / expect(false) / expect(x).toBe(x)
- *   2. 空测试：it/test 的回调体没有任何语句
- *   3. 空的测试文件
- *   4. 直接读取 .env（测试不应依赖本地密钥文件）
+ * Test-quality meta test (frontend counterpart of backend tests/test_test_quality.py)
+ * Guards against "fake data passes" regressions:
+ *   1. always-true assertions: expect(true) / expect(false) / expect(x).toBe(x)
+ *   2. empty tests: the it/test callback body has no statements
+ *   3. empty test files
+ *   4. reading .env directly (tests must not depend on a local secret file)
  */
 
 const SRC = join(process.cwd(), 'src')
@@ -31,7 +31,7 @@ function walk(dir: string): string[] {
 
 const TEST_FILES = walk(SRC)
 
-/** 源码中某个表达式的规范化文本 */
+/** Normalized text of an expression in the source. */
 function exprText(node: ts.Node): string {
   return node.getText().replace(/\s+/g, ' ')
 }
@@ -43,13 +43,13 @@ function findViolations(file: string): string[] {
   const rel = relative(process.cwd(), file)
 
   const visit = (node: ts.Node): void => {
-    // 1) 恒真断言
+    // 1) always-true assertions
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'expect') {
       const arg = node.arguments[0]
       if (arg && (arg.kind === ts.SyntaxKind.TrueKeyword || arg.kind === ts.SyntaxKind.FalseKeyword)) {
         problems.push(`${rel}: expect(${arg.getText()}) 恒真断言`)
       }
-      // expect(x).toBe(x) / .toEqual(x) —— 自比较
+      // expect(x).toBe(x) / .toEqual(x) — self comparison
       const parent = node.parent
       if (arg && ts.isPropertyAccessExpression(parent) && ts.isCallExpression(parent.parent)) {
         const matcher = parent.name.text
@@ -62,7 +62,7 @@ function findViolations(file: string): string[] {
       }
     }
 
-    // 2) 空测试体
+    // 2) empty test bodies
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && ['it', 'test'].includes(node.expression.text)) {
       const cb = node.arguments.find((a) => ts.isArrowFunction(a) || ts.isFunctionExpression(a))
       if (cb && ts.isArrowFunction(cb)) {
@@ -103,7 +103,7 @@ describe('前端测试质量元测试', () => {
     const offenders: string[] = []
     const self = relative(process.cwd(), fileURLToPath(import.meta.url))
     for (const f of TEST_FILES) {
-      if (relative(process.cwd(), f) === self) continue // 本文件包含检测规则本身
+      if (relative(process.cwd(), f) === self) continue // this file contains the rules themselves
       const text = readFileSync(f, 'utf8')
       if (/(readFileSync|readFile)\s*\([^)]*\.env/.test(text) || /load_dotenv/.test(text)) {
         offenders.push(relative(process.cwd(), f))

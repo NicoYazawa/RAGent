@@ -5,7 +5,7 @@ import Icon from './Icon.vue'
 
 const { t } = useI18n()
 
-/** 全屏图片预览弹窗（Lightbox）：ESC / 遮罩 / 右上角关闭；多图支持左右切换与序号指示 */
+/** Full-screen image lightbox: ESC / overlay / close in the top-right; multiple images page left and right with an index */
 const props = defineProps<{
   open: boolean
   images: string[]
@@ -40,7 +40,7 @@ watch(
   },
 )
 
-/* 打开与切换时预加载相邻图（切换更顺滑） */
+/* Preload the neighbouring images on open and switch (smoother paging) */
 watch(
   () => [props.open, index.value] as const,
   ([open, i]) => {
@@ -56,7 +56,7 @@ watch(
   <Teleport to="body">
     <Transition name="viewer">
       <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-deep/85" @click="emit('close')">
-        <!-- 关闭 -->
+        <!-- Close -->
         <button
           type="button"
           class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg border border-edge bg-card text-ink-mute transition-all duration-150 hover:border-edge-bright hover:text-accent active:scale-95"
@@ -66,7 +66,7 @@ watch(
           <Icon name="x" :size="16" />
         </button>
 
-        <!-- 上一张 -->
+        <!-- Previous -->
         <button
           v-if="images.length > 1 && index > 0"
           type="button"
@@ -77,7 +77,7 @@ watch(
           <Icon name="chev-left" :size="18" />
         </button>
 
-        <!-- 大图（切换淡入淡出；点击图片不关闭，便于查看细节） -->
+        <!-- Full image (fades when switching; clicking the image does not close it, so details stay visible) -->
         <Transition name="viewer-img" mode="out-in">
           <img
             :key="index"
@@ -88,7 +88,7 @@ watch(
           />
         </Transition>
 
-        <!-- 下一张 -->
+        <!-- Next -->
         <button
           v-if="images.length > 1 && index < images.length - 1"
           type="button"
@@ -99,7 +99,7 @@ watch(
           <Icon name="chev-right" :size="18" />
         </button>
 
-        <!-- 序号指示 -->
+        <!-- Index indicator -->
         <span v-if="images.length > 1" class="absolute bottom-5 font-mono text-[11px] tracking-wider text-ink-mute">
           {{ index + 1 }} / {{ images.length }}
         </span>

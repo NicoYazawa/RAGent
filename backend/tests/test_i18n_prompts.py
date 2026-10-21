@@ -26,15 +26,15 @@ def test_disabled_database_is_not_advertised_to_router(locale):
 def test_detect_lang():
     assert detect_lang("迟到是怎么认定和处罚的？") == "zh-CN"
     assert detect_lang("How is lateness handled?") == "en-US"
-    assert detect_lang("ES 的向量检索怎么配合 BM25？") == "zh-CN"  # 中文占比高
+    assert detect_lang("ES 的向量检索怎么配合 BM25？") == "zh-CN"  # mostly Chinese
     assert detect_lang("What is the RRF fusion k value?") == "en-US"
-    assert detect_lang("") == "zh-CN"  # 空串回落默认
+    assert detect_lang("") == "zh-CN"  # an empty string falls back to the default
 
 
 def test_prompt_bundles_have_same_keys():
     keys = set(prompts.PROMPTS["zh-CN"].keys())
     assert keys == set(prompts.PROMPTS["en-US"].keys())
-    # 必备 system prompt
+    # the required system prompts
     assert {
         "router_sys",
         "planner_sys",
@@ -63,6 +63,6 @@ def test_en_user_builders_are_english():
 
 
 def test_zh_backward_compat_constants():
-    # orchestration/旧测试仍可引用模块级只读常量（默认中文）
+    # orchestration and older tests can still use the module-level read-only constants (Chinese)
     assert prompts.ROUTER_SYS == prompts.PROMPTS["zh-CN"]["router_sys"]
     assert prompts.GENERATE_SYS == prompts.PROMPTS["zh-CN"]["generate_sys"]

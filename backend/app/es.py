@@ -1,7 +1,7 @@
-"""Elasticsearch 客户端 — kb_chunks 索引（dense_vector kNN + BM25 双路检索）
+"""Elasticsearch client — the kb_chunks index (dense_vector kNN + BM25 hybrid retrieval).
 
-单索引承载全部知识库切片，kb_id 字段隔离多库。
-IK 分词插件未安装时自动退回 standard 分词器。
+A single index holds every knowledge-base chunk and the kb_id field isolates knowledge bases.
+When the IK analysis plugin is not installed the client falls back to the standard analyzer.
 """
 import json
 import logging
@@ -19,10 +19,12 @@ _SOURCE_FIELDS = ["kb_id", "doc_id", "chunk_uid", "doc_name", "section_path", "c
 class Elastic:
     def __init__(self) -> None:
         auth = (settings.es_user, settings.es_password) if settings.es_user else None
-        # trust_env=False：ES 是内部服务（容器内 es:9200 / 本机 localhost:9200），
-        # 不应走系统代理。Windows「系统代理」/ Clash 等会把 localhost 请求也代理出去，
-        # 导致 ES 探测与检索全部 502（httpx 默认读取系统代理设置）。
-        # 外部 LLM/Embedding 供应商的客户端保持 trust_env 默认值，仍可正常走代理。
+        # trust_env=False: ES is an internal service (es:9200 inside the container, localhost:9200
+        # on the host) and must bypass the system proxy. Windows system proxies and tools such as
+        # Clash forward localhost requests too, which turns ES probing and retrieval into 502s
+        # (httpx reads the system proxy settings by default).
+        # Clients for external LLM/Embedding providers keep the default trust_env so they can
+        # still use the proxy.
         self.client = httpx.AsyncClient(base_url=settings.es_url, auth=auth, timeout=30, trust_env=False)
 
     async def close(self) -> None:
@@ -70,7 +72,8 @@ class Elastic:
         logger.info("已创建 ES 索引 %s（analyzer=%s）", INDEX, analyzer)
 
     async def index_dims(self) -> int | None:
-        """读取现有索引的 dense_vector 维度；索引不存在或 mapping 异常返回 None"""
+        """Read the dense_vector dims of the existing index; None when the index is missing or
+        the mapping is malformed."""
         r = await self.client.get(f"/{INDEX}/_mapping")
         if r.status_code == 404:
             return None
@@ -89,7 +92,7 @@ class Elastic:
         return {"match_all": {}}
 
     async def knn_search(self, query_vector: list[float], kb_ids: list[int] | None, k: int = 5) -> list[dict]:
-        """语义检索：顶层 knn + kb_id 过滤，_score = (1+cosine)/2"""
+        """Semantic retrieval: top-level knn with a kb_id filter, _score = (1+cosine)/2."""
         body = {
             "size": k,
             "_source": _SOURCE_FIELDS,
@@ -98,7 +101,8 @@ class Elastic:
                 "query_vector": query_vector,
                 "k": k,
                 "num_candidates": 100,
-                # 顶层 query 与 knn 是 OR；库隔离必须在向量候选召回前生效。
+                # A top-level query is OR-ed with knn, so knowledge-base isolation must apply
+                # before vector candidates are recalled.
                 "filter": self._kb_filter(kb_ids),
             },
         }
@@ -108,7 +112,7 @@ class Elastic:
         return [{"score": h["_score"] or 0.0, **h["_source"]} for h in hits]
 
     async def match_search(self, query: str, kb_ids: list[int] | None, k: int = 5) -> list[dict]:
-        """关键词检索：BM25 match（content 主字段 + section_path 加权）"""
+        """Keyword retrieval: BM25 match (content as the main field, section_path boosted)."""
         body = {
             "size": k,
             "_source": _SOURCE_FIELDS,
@@ -139,7 +143,7 @@ class Elastic:
             raise RuntimeError(f"ES bulk 写入存在失败项：{str(resp)[:200]}")
 
     async def delete_by_doc(self, doc_id: int) -> None:
-        """删除文档：先 ES 后 MySQL"""
+        """Delete a document: ES first, then MySQL."""
         r = await self.client.post(
             f"/{INDEX}/_delete_by_query",
             json={"query": {"term": {"doc_id": doc_id}}, "conflicts": "proceed"},
@@ -148,7 +152,8 @@ class Elastic:
         r.raise_for_status()
 
     async def delete_by_kb(self, kb_id: int) -> None:
-        # delete_by_query 仅能看到已刷新的切片；bulk 写入后立即删除也必须完整清理。
+        # delete_by_query only sees refreshed chunks; a delete issued right after a bulk write
+        # must still clean up everything.
         refreshed = await self.client.post(f"/{INDEX}/_refresh")
         if refreshed.status_code == 404 and refreshed.json().get('error', {}).get('type') == 'index_not_found_exception':
             return

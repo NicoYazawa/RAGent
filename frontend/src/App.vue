@@ -3,7 +3,7 @@ import { MotionConfig } from 'motion-v'
 </script>
 
 <template>
-  <!-- reduced-motion="user"：尊重系统"减少动态效果"偏好，所有 motion 动画自动降级 -->
+  <!-- reduced-motion="user": respects the system "reduce motion" preference and degrades every motion animation -->
   <MotionConfig reduced-motion="user">
     <router-view />
   </MotionConfig>

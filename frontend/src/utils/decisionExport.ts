@@ -2,8 +2,8 @@ import { useI18n } from 'vue-i18n'
 import type { DecisionCard } from '@/stores/chat'
 
 /* ============================================================
- * 决策链导出 — Markdown（复制/下载）与 JSON（下载）
- * 时间线卡片 → 教程素材 / 排查归档两用
+ * Decision-chain export — Markdown (copy/download) and JSON (download)
+ * Timeline cards serve both tutorials and triage archives
  * ============================================================ */
 
 export interface DecisionExportStats {
@@ -13,7 +13,7 @@ export interface DecisionExportStats {
   completion?: number
 }
 
-/** 事件 type → i18n 键（与 chat.pipeline.stageN 对齐；generate/reflect/done/error 自有标签） */
+/** Event type to i18n key (aligned with chat.pipeline.stageN; generate/reflect/done/error have their own labels) */
 const TYPE_KEY: Record<string, string> = {
   router: 'chat.pipeline.stage1',
   rewrite: 'chat.pipeline.stage2',
@@ -38,12 +38,12 @@ export function stepName(card: DecisionCard): string {
   return typeLabel
 }
 
-/** 耗时格式化：<1s 显示毫秒，否则一位小数秒 */
+/** Duration formatting: under 1s shows ms, otherwise seconds with one decimal */
 export function fmtMs(ms: number): string {
   return ms < 1000 ? `${Math.round(ms)}ms` : `${(ms / 1000).toFixed(1)}s`
 }
 
-/** 决策链 → Markdown */
+/** Decision chain to Markdown */
 export function toDecisionMarkdown(question: string, cards: DecisionCard[], stats: DecisionExportStats | null): string {
   const { t } = useI18n({ useScope: 'global' })
   const lines: string[] = []
@@ -66,7 +66,7 @@ export function toDecisionMarkdown(question: string, cards: DecisionCard[], stat
   return lines.join('\n')
 }
 
-/** 决策链 → 可序列化 JSON 结构（对齐 agent_decision_log 字段） */
+/** Decision chain to a serializable JSON structure (aligned with agent_decision_log fields) */
 export function buildDecisionJson(question: string, cards: DecisionCard[], stats: DecisionExportStats | null) {
   return {
     question,
@@ -90,7 +90,7 @@ export function buildDecisionJson(question: string, cards: DecisionCard[], stats
   }
 }
 
-/** 触发浏览器下载 JSON 文件 */
+/** Trigger a browser download of the JSON file */
 export function downloadDecisionJson(question: string, cards: DecisionCard[], stats: DecisionExportStats | null): void {
   const blob = new Blob([JSON.stringify(buildDecisionJson(question, cards, stats), null, 2)], { type: 'application/json;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -102,7 +102,7 @@ export function downloadDecisionJson(question: string, cards: DecisionCard[], st
   URL.revokeObjectURL(url)
 }
 
-/** 复制文本（clipboard API + 降级 execCommand） */
+/** Copy text (clipboard API with an execCommand fallback) */
 export async function copyText(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text)

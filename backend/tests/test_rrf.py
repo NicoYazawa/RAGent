@@ -37,7 +37,8 @@ def test_document_id_disambiguates_without_chunk_uid():
 
 
 def _item(source, score, *, doc_name=None, chunk_no=1, url=None, title="标题", content="内容"):
-    """默认每个切片属于不同文档（doc_name 由 chunk_no 派生），避免被单路去重折叠"""
+    """By default each chunk belongs to a different document (doc_name derives from chunk_no) so single-lane
+    dedupe does not collapse them."""
     if doc_name is None and chunk_no is not None:
         doc_name = f"文档{chunk_no}"
     meta = {}
@@ -53,7 +54,7 @@ def _item(source, score, *, doc_name=None, chunk_no=1, url=None, title="标题",
 # ---------- item_key ----------
 
 def test_item_key_distinguishes_chunk_no():
-    """去重键必须含 chunk_no：同一文档的不同切片是两个条目"""
+    """The dedupe key must include chunk_no: different chunks of one document are two entries."""
     a = _item("vector", 1.0, doc_name="考勤制度", chunk_no=1)
     b = _item("vector", 0.9, doc_name="考勤制度", chunk_no=2)
     assert item_key(a) == "chunk:考勤制度#1"
@@ -62,7 +63,7 @@ def test_item_key_distinguishes_chunk_no():
 
 
 def test_item_key_prefers_url_for_web_results():
-    """带 url 的网页结果按 url 建键（同一页面的多片段应合并）"""
+    """A web result with a url keys by url (several fragments of one page merge)."""
     a = _item("web", 1.0, doc_name=None, chunk_no=None, url="https://a.com/x")
     b = _item("web", 0.8, doc_name=None, chunk_no=None, url="https://a.com/x")
     assert item_key(a) == "web:https://a.com/x"
@@ -70,13 +71,13 @@ def test_item_key_prefers_url_for_web_results():
 
 
 def test_item_key_falls_back_to_db_title():
-    """既无 url 又无 doc_name/chunk_no → 退化为 db:title"""
+    """Neither url nor doc_name/chunk_no -> degrade to db:title."""
     it = _item("database", 1.0, doc_name=None, chunk_no=None, title="Q1 销售额")
     assert item_key(it) == "db:Q1 销售额"
 
 
 def test_item_key_requires_both_doc_name_and_chunk_no():
-    """只有 doc_name（缺 chunk_no）时不得建 chunk 键（否则不同切片会被误合并）"""
+    """With only doc_name (no chunk_no) no chunk key is built (otherwise distinct chunks would merge)."""
     it = _item("vector", 1.0, chunk_no=None, title="T")
     assert item_key(it) == "db:T"
 
@@ -84,7 +85,7 @@ def test_item_key_requires_both_doc_name_and_chunk_no():
 # ---------- dedupe_lane ----------
 
 def test_dedupe_lane_removes_adjacent_same_doc_chunks():
-    """同一文档的相邻切片只保留首个（防单文档刷分）"""
+    """Only the first of adjacent chunks from one document is kept (one document cannot flood the ranking)."""
     items = [
         _item("vector", 1.0, doc_name="考勤制度", chunk_no=1),
         _item("vector", 0.9, doc_name="考勤制度", chunk_no=2),
@@ -96,7 +97,7 @@ def test_dedupe_lane_removes_adjacent_same_doc_chunks():
 
 
 def test_dedupe_lane_keeps_non_adjacent_same_doc():
-    """非相邻出现的同文档切片都保留（只合并连续段）"""
+    """Non-adjacent chunks of the same document are all kept (only continuous runs merge)."""
     items = [
         _item("vector", 1.0, doc_name="A", chunk_no=1),
         _item("vector", 0.9, doc_name="B", chunk_no=1),
@@ -107,7 +108,7 @@ def test_dedupe_lane_keeps_non_adjacent_same_doc():
 
 
 def test_dedupe_lane_keeps_items_without_doc_name():
-    """无 doc_name 的条目（db/web 路）不参与去重"""
+    """Entries without doc_name (db/web lanes) take no part in dedupe."""
     items = [
         _item("database", 1.0, doc_name=None, chunk_no=None, title="A"),
         _item("database", 0.9, doc_name=None, chunk_no=None, title="B"),
@@ -118,7 +119,7 @@ def test_dedupe_lane_keeps_items_without_doc_name():
 # ---------- rrf_fuse ----------
 
 def test_rrf_fuse_orders_by_rrf_descending():
-    """融合结果必须按 rrf 降序：rank 0 的片段排在 rank 1 之前"""
+    """Fused results must be sorted by rrf descending: the rank-0 chunk comes before rank 1."""
     lanes = {"vector": [
         _item("vector", 0.9, chunk_no=1),
         _item("vector", 0.8, chunk_no=2),
@@ -130,7 +131,7 @@ def test_rrf_fuse_orders_by_rrf_descending():
 
 
 def test_rrf_score_decays_with_rank():
-    """rrf 分数随 rank 递减（1/(k+rank+1)），不能全部同分"""
+    """The rrf score decreases with rank (1/(k+rank+1)) and cannot be identical for all."""
     lanes = {"vector": [
         _item("vector", 0.9, chunk_no=1),
         _item("vector", 0.8, chunk_no=2),
@@ -143,7 +144,7 @@ def test_rrf_score_decays_with_rank():
 
 
 def test_rrf_accumulates_score_across_lanes():
-    """同一条目在多路命中 → rrf 累加，from_lanes 记录来源路"""
+    """An item hit by several lanes accumulates rrf and from_lanes records the sources."""
     shared = _item("vector", 0.9, chunk_no=1)
     lanes = {
         "vector": [shared, _item("vector", 0.5, chunk_no=2)],
@@ -157,20 +158,20 @@ def test_rrf_accumulates_score_across_lanes():
 
 
 def test_rrf_fuse_respects_top_n():
-    """结果数受 top_n 截断"""
+    """The result count is truncated to top_n."""
     lanes = {"vector": [_item("vector", 1.0 - i * 0.01, chunk_no=i + 1) for i in range(20)]}
     assert len(rrf_fuse(lanes, top_n=8)) == 8
     assert len(rrf_fuse(lanes, top_n=3)) == 3
 
 
 def test_rrf_fuse_empty_lanes():
-    """空检索路 → 空结果，不抛异常"""
+    """Empty lanes -> empty result without raising."""
     assert rrf_fuse({}, top_n=8) == []
     assert rrf_fuse({"vector": []}, top_n=8) == []
 
 
 def test_rrf_fuse_dedupes_same_doc_adjacent_chunks():
-    """融合前的单路去重会影响最终条目数（同文档相邻切片只留一个）"""
+    """Per-lane dedupe before fusion affects the final count (adjacent chunks of one document keep one)."""
     lanes = {"vector": [
         _item("vector", 0.9, doc_name="考勤制度", chunk_no=1),
         _item("vector", 0.8, doc_name="考勤制度", chunk_no=2),
@@ -181,7 +182,7 @@ def test_rrf_fuse_dedupes_same_doc_adjacent_chunks():
 
 
 def test_rrf_fuse_result_shape():
-    """返回结构契约：item / rrf / from_lanes"""
+    """Return structure contract: item / rrf / from_lanes."""
     fused = rrf_fuse({"vector": [_item("vector", 0.9, chunk_no=1)]}, top_n=1)
     assert set(fused[0]) == {"item", "rrf", "from_lanes"}
     assert isinstance(fused[0]["item"], RetrieverResult)

@@ -45,9 +45,9 @@ import {
 } from 'lucide-vue-next'
 
 /**
- * 统一线性图标组件（stroke 风格，24x24 viewBox）
- * 底层使用 lucide-vue-next：纯 SVG、无内置配色，颜色由 currentColor 继承 token，
- * 与 theme.css 的青色光效体系零冲突。新增图标在此登记即可。
+ * Unified line-icon component (stroke style, 24x24 viewBox)
+ * Built on lucide-vue-next: pure SVG with no baked-in colours; currentColor inherits the tokens,
+ * so it never clashes with the teal accent system in theme.css. Register new icons here.
  */
 const props = withDefaults(
   defineProps<{

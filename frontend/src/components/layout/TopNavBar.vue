@@ -28,7 +28,7 @@ function isActive(to: string): boolean {
 
 <template>
   <header class="scanline flex h-14 items-center border-b border-edge bg-panel/90">
-    <!-- 品牌区 -->
+    <!-- Brand area -->
     <div class="flex items-center gap-3 pl-5 pr-8">
       <img
         src="/logo.png"
@@ -43,7 +43,7 @@ function isActive(to: string): boolean {
       </div>
     </div>
 
-    <!-- 导航菜单 -->
+    <!-- Navigation menu -->
     <nav class="flex h-full items-stretch gap-1" :aria-label="t('layout.mainNav')">
       <router-link
         v-for="item in navItems"
@@ -54,7 +54,7 @@ function isActive(to: string): boolean {
       >
         <Icon :name="item.icon" :size="15" />
         <span>{{ t(item.key) }}</span>
-        <!-- 激活指示条 -->
+        <!-- Active indicator -->
         <span
           class="absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 rounded-full transition-all duration-200"
           :class="isActive(item.to) ? 'w-8 bg-accent' : 'w-0 bg-transparent group-hover:w-6 group-hover:bg-edge-bright'"
@@ -64,9 +64,9 @@ function isActive(to: string): boolean {
 
     <div class="flex-1" />
 
-    <!-- 右侧状态区 -->
+    <!-- Right status area -->
     <div class="flex items-center gap-3 pr-5">
-      <!-- 语言切换（中 / EN） -->
+      <!-- Language switch (Chinese / EN) -->
       <div class="flex items-center gap-1 rounded-md border border-edge bg-card px-1 py-0.5">
         <button
           v-for="l in (['zh-CN', 'en-US'] as const)"
@@ -79,7 +79,7 @@ function isActive(to: string): boolean {
           {{ l === 'zh-CN' ? '中' : 'EN' }}
         </button>
       </div>
-      <!-- 亮色/暗色模式切换 -->
+      <!-- Light/dark mode switch -->
       <BaseTooltip :content="theme.mode === 'dark' ? t('layout.theme.toLight') : t('layout.theme.toDark')">
         <button
           type="button"

@@ -6,16 +6,16 @@ import type { DecisionCard } from '@/stores/chat'
 import { fmtMs } from '@/utils/decisionExport'
 
 /**
- * 管线流程图模式 — 6 决策点垂直管线，SSE 实时点亮当前环节；
- * 回流（CRAG/Self-RAG）与闲聊直答旁路以虚线回边可视化
+ * Pipeline flowchart mode — a vertical pipeline of 6 decision points lit live by SSE;
+ * backflow (CRAG/Self-RAG) and the chitchat bypass are drawn as dashed edges
  */
 const props = defineProps<{
   cards: DecisionCard[]
-  /** 正在流式（实时模式） */
+  /** Streaming now (live mode) */
   streaming: boolean
-  /** 当前进行中的管线环节（1~7，0=空闲） */
+  /** The pipeline stage in progress (1-7, 0=idle) */
   activeStage: number
-  /** 当前 pending 过渡卡（active 节点内展示动态文案） */
+  /** The current pending transition card (dynamic copy inside the active node) */
   pending: DecisionCard | null
 }>()
 
@@ -38,7 +38,7 @@ const STAGES: StageDef[] = [
   { step: 7, icon: 'link', types: ['citation'] },
 ]
 
-/* 行几何：固定行高 56px + 间隙 10px，回边按中心定位（纯 CSS 无测量） */
+/* Row geometry: fixed 56px row height plus 10px gap; back edges position by center (pure CSS, no measuring) */
 const ROW_H = 56
 const ROW_GAP = 10
 const centerOf = (rowIdx: number) => rowIdx * (ROW_H + ROW_GAP) + ROW_H / 2
@@ -49,16 +49,16 @@ interface NodeState {
   elapsedMs: number
   detail: string
   metric: string | null
-  /** 未触发环节的旁路原因（流程结束后展示，替代生硬的「待触发」） */
+  /** Bypass reason for a stage that never ran (shown after the flow, replacing a blunt "not triggered") */
   skip: string | null
 }
 
-/* 路由意图（判断旁路原因用，需先于 nodes 定义） */
+/* Routing intent (used to derive bypass reasons; must be defined before nodes) */
 const routerCard = computed(() => props.cards.find((c) => c.type === 'router'))
 const intent = computed(() => (routerCard.value?.payload as { intent?: string } | undefined)?.intent ?? null)
 const isChitchat = computed(() => intent.value === 'chitchat')
 
-/** 已结束（实时完成或历史回放）但该环节无卡片 → 按意图/评分给出跳过原因 */
+/** Finished (live or replayed) but this stage has no card -> derive the skip reason from intent/grade */
 const finished = computed(() => !props.streaming && props.cards.length > 0)
 
 function skipReason(def: StageDef): string | null {
@@ -93,13 +93,13 @@ const nodes = computed<NodeState[]>(() =>
     const active = props.streaming && props.activeStage === def.step
     const state: NodeState['state'] = active ? 'active' : own.length === 0 ? 'inactive' : warn ? 'warn' : 'done'
 
-    // 动态文案：active 时优先 pending 提示，否则取该环节最后一张卡
+    // dynamic copy: prefer the pending hint while active, otherwise the last card of that stage
     const detail = active && props.pending && props.activeStage === def.step ? props.pending.detail : (last?.detail ?? '')
     const p = (last?.payload ?? {}) as Record<string, unknown>
     let metric: string | null = null
     if (def.step === 1 && p.intent) metric = `${p.intent} · ${(((p.confidence as number) ?? 0) * 100).toFixed(0)}%`
     else if (def.step === 3 && own.length) {
-      // 精排卡（source=rerank）不是独立检索路，不计入「N 路命中」，避免重复计数
+      // the rerank card (source=rerank) is not a separate lane and is excluded from the "N-lane hits" count
       const laneCards = own.filter((c) => (c.payload.source as string) !== 'rerank')
       if (laneCards.length) {
         const hits = laneCards.reduce((s, c) => s + ((c.payload.hit_count as number) ?? 0), 0)
@@ -116,7 +116,7 @@ const nodes = computed<NodeState[]>(() =>
   }),
 )
 
-/* 回边与旁路（按行中心定位的绝对定位虚线；routerCard/intent/isChitchat 见上） */
+/* Back edges and bypasses (absolutely positioned dashed lines anchored to row centers; see routerCard/intent/isChitchat above) */
 const EDGE_ROW = { retrieve: 2, crag: 4, generate: 5 } as const
 
 const edges = computed(() => {
@@ -132,7 +132,7 @@ const edges = computed(() => {
 
 const bypass = computed(() => {
   if (!isChitchat.value) return null
-  return { from: 0, to: 5 } // ① → ⑥ 闲聊直答旁路
+  return { from: 0, to: 5 } // (1) -> (6) chitchat bypass
 })
 
 function edgeStyle(from: number, to: number): Record<string, string> {
@@ -143,7 +143,7 @@ function edgeStyle(from: number, to: number): Record<string, string> {
 
 <template>
   <div class="anim-fade-up relative py-1" :style="{ paddingLeft: '44px' }">
-    <!-- 回流回边（左 gutter 两层虚线，⑤/⑥ → ③） -->
+    <!-- Backflow edge (two-layer dashed line in the left gutter, (5)/(6) -> (3)) -->
     <div
       v-for="e in edges"
       :key="e.key"
@@ -159,7 +159,7 @@ function edgeStyle(from: number, to: number): Record<string, string> {
       </span>
     </div>
 
-    <!-- 闲聊直答旁路（① → ⑥ 最外层） -->
+    <!-- Chitchat bypass ((1) -> (6), outermost) -->
     <div
       v-if="bypass"
       class="absolute rounded-r-xl border border-dashed border-ok/60"
@@ -170,7 +170,7 @@ function edgeStyle(from: number, to: number): Record<string, string> {
       </span>
     </div>
 
-    <!-- 节点列：行高 56 + 间隙 10（连接线），与 centerOf 几何一致 -->
+    <!-- Node column: 56px rows + 10px gaps (connector lines), matching the centerOf geometry -->
     <div class="flex flex-col">
       <div v-for="(n, i) in nodes" :key="n.def.step" class="contents">
         <div
@@ -186,7 +186,7 @@ function edgeStyle(from: number, to: number): Record<string, string> {
           ]"
           :style="{ height: `${ROW_H}px` }"
         >
-          <!-- 序号+图标 -->
+          <!-- Ordinal + icon -->
           <span
             class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-bold transition-colors"
             :class="
@@ -223,7 +223,7 @@ function edgeStyle(from: number, to: number): Record<string, string> {
           <span v-if="n.elapsedMs > 0" class="shrink-0 font-mono text-[11px] text-accent/80">{{ fmtMs(n.elapsedMs) }}</span>
         </div>
 
-        <!-- 节点间连接线 -->
+        <!-- Connector between nodes -->
         <div v-if="i < nodes.length - 1" class="flex justify-start" :style="{ height: `${ROW_GAP}px`, marginLeft: '26px' }">
           <div
             class="w-px transition-colors duration-300"

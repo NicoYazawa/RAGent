@@ -4,9 +4,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { DatasourceItem, KbDocument, KnowledgeBase } from '@/api/types'
 
 /**
- * 知识库管理页 / 检索测试 Playground：
- *   - KbManageView：库列表切换、文档状态统计、新建知识库（含名称校验与错误提示）、上传/重试/删除
- *   - PlaygroundView：按数据源开关裁剪召回 → RRF 融合 → Grader 评分，全链路状态
+ * Knowledge-base management page / retrieval test playground:
+ *   - KbManageView: list switching, document status counts, creating a knowledge base (name validation and error hints), upload/retry/delete
+ *   - PlaygroundView: recall trimmed by the data-source switches -> RRF fusion -> grading, with full-chain state
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -294,7 +294,7 @@ describe('PlaygroundView', () => {
     await vi.waitFor(() => {
       expect(mockFuse).toHaveBeenCalled()
     })
-    expect(mockLane).toHaveBeenCalledTimes(2) // 只对启用的 vector/keyword 召回
+    expect(mockLane).toHaveBeenCalledTimes(2) // recall only for the enabled vector/keyword lanes
     expect(mockLane).toHaveBeenCalledWith('年假怎么算', 'vector', 5)
     expect(w.text()).toContain('命中片段')
   })
@@ -337,7 +337,7 @@ describe('PlaygroundView', () => {
     })
     expect(mockFuse).toHaveBeenCalledTimes(1)
     const lanesArg = mockFuse.mock.calls[0][0] as unknown[]
-    expect(lanesArg).toHaveLength(1) // 只把成功的路送进融合
+    expect(lanesArg).toHaveLength(1) // only successful lanes enter fusion
   })
 
   it('可以切换 top_k', async () => {

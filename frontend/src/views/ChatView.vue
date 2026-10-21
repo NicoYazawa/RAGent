@@ -9,7 +9,7 @@ import BaseTooltip from '@/components/ui/BaseTooltip.vue'
 import { useI18n } from 'vue-i18n'
 import { useChatStore } from '@/stores/chat'
 
-/** 问答对话页：会话列表 / 对话区 / 决策过程侧栏 */
+/** Chat page: session list, conversation area and decision sidebar */
 const { t } = useI18n()
 const store = useChatStore()
 const sidebarOpen = ref(true)
@@ -22,7 +22,7 @@ onMounted(async () => {
   }
 })
 
-// 手机抽屉：选中会话后收起
+// phone drawer: closes after a session is picked
 watch(
   () => store.currentSessionId,
   () => {
@@ -35,13 +35,13 @@ watch(
   <div class="flex h-full min-w-0">
     <SessionList class="hidden lg:flex" />
 
-    <!-- 手机：会话抽屉 -->
+    <!-- Phone: session drawer -->
     <div v-if="sessionsOpen" class="fixed inset-0 z-50 flex lg:hidden">
       <div class="absolute inset-0 bg-black/60" @click="sessionsOpen = false" />
       <SessionList class="relative z-10 flex" @select="sessionsOpen = false" />
     </div>
 
-    <!-- 中栏 -->
+    <!-- Middle column -->
     <div class="flex min-w-0 flex-1 flex-col">
       <header class="flex h-14 items-center gap-3 border-b border-edge px-4 md:px-6">
         <button
@@ -79,7 +79,7 @@ watch(
       <ChatInput />
     </div>
 
-    <!-- 右栏：决策过程（可折叠；手机隐藏） -->
+    <!-- Right column: decision process (collapsible; hidden on phones) -->
     <Transition name="sidebar">
       <DecisionSidebar v-if="sidebarOpen || store.viewingLog" class="hidden lg:flex" />
     </Transition>

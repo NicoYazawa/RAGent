@@ -8,7 +8,7 @@ import Icon from '@/components/ui/Icon.vue'
 import { listDocumentChunks } from '@/api/admin'
 import type { KbChunk, KbDocument } from '@/api/types'
 
-/** 切片明细抽屉：分页浏览文档切片（chunk_no / 章节路径 / 正文 / token 数） */
+/** Chunk drawer: browse document chunks page by page (chunk_no / section path / body / token count) */
 const props = defineProps<{ open: boolean; doc: KbDocument | null }>()
 const emit = defineEmits<{ close: [] }>()
 const { t } = useI18n()
@@ -58,7 +58,7 @@ function turn(p: number): void {
 
 function toggle(chunkId: number): void {
   expanded.value.has(chunkId) ? expanded.value.delete(chunkId) : expanded.value.add(chunkId)
-  // Set 原地变更需触发响应式更新
+  // mutating a Set in place must trigger a reactive update
   expanded.value = new Set(expanded.value)
 }
 </script>
@@ -74,7 +74,7 @@ function toggle(chunkId: number): void {
     </div>
 
     <div v-else-if="doc" class="space-y-4 pb-6">
-      <!-- 文档概要 -->
+      <!-- Document summary -->
       <div class="rounded-xl border border-edge bg-card/70 p-4">
         <div class="flex items-center gap-2.5">
           <Icon name="file" :size="15" class="shrink-0 text-accent" />
@@ -89,7 +89,7 @@ function toggle(chunkId: number): void {
         </div>
       </div>
 
-      <!-- 切片列表 -->
+      <!-- Chunk list -->
       <div
         v-for="chunk in chunks"
         :key="chunk.id"
@@ -117,7 +117,7 @@ function toggle(chunkId: number): void {
         </p>
       </div>
 
-      <!-- 分页 -->
+      <!-- Pagination -->
       <div v-if="total > PAGE_SIZE" class="flex justify-center pt-1">
         <BasePagination :page="page" :page-size="PAGE_SIZE" :total="total" @change="turn" />
       </div>

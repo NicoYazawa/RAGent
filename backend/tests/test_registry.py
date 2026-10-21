@@ -19,11 +19,11 @@ def test_get_spec_case_and_space_insensitive():
 def test_get_spec_unknown_raises_with_options():
     with pytest.raises(UnknownProviderError) as ei:
         get_spec("gpt4all")
-    assert "deepseek" in str(ei.value)  # 错误信息附可选清单
+    assert "deepseek" in str(ei.value)  # the error message lists the available options
 
 
 def test_deepseek_defaults_preserve_current_behavior():
-    """向后兼容：deepseek 默认模型必须与重构前 config 默认值一致"""
+    """Backward compatibility: the deepseek default model must match the pre-refactor config default."""
     spec = get_spec("deepseek")
     assert spec.default_llm_model == "deepseek-v4-flash-vision-exp"
     assert spec.llm_capabilities.vision is True
@@ -32,7 +32,7 @@ def test_deepseek_defaults_preserve_current_behavior():
 
 
 def test_qwen_defaults_preserve_current_embedding_behavior():
-    """向后兼容：qwen（百炼）默认 embedding 必须与重构前一致"""
+    """Backward compatibility: the qwen (Bailian) default embedding must match the pre-refactor value."""
     spec = get_spec("qwen")
     assert spec.default_embed_model == "text-embedding-v4"
     assert spec.default_embed_dims == 1024

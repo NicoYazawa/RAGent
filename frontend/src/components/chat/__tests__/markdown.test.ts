@@ -3,12 +3,12 @@ import { mount } from '@vue/test-utils'
 import type { Citation } from '@/api/types'
 
 /**
- * MarkdownText —— 自研轻量 Markdown 渲染器。
- * 关键契约：
- *   - 标题 / 加粗 / 行内代码 / 围栏代码块 / 表格 / 列表 / 引用块 / 链接 / 分隔线
- *   - HTML 必须转义（防止注入）
- *   - 链接只允许 http/https（javascript: 不得生成 <a>）
- *   - [n] 引用角标：citations 里存在该序号才可点击，点击抛出 citeClick
+ * MarkdownText — a lightweight in-house Markdown renderer.
+ * Key contracts:
+ *   - headings / bold / inline code / fenced code / tables / lists / blockquotes / links / rules
+ *   - HTML must be escaped (prevents injection)
+ *   - links allow http/https only (javascript: must not produce an <a>)
+ *   - [n] citation badges: clickable only when the number exists in citations, clicking emits citeClick
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

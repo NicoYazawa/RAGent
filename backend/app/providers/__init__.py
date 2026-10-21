@@ -1,7 +1,8 @@
-"""Provider 抽象层门面 — 按 settings 解析当前生效的 LLM / Embedding / Rerank 供应商（带缓存）
+"""Provider abstraction facade — resolves the active LLM / Embedding / Rerank provider from settings (cached).
 
-Phase 1：供应商由 .env（LLM_PROVIDER / EMBED_PROVIDER / RERANK_PROVIDER）决定；
-Phase 2：改为读 provider_config 表 + 按决策点路由，门面签名不变。
+Phase 1: the provider is chosen by .env (LLM_PROVIDER / EMBED_PROVIDER / RERANK_PROVIDER).
+Phase 2: switch to reading the provider_config table and routing per decision point, keeping
+the facade signatures unchanged.
 """
 from ..config import settings
 from .base import EmbeddingProvider, LLMProvider, RerankProvider
@@ -15,7 +16,7 @@ _rerank_singleton: RerankProvider | None = None
 
 
 def _key_for(spec: ProviderSpec) -> str:
-    """免密钥供应商（api_key_env 为空串）用占位；否则走 settings.api_key_for"""
+    """Keyless providers (empty api_key_env) get a placeholder; others go through settings.api_key_for."""
     if not spec.api_key_env:
         return "not-needed"
     return settings.api_key_for(spec.api_key_env)
@@ -48,7 +49,7 @@ def _build_embedder() -> EmbeddingProvider:
 
 
 def get_llm() -> LLMProvider:
-    """当前生效 LLM 供应商（进程内单例；配置变更后需 reset_providers）"""
+    """Active LLM provider (per-process singleton; call reset_providers after a config change)."""
     global _llm_singleton
     if _llm_singleton is None:
         _llm_singleton = _build_llm()
@@ -56,7 +57,7 @@ def get_llm() -> LLMProvider:
 
 
 def get_embedder() -> EmbeddingProvider:
-    """当前生效 Embedding 供应商（进程内单例）"""
+    """Active Embedding provider (per-process singleton)."""
     global _embed_singleton
     if _embed_singleton is None:
         _embed_singleton = _build_embedder()
@@ -64,7 +65,7 @@ def get_embedder() -> EmbeddingProvider:
 
 
 def reset_providers() -> None:
-    """清空缓存（测试 / 运行时切换供应商后调用）"""
+    """Clear the cache (used by tests and after switching providers at runtime)."""
     global _llm_singleton, _embed_singleton, _rerank_singleton
     _llm_singleton = None
     _embed_singleton = None
@@ -72,7 +73,7 @@ def reset_providers() -> None:
 
 
 async def close_providers() -> None:
-    """关闭供应商自建 httpx 客户端（lifespan 关闭期调用）"""
+    """Close the providers' own httpx clients (called during lifespan shutdown)."""
     for p in (_llm_singleton, _embed_singleton, _rerank_singleton):
         aclose = getattr(p, "aclose", None)
         if aclose is not None:
@@ -81,10 +82,11 @@ async def close_providers() -> None:
 
 
 def get_rerank() -> RerankProvider:
-    """当前生效精排供应商（进程内单例）
+    """Active rerank provider (per-process singleton).
 
-    供应商未配置 rerank（registry.rerank_model 为空）或开关校验失败时抛
-    UnknownProviderError——调用方（orchestrator）据此降级为粗排序。
+    Raises UnknownProviderError when the provider has no rerank model configured
+    (registry.rerank_model is empty) or the switch check fails — the caller (orchestrator)
+    then degrades to coarse ranking.
     """
     global _rerank_singleton
     if _rerank_singleton is None:

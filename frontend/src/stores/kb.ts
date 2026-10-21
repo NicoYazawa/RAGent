@@ -5,9 +5,9 @@ import type { KbDocument, KnowledgeBase } from '@/api/types'
 import * as adminApi from '@/api/admin'
 
 /**
- * 知识库管理 Store：
- * 数据经 api 层从后端加载，
- * 入库中状态通过 2.5s 轮询刷新（实时反映流水线推进）
+ * Knowledge-base store:
+ * data is loaded from the backend through the api layer,
+ * and ingestion status refreshes through a 2.5s poll (reflecting pipeline progress live)
  */
 export const useKbStore = defineStore('kb', () => {
   const selectedKbId = ref<number | null>(null)
@@ -53,10 +53,10 @@ export const useKbStore = defineStore('kb', () => {
     await Promise.all([loadKbs(), loadDocuments()])
   }
 
-  // 切换知识库时自动拉取文档；失败不再冒泡成未处理的 Promise 拒绝
+  // switching knowledge base fetches its documents; failures no longer surface as unhandled rejections
   watch(selectedKbId, () => void loadDocuments().catch(() => undefined))
 
-  /* 入库中状态轮询（仅 processingCount > 0 时发起请求，避免空转） */
+  /* Ingestion polling (requests only while processingCount > 0 to avoid idle work) */
   let pollTimer: number | null = null
   let polling = false
 

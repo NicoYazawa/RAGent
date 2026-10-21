@@ -18,14 +18,14 @@ import ast
 from pathlib import Path
 
 TESTS_DIR = Path(__file__).resolve().parent
-# 本文件自身含 AST 样例数据，扫描时排除，避免自指
+# this file contains AST sample data itself, so it is excluded from the scan to avoid self-reference
 SELF = Path(__file__).name
-# 异步函数在 ast 里是 AsyncFunctionDef（与 FunctionDef 平级，不是子类）
+# async functions are AsyncFunctionDef in ast (a sibling of FunctionDef, not a subclass)
 FUNC_TYPES = (ast.FunctionDef, ast.AsyncFunctionDef)
 
 
 def _read(path: Path) -> str:
-    """用 utf-8-sig 读取，容忍 BOM（Windows PowerShell 写文件会带 BOM）"""
+    """Read with utf-8-sig to tolerate a BOM (Windows PowerShell writes one)."""
     return path.read_text(encoding="utf-8-sig")
 
 
@@ -34,7 +34,8 @@ def _test_files():
 
 
 def _always_truthy(node: ast.AST) -> bool:
-    """判断表达式是否"无条件为真"（非空容器 / 非零数 / True / 非空字符串）"""
+    """Decide whether an expression is unconditionally truthy (non-empty container / non-zero number /
+    True / non-empty string)."""
     if isinstance(node, ast.Constant):
         v = node.value
         if v is True:
@@ -54,7 +55,7 @@ def _always_truthy(node: ast.AST) -> bool:
 
 
 def _has_real_assertion(func: ast.FunctionDef) -> bool:
-    """函数体内是否有真正的断言（assert 或 pytest.raises/warns 上下文）"""
+    """Whether the function body has a real assertion (an assert or a pytest.raises/warns context)."""
     for child in ast.walk(func):
         if isinstance(child, ast.Assert):
             return True
@@ -69,10 +70,10 @@ def _has_real_assertion(func: ast.FunctionDef) -> bool:
     return False
 
 
-# ---------- 1. 恒真字面量断言 ----------
+# ---------- 1. Always-true literal assertions ----------
 
 def test_no_always_truthy_assertions():
-    """禁止 assert <非空字面量> 这类永远为真的断言"""
+    """Forbid always-true assertions such as assert <non-empty literal>."""
     bad = []
     for path in _test_files():
         tree = ast.parse(_read(path))
@@ -84,10 +85,10 @@ def test_no_always_truthy_assertions():
     assert not bad, "恒真断言（永远通过，等于没断言）：\n  " + "\n  ".join(bad)
 
 
-# ---------- 2. or 短路恒真 ----------
+# ---------- 2. Always-true or short circuit ----------
 
 def test_no_short_circuit_tautology():
-    """禁止 `assert <恒真字面量> or <表达式>` —— 右侧永不执行"""
+    """Forbid `assert <always-true literal> or <expression>` — the right side never runs."""
     bad = []
     for path in _test_files():
         tree = ast.parse(_read(path))
@@ -101,13 +102,13 @@ def test_no_short_circuit_tautology():
     assert not bad, "or 短路恒真（右侧断言永不执行）：\n  " + "\n  ".join(bad)
 
 
-# ---------- 3. 自比较 ----------
+# ---------- 3. Self comparison ----------
 
 def test_no_self_comparison():
-    """禁止 assert x == x（同一个变量与自身比较，恒真）
+    """Forbid assert x == x (a variable compared with itself is always true).
 
-    只针对纯引用（Name/Attribute）；`assert f() is f()` 这类用于验证
-    单例缓存的断言是有意义的，不在此列。
+    Only plain references (Name/Attribute) are covered; assertions such as `assert f() is f()` that
+    verify a singleton cache are meaningful and are not flagged.
     """
     bad = []
     pure = (ast.Name, ast.Attribute)
@@ -125,10 +126,10 @@ def test_no_self_comparison():
     assert not bad, "自比较断言（恒真）：\n  " + "\n  ".join(bad)
 
 
-# ---------- 4. 空测试 ----------
+# ---------- 4. Empty tests ----------
 
 def test_no_empty_test_functions():
-    """禁止没有任何断言的测试函数（它永远通过）"""
+    """Forbid test functions without any assertion (they always pass)."""
     bad = []
     for path in _test_files():
         tree = ast.parse(_read(path))
@@ -142,10 +143,10 @@ def test_no_empty_test_functions():
     assert not bad, "空测试（无任何断言，永远通过）：\n  " + "\n  ".join(bad)
 
 
-# ---------- 5. 空测试文件 ----------
+# ---------- 5. Empty test files ----------
 
 def test_no_empty_test_files():
-    """禁止没有测试函数的文件"""
+    """Forbid files without any test function."""
     bad = []
     for path in _test_files():
         tree = ast.parse(_read(path))
@@ -158,12 +159,12 @@ def test_no_empty_test_files():
     assert not bad, f"没有测试的文件：{bad}"
 
 
-# ---------- 6. 测试文件不得依赖本机 .env ----------
+# ---------- 6. Test files must not depend on a local .env ----------
 
 def test_tests_do_not_read_env_file_directly():
-    """测试不得直接读取 backend/.env（环境耦合会让结果随机器变化）
+    """Tests must not read backend/.env directly (environment coupling makes results machine dependent).
 
-    只拦截"真的去读文件"的写法；docstring 里解释 .env 语义是允许的。
+    Only code that really reads the file is flagged; explaining .env semantics in a docstring is fine.
     """
     bad = []
     read_patterns = ("open(", "read_text(", "read_bytes(", "load_dotenv", "dotenv")

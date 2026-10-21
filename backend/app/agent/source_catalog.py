@@ -1,7 +1,9 @@
-"""当前允许 NL2SQL 查询的业务数据能力，供路由与 SQL 生成共用。
+"""Business data capabilities that NL2SQL is allowed to query, shared by routing and SQL generation.
 
-这是接入契约，不通过枚举应用数据库表推断能力，避免把会话等内部表当作业务源。
-新增业务表时在此维护 Schema，而不是在路由提示词里追加领域特例。
+This is the integration contract: capabilities are not inferred by enumerating application
+tables, so internal tables such as conversations are never treated as business sources.
+When adding a business table, maintain its schema here instead of adding domain special
+cases to the routing prompt.
 """
 
 BUSINESS_DB_SCHEMAS: dict[str, str] = {

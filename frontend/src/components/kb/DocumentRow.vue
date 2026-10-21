@@ -4,7 +4,7 @@ import Icon from '@/components/ui/Icon.vue'
 import StatusBadge from './StatusBadge.vue'
 import type { KbDocument } from '@/api/types'
 
-/** 文档列表 — 五态监控 / failed 悬浮错误详情 / 重试 / 删除 / 切片明细 */
+/** Document row — five-state monitoring, error details on hover when failed, retry, delete, chunk details */
 defineProps<{ docs: KbDocument }>()
 const emit = defineEmits<{ retry: [docId: number]; remove: [docId: number]; chunks: [doc: KbDocument] }>()
 const { t } = useI18n()
@@ -19,7 +19,7 @@ function fmt(iso: string): string {
   <div
     class="group grid grid-cols-[minmax(0,1fr)_100px_170px_110px_72px] items-center gap-3 border-b border-edge px-4 py-3.5 transition-colors duration-100 hover:bg-raise/50 md:px-6"
   >
-    <!-- 文件 -->
+    <!-- File -->
     <div class="flex min-w-0 items-center gap-2.5">
       <Icon name="file" :size="15" class="shrink-0 text-ink-mute" />
       <div class="min-w-0">
@@ -31,7 +31,7 @@ function fmt(iso: string): string {
       <span class="shrink-0 rounded border border-edge px-1 font-mono text-[11px] text-ink-mute">{{ docs.file_type }}</span>
     </div>
 
-    <!-- 切片数（ready 可点击查看切片明细） -->
+    <!-- Chunk count (clickable for details when ready) -->
     <div class="font-mono text-[11.5px]">
       <button
         v-if="docs.status === 'ready'"
@@ -47,13 +47,13 @@ function fmt(iso: string): string {
       <span v-else class="text-ink-mute">—</span>
     </div>
 
-    <!-- 状态 -->
+    <!-- Status -->
     <StatusBadge :status="docs.status" />
 
-    <!-- 时间 -->
+    <!-- Time -->
     <div class="font-mono text-[11px] text-ink-mute">{{ fmt(docs.updated_at) }}</div>
 
-    <!-- 操作 -->
+    <!-- Actions -->
     <div class="flex items-center justify-end gap-1 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
       <button
         v-if="docs.status === 'failed'"

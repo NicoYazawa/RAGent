@@ -1,7 +1,7 @@
-"""知识库入库流水线 — 解析 → 切片 → Embedding → ES 入库
+"""Knowledge-base ingestion pipeline — parse -> chunk -> embed -> index into ES.
 
-parsing → chunking → embedding → ready；任一步失败置 failed 并记录 error_msg，支持重试。
-删除文档：先 ES（按 doc_id）后 MySQL。
+parsing -> chunking -> embedding -> ready; any failing step sets failed and records error_msg,
+and a retry is supported. Deleting a document: ES first (by doc_id), then MySQL.
 """
 import asyncio
 import logging
@@ -42,7 +42,8 @@ def _remove_upload_directory(kb_id: int) -> None:
 
 
 async def delete_knowledge_base(kb_id: int) -> None:
-    """先清理 ES 和文件，再事务删除元数据；任一失败允许保留库记录后重试。"""
+    """Clean up ES and the files first, then delete the metadata in a transaction; on any
+    failure the knowledge base record is kept so the operation can be retried."""
     async with db.kb_write_lock(kb_id):
         if await db.aquery_one('SELECT id FROM kb_database WHERE id=%s', (kb_id,)) is None:
             raise KnowledgeBaseMissing()
@@ -71,7 +72,8 @@ def validate_upload(file_name: str, size: int) -> str:
 
 
 def save_upload(kb_id: int, file_name: str, content: bytes) -> tuple[int, str, str]:
-    """落盘 + 建 kb_document 记录（status=parsing），返回 (doc_id, file_path, file_type)"""
+    """Write the file to disk and create the kb_document row (status=parsing);
+    returns (doc_id, file_path, file_type)."""
     ext = validate_upload(file_name, len(content))
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     safe_name = Path(file_name).name
@@ -101,7 +103,7 @@ async def _set_status(doc_id: int, status: str, error_msg: str | None = None, ch
 
 
 async def process_document(doc_id: int) -> None:
-    """异步入库流水线（上传后由 BackgroundTasks 触发；失败可重试）"""
+    """Asynchronous ingestion pipeline (triggered by BackgroundTasks after an upload; retryable)."""
     doc = await db.aquery_one("SELECT * FROM kb_document WHERE id=%s", (doc_id,))
     if doc is None:
         logger.error("文档 %s 不存在，跳过入库", doc_id)
@@ -123,10 +125,10 @@ async def process_document(doc_id: int) -> None:
     doc_name = doc["file_name"].rsplit(".", 1)[0]
     kb_id = int(doc["kb_id"])
     try:
-        # 1. 解析
+        # 1. Parse
         blocks = await _parse(path, doc["file_type"])
 
-        # 2. 切片（清旧切片，重试场景可重跑）
+        # 2. Chunk (clear old chunks; a retry can re-run the step)
         await _set_status(doc_id, "chunking")
         await db.aexecute("DELETE FROM kb_chunk WHERE doc_id=%s", (doc_id,))
         await elastic.delete_by_doc(doc_id)
@@ -134,11 +136,11 @@ async def process_document(doc_id: int) -> None:
         if not chunks:
             raise ValueError("文档解析后无有效内容（空文档或扫描件）")
 
-        # 3. 向量化（当前 Embedding 供应商，≤10 条/批）
+        # 3. Embed (with the active Embedding provider, <=10 texts per batch)
         await _set_status(doc_id, "embedding")
         vectors = await embed_texts([c["content"] for c in chunks])
 
-        # 4. ES bulk 写入 + MySQL 元数据
+        # 4. ES bulk write plus MySQL metadata
         now = datetime.now(timezone.utc).isoformat()
         es_docs = []
         rows: list[tuple] = []
@@ -178,7 +180,8 @@ async def _parse(path: Path, file_type: str):
 
 
 async def reset_for_retry(kb_id: int, doc_id: int) -> dict:
-    """失败重试前置：仅 failed 状态可触发，重置状态后由后台任务重跑流水线"""
+    """Retry prerequisite: only failed documents qualify; the status is reset and the background
+    task re-runs the pipeline."""
     doc = await db.aquery_one("SELECT * FROM kb_document WHERE id=%s AND kb_id=%s", (doc_id, kb_id))
     if doc is None:
         raise ValueError("文档不存在")
@@ -190,7 +193,7 @@ async def reset_for_retry(kb_id: int, doc_id: int) -> dict:
 
 
 async def delete_document(kb_id: int, doc_id: int) -> None:
-    """删除：先 ES 后 MySQL（孤儿切片可由重建任务清理）"""
+    """Delete: ES first, then MySQL (orphan chunks can be cleaned by the rebuild task)."""
     await elastic.delete_by_doc(doc_id)
     await db.aexecute("DELETE FROM kb_chunk WHERE doc_id=%s", (doc_id,))
     await db.aexecute("DELETE FROM kb_document WHERE id=%s AND kb_id=%s", (doc_id, kb_id))

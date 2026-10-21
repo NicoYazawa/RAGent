@@ -2,8 +2,8 @@
 import { TooltipProvider, TooltipRoot, TooltipTrigger, TooltipPortal, TooltipContent, TooltipArrow } from 'reka-ui'
 
 /**
- * 统一悬浮提示 — 无障碍完整（hover 意图、键盘 focus、Esc 关闭）
- * 视觉层仍用 token 类名，不引入库自带样式
+ * Unified tooltip — fully accessible (hover intent, keyboard focus, Esc to close)
+ * The visual layer keeps using token class names and brings in no library styles
  */
 withDefaults(
   defineProps<{

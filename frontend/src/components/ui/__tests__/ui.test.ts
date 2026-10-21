@@ -2,12 +2,12 @@
 import { mount } from '@vue/test-utils'
 
 /**
- * UI 基础组件 —— 交互契约（不是快照对比）：
- *   - BaseButton：variant/size/loading/disabled 决定样式与可点性
- *   - BaseInput / BaseToggle：v-model 事件契约
- *   - BasePagination：页码窗口与 change 事件，越界/同页不触发
- *   - BaseModal / BaseDrawer：遮罩/ESC/关闭按钮、body 滚动锁、焦点
- *   - ImageViewer：键盘与按钮翻页、越界保护
+ * Base UI components — interaction contracts (not snapshot comparisons):
+ *   - BaseButton: variant/size/loading/disabled drive styling and clickability
+ *   - BaseInput / BaseToggle: v-model event contracts
+ *   - BasePagination: page window and change event, no emit for out-of-range or same page
+ *   - BaseModal / BaseDrawer: overlay/ESC/close button, body scroll lock, focus
+ *   - ImageViewer: keyboard and button paging with bounds protection
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -25,10 +25,10 @@ import BaseTag from '../BaseTag.vue'
 import BaseToggle from '../BaseToggle.vue'
 import ImageViewer from '../ImageViewer.vue'
 
-/** Teleport 的内容渲染到 body，测试里挂到 body 上便于断言 */
+/** Teleport renders into body, so tests mount onto body for easier assertions. */
 const mountOpts = { global: { stubs: { teleport: true } } }
 
-/** 需要真实 DOM（焦点 / window 键盘事件）的组件挂到 document.body */
+/** Components needing a real DOM (focus / window key events) mount onto document.body. */
 const attachOpts = { global: { stubs: { teleport: true } }, attachTo: document.body }
 
 const mounted: { unmount: () => void }[] = []

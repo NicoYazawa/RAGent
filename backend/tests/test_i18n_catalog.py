@@ -14,25 +14,25 @@ PLACEHOLDER_RE = re.compile(r"\{(\w+)\}")
 
 
 def _real_keys():
-    """排除用例注入的临时 key"""
+    """Exclude the temporary keys injected by tests."""
     return {k: v for k, v in MESSAGES.items() if not k.startswith("test.")}
 
 
-# ---------- 目录结构 ----------
+# ---------- Catalog structure ----------
 
 def test_catalog_has_entries():
-    """目录非空"""
+    """The catalog is not empty."""
     assert len(_real_keys()) > 50
 
 
 def test_every_key_has_both_locales():
-    """每个 key 必须同时有 zh-CN 与 en-US"""
+    """Every key must have both zh-CN and en-US."""
     missing = [k for k, v in _real_keys().items() if set(v.keys()) != set(SUPPORTED)]
     assert not missing, f"语言不全的 key：{missing}"
 
 
 def test_no_empty_translations():
-    """任何语言的文案都不得为空串或纯空白（漏翻译必须被发现）"""
+    """No language may be empty or whitespace only (a missing translation must be caught)."""
     empties = [
         f"{k}/{loc}"
         for k, v in _real_keys().items()
@@ -43,7 +43,7 @@ def test_no_empty_translations():
 
 
 def test_placeholders_match_between_locales():
-    """zh 与 en 的占位符集合必须一致（否则英文渲染会丢参数）"""
+    """zh and en must carry the same placeholder set (otherwise English rendering drops parameters)."""
     bad = []
     for k, v in _real_keys().items():
         zh = set(PLACEHOLDER_RE.findall(v.get("zh-CN", "")))
@@ -54,13 +54,13 @@ def test_placeholders_match_between_locales():
 
 
 def test_catalog_keys_are_namespaced():
-    """key 必须带命名空间前缀（便于定位与批量维护）"""
+    """Keys must carry a namespace prefix (easier to locate and maintain in bulk)."""
     allowed = ("intent.", "sse.", "api.", "error.", "disclaimer.", "cite.")
     bad = [k for k in _real_keys() if not k.startswith(allowed)]
     assert not bad, f"缺少命名空间的 key：{bad}"
 
 
-# ---------- 语言协商 ----------
+# ---------- Locale negotiation ----------
 
 @pytest.mark.parametrize("header,expected", [
     ("zh-CN,zh;q=0.9", "zh-CN"),
@@ -73,17 +73,17 @@ def test_catalog_keys_are_namespaced():
     (None, DEFAULT_LOCALE),
 ])
 def test_resolve_locale(header, expected):
-    """Accept-Language 协商"""
+    """Accept-Language negotiation."""
     assert resolve_locale(header) == expected
 
 
 def test_resolve_locale_skips_empty_parts():
-    """空片段被跳过（畸形头不崩）"""
+    """Empty segments are skipped (a malformed header does not crash)."""
     assert resolve_locale(",,zh-CN,,en") == "zh-CN"
 
 
 def test_set_locale_rejects_unsupported():
-    """非法 locale 回落默认"""
+    """An invalid locale falls back to the default."""
     set_locale("fr-FR")
     assert i18n.current_locale() == DEFAULT_LOCALE
     set_locale("en-US")
@@ -94,12 +94,12 @@ def test_set_locale_rejects_unsupported():
 # ---------- t() ----------
 
 def test_t_returns_key_when_missing():
-    """缺失 key → 返回 key 本身"""
+    """A missing key returns the key itself."""
     assert t("definitely.absent.key", "zh-CN") == "definitely.absent.key"
 
 
 def test_t_falls_back_to_zh_when_en_missing():
-    """缺英文 → 回落中文"""
+    """Missing English -> fall back to Chinese."""
     MESSAGES["test.only_zh"] = {"zh-CN": "仅中文"}
     try:
         assert t("test.only_zh", "en-US") == "仅中文"
@@ -108,7 +108,7 @@ def test_t_falls_back_to_zh_when_en_missing():
 
 
 def test_t_interpolates_params():
-    """占位符替换"""
+    """Placeholder substitution."""
     MESSAGES["test.with_param"] = {"zh-CN": "你好 {name}", "en-US": "Hello {name}"}
     try:
         assert t("test.with_param", "zh-CN", name="世界") == "你好 世界"
@@ -118,7 +118,7 @@ def test_t_interpolates_params():
 
 
 def test_t_missing_param_does_not_crash():
-    """缺参数时不抛异常（返回可读串）"""
+    """A missing parameter does not raise (a readable string is returned)."""
     MESSAGES["test.needs_param"] = {"zh-CN": "值 {x}", "en-US": "value {x}"}
     try:
         out = t("test.needs_param", "zh-CN")
@@ -128,7 +128,7 @@ def test_t_missing_param_does_not_crash():
 
 
 def test_t_returns_key_when_entry_has_no_text_at_all():
-    """条目存在但两种语言都无文案 → 回落为 key（并告警）"""
+    """The entry exists but neither language has copy -> fall back to the key (and warn)."""
     MESSAGES["test.no_text"] = {"zh-CN": None, "en-US": None}
     try:
         assert t("test.no_text", "zh-CN") == "test.no_text"
@@ -137,7 +137,7 @@ def test_t_returns_key_when_entry_has_no_text_at_all():
 
 
 def test_t_keeps_text_when_format_fails():
-    """占位符格式化失败（参数名对不上）→ 保留原文，不抛异常"""
+    """Placeholder formatting fails (parameter names mismatch) -> keep the raw text, no exception."""
     MESSAGES["test.bad_fmt"] = {"zh-CN": "值 {missing}", "en-US": "v {missing}"}
     try:
         out = t("test.bad_fmt", "zh-CN", other=1)

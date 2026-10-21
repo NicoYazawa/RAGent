@@ -1,7 +1,9 @@
-"""RAGent 后端入口 — FastAPI + SSE
+"""RAGent backend entry point — FastAPI + SSE.
 
-启动流程：依赖自检（ES / LLM 与 Embedding 供应商密钥 / ES 索引维度，异常仅终端提示）→ ES 建索引。
-MySQL 库表与基础数据（datasource_config / sales）由项目根目录 ragent_init.sql 前置导入。
+Startup: dependency self-checks (ES / LLM and Embedding provider keys / ES index dimensions,
+failures are only reported to the terminal) -> create the ES index.
+MySQL schema and base data (datasource_config / sales) are imported beforehand from
+ragent_init.sql at the project root.
 """
 import logging
 from contextlib import asynccontextmanager
@@ -22,11 +24,12 @@ logger = logging.getLogger("agentic.main")
 
 
 def parse_cors_origins(raw: str) -> list[str]:
-    """解析 CORS 来源列表；拒绝通配符 ``*``。
+    """Parse the CORS origin list and reject the ``*`` wildcard.
 
-    Fail-closed：CORS 允许 ``*`` 且 ``allow_credentials=True`` 时，Starlette 会把请求
-    Origin 原样回显到 ``Access-Control-Allow-Origin`` 并带 ``Allow-Credentials: true``，
-    任意站点即可带凭据跨域访问本服务。这里直接拒绝启动，强制部署方显式列出前端来源。
+    Fail closed: with ``*`` allowed and ``allow_credentials=True``, Starlette echoes the
+    request Origin into ``Access-Control-Allow-Origin`` together with
+    ``Allow-Credentials: true``, so any site could call this service with credentials.
+    Startup therefore fails fast, forcing the deployment to list frontend origins explicitly.
     """
     origins = [o.strip() for o in raw.split(",") if o.strip()]
     if "*" in origins:

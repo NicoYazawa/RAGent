@@ -13,24 +13,24 @@ from app.services import ingestion
     ("a.md", "md"), ("a.TXT", "txt"), ("a.pdf", "pdf"), ("a.docx", "docx"),
 ])
 def test_validate_upload_accepts_allowed_types(name, expected):
-    """白名单类型放行，扩展名统一小写"""
+    """Allowlisted types pass and the extension is lowercased."""
     assert ingestion.validate_upload(name, 100) == expected
 
 
 def test_validate_upload_rejects_disallowed_type():
-    """非白名单类型拒绝"""
+    """A type outside the allowlist is rejected."""
     with pytest.raises(ValueError, match="不支持的文件类型"):
         ingestion.validate_upload("a.exe", 100)
 
 
 def test_validate_upload_rejects_extensionless_name():
-    """无扩展名 → 拒绝"""
+    """No extension -> rejected."""
     with pytest.raises(ValueError, match="不支持的文件类型"):
         ingestion.validate_upload("noext", 100)
 
 
 def test_validate_upload_rejects_oversized_file():
-    """超过 20MB 拒绝"""
+    """Over 20MB -> rejected."""
     with pytest.raises(ValueError, match="20MB"):
         ingestion.validate_upload("a.md", ingestion.MAX_SIZE + 1)
 
@@ -38,7 +38,7 @@ def test_validate_upload_rejects_oversized_file():
 # ---------- save_upload ----------
 
 def test_save_upload_writes_file_and_record(tmp_path, monkeypatch):
-    """落盘 + 建 kb_document 记录（status=parsing）"""
+    """Write the file and create the kb_document row (status=parsing)."""
     monkeypatch.setattr(ingestion, "UPLOAD_DIR", tmp_path)
     monkeypatch.setattr(ingestion.db, "execute", lambda sql, params=None: 11)
 
@@ -51,7 +51,7 @@ def test_save_upload_writes_file_and_record(tmp_path, monkeypatch):
 
 
 def test_save_upload_strips_directory_from_name(tmp_path, monkeypatch):
-    """文件名去目录（防路径穿越）"""
+    """Directory components are stripped from the file name (blocks path traversal)."""
     monkeypatch.setattr(ingestion, "UPLOAD_DIR", tmp_path)
     monkeypatch.setattr(ingestion.db, "execute", lambda sql, params=None: 1)
 
@@ -61,7 +61,7 @@ def test_save_upload_strips_directory_from_name(tmp_path, monkeypatch):
 
 
 def test_save_upload_rejects_bad_type(tmp_path, monkeypatch):
-    """类型不合法时不得落盘、不得建记录"""
+    """An illegal type writes nothing and creates no row."""
     monkeypatch.setattr(ingestion, "UPLOAD_DIR", tmp_path)
     with pytest.raises(ValueError):
         ingestion.save_upload(1, "a.exe", b"x")
@@ -71,7 +71,7 @@ def test_save_upload_rejects_bad_type(tmp_path, monkeypatch):
 
 @pytest.fixture
 def pipeline(monkeypatch, tmp_path):
-    """把解析/切片/向量化/ES 写入全部替身化，只留下流水线编排本身"""
+    """Stub out parsing/chunking/embedding/ES writes so only the pipeline orchestration remains."""
     state = {"es_docs": [], "deleted": [], "vectors": None}
 
     async def _parse(path, file_type):
@@ -95,14 +95,14 @@ def pipeline(monkeypatch, tmp_path):
 
 
 async def test_process_document_skips_missing_record(fake_db):
-    """文档记录不存在 → 直接跳过（不抛异常）"""
+    """A missing document row -> skip silently (no exception)."""
     fake_db.route("FROM kb_document", None)
     await ingestion.process_document(999)
     assert not any("UPDATE kb_document" in s for s in fake_db.sqls())
 
 
 async def test_process_document_marks_failed_when_source_missing(fake_db, tmp_path):
-    """源文件被清理 → 状态置 failed 并记录原因"""
+    """The source file was cleaned up -> status becomes failed with the reason recorded."""
     fake_db.route("FROM kb_document", {
         "id": 1, "file_path": str(tmp_path / "gone.md"), "file_name": "gone.md",
         "file_type": "md", "kb_id": 1})
@@ -113,7 +113,7 @@ async def test_process_document_marks_failed_when_source_missing(fake_db, tmp_pa
 
 
 async def test_process_document_happy_path(fake_db, pipeline, tmp_path):
-    """完整流程：解析→切片→向量化→ES bulk→MySQL 切片→status=ready"""
+    """Full flow: parse -> chunk -> embed -> ES bulk -> MySQL chunks -> status=ready."""
     src = tmp_path / "doc.md"
     src.write_text("# 第一章\n正文", encoding="utf-8")
     fake_db.route("FROM kb_document", {
@@ -122,7 +122,7 @@ async def test_process_document_happy_path(fake_db, pipeline, tmp_path):
 
     await ingestion.process_document(5)
 
-    # ES 收到向量化的文档
+    # ES received the embedded documents
     assert pipeline["es_docs"], "ES 未收到任何文档"
     doc = pipeline["es_docs"][0]
     assert doc["doc_id"] == 5
@@ -130,16 +130,16 @@ async def test_process_document_happy_path(fake_db, pipeline, tmp_path):
     assert doc["doc_name"] == "doc"
     assert doc["embedding"] == [0.1, 0.2]
     assert doc["chunk_no"] == 1
-    # 重试场景先清旧数据
+    # a retry clears the old data first
     assert pipeline["deleted"] == [5]
-    # 状态推进到 ready
+    # the status moves to ready
     assert any("SET status=%s, chunk_count=%s" in s for s in fake_db.sqls())
-    # 切片元数据落库
+    # chunk metadata is persisted
     assert any("INSERT INTO kb_chunk" in s for s in fake_db.sqls())
 
 
 async def test_process_document_marks_failed_on_exception(fake_db, pipeline, monkeypatch, tmp_path):
-    """任一步异常 → 状态置 failed（不得静默停在中间态）"""
+    """Any failing step -> status failed (never stuck in an intermediate state)."""
     async def _boom(texts):
         raise RuntimeError("embedding 401")
 
@@ -157,7 +157,7 @@ async def test_process_document_marks_failed_on_exception(fake_db, pipeline, mon
 
 
 async def test_process_document_fails_on_empty_content(fake_db, pipeline, monkeypatch, tmp_path):
-    """解析后无有效内容 → failed（空文档/扫描件）"""
+    """No usable content after parsing -> failed (empty document or scanned file)."""
     async def _empty(path, file_type):
         return []
 
@@ -175,21 +175,21 @@ async def test_process_document_fails_on_empty_content(fake_db, pipeline, monkey
 # ---------- reset_for_retry / delete_document ----------
 
 async def test_reset_for_retry_rejects_unknown_doc(fake_db):
-    """文档不存在 → 明确报错"""
+    """A missing document raises a clear error."""
     fake_db.route("FROM kb_document", None)
     with pytest.raises(ValueError, match="文档不存在"):
         await ingestion.reset_for_retry(1, 2)
 
 
 async def test_reset_for_retry_rejects_non_failed_status(fake_db):
-    """仅 failed 状态可重试"""
+    """Only the failed status can be retried."""
     fake_db.route("FROM kb_document", {"id": 2, "status": "ready"})
     with pytest.raises(ValueError, match="仅失败文档可重试"):
         await ingestion.reset_for_retry(1, 2)
 
 
 async def test_reset_for_retry_resets_status(fake_db):
-    """failed → 置 parsing 并回读最新行"""
+    """failed -> set to parsing and read the row back."""
     fake_db.route("FROM kb_document", {"id": 2, "status": "failed"})
     doc = await ingestion.reset_for_retry(1, 2)
     assert doc["id"] == 2
@@ -197,7 +197,7 @@ async def test_reset_for_retry_resets_status(fake_db):
 
 
 async def test_delete_document_removes_es_first_then_mysql(fake_db, monkeypatch):
-    """删除顺序：先 ES 后 MySQL（ES 留孤儿不影响 MySQL 一致性）"""
+    """Delete order: ES first, then MySQL (an orphan in ES does not affect MySQL consistency)."""
     order = []
 
     async def _delete(doc_id):
@@ -213,10 +213,10 @@ async def test_delete_document_removes_es_first_then_mysql(fake_db, monkeypatch)
     assert "DELETE FROM kb_document WHERE id=%s AND kb_id=%s" in sqls
 
 
-# ---------- _parse 分派 ----------
+# ---------- _parse dispatch ----------
 
 async def test_parse_dispatches_to_parse_file(tmp_path, monkeypatch):
-    """_parse 走 parse_file（在工作线程里执行同步解析）"""
+    """_parse goes through parse_file (synchronous parsing on a worker thread)."""
     called = {}
 
     def _fake_parse_file(path, file_type):

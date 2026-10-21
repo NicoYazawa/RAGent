@@ -4,11 +4,11 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { DecisionLog, DatasourceItem } from '@/api/types'
 
 /**
- * 页面级视图：
- *   - ChatView：挂载即拉会话并自动选中第一个、侧栏折叠、标题与消息数
- *   - DatasourceView：加载三类数据源、开关与配置变更、保存
- *   - DecisionLogView：过滤查询、时间轴列表、打开详情抽屉、分页
- *   - 路由表：路径 / 名称 / 元信息
+ * Page-level views:
+ *   - ChatView: fetches sessions on mount and selects the first, sidebar collapse, title and message count
+ *   - DatasourceView: loads the three data sources, toggles and config changes, save
+ *   - DecisionLogView: filtered query, timeline list, opening the detail drawer, pagination
+ *   - route table: path / name / meta
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

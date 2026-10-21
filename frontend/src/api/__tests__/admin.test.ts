@@ -2,12 +2,12 @@
 import { createPinia, setActivePinia } from 'pinia'
 
 /**
- * 管理端 API —— 知识库 / 数据源 / 决策日志 / 检索测试。
- * 关键契约：
- *   - 路径与后端路由一一对应（含分页与过滤参数）
- *   - 上传走 multipart（FormData），不设 Content-Type（交给浏览器带 boundary）
- *   - 引用溯源查询的 doc_name 需 URL 编码
- *   - sourceMeta 的文案随语言切换，icon/color 为固定映射
+ * Admin API — knowledge bases / data sources / decision logs / retrieval test.
+ * Key contracts:
+ *   - paths map one-to-one onto backend routes (including pagination and filter params)
+ *   - uploads use multipart (FormData) without a Content-Type (the browser adds the boundary)
+ *   - the doc_name in citation lookups must be URL encoded
+ *   - sourceMeta copy follows the language while icon/color stay fixed
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

@@ -1,16 +1,18 @@
-"""抽取前端/后端中文 UI 字符串 → 待译候选清单（i18n 工作流第 2 步）
+"""Extract Chinese UI strings from the frontend and backend into a translation candidate list
+(step 2 of the i18n workflow).
 
-范围：
-- frontend/src 下 .vue/.ts/.js 的模板文本、属性值、字符串字面量
-- backend 用户可见字符串（完整字面量，f-string 占位符归一化为 {0}/{1}…）：
-  - app/agent/orchestrator.py：SSE 决策链文本 + 生成侧声明
-  - app/routers/*.py：HTTPException 错误消息
-  - app/agent/prompts.py：LLM 提示词模板（英文提问时需英文提示，归 kind=prompt）
+Scope:
+- template text, attribute values and string literals in .vue/.ts/.js under frontend/src
+- user-visible backend strings (full literals, f-string placeholders normalized to {0}/{1}...):
+  - app/agent/orchestrator.py: SSE decision-chain text plus generation-side notices
+  - app/routers/*.py: HTTPException error messages
+  - app/agent/prompts.py: LLM prompt templates (English questions need English prompts; kind=prompt)
 
-输出：frontend/src/i18n/candidates/strings.json
+Output: frontend/src/i18n/candidates/strings.json
   [{ "zh": "...", "kinds": ["text"|"attr"|"literal"|"sse"|"api"|"prompt"], "files": [...], "count": 3 }]
 
-过滤：无 CJK、纯 ASCII/数字、日志与调试用途字符串（console./logger. 同行字面量）。
+Filtering: strings without CJK, pure ASCII/digit strings, and log or debug strings
+(literals on the same line as console./logger.).
 """
 import json
 import re
@@ -37,10 +39,10 @@ def _keep(s: str) -> bool:
     return True
 
 
-# ---------- 前端 ----------
+# ---------- Frontend ----------
 
 def extract_frontend() -> list[tuple[str, str, str]]:
-    """返回 (字符串, 类型, 文件) 三元组"""
+    """Return (string, kind, file) triples."""
     out = []
     for f in sorted(FRONTEND_SRC.rglob("*")):
         if f.suffix not in {".vue", ".ts", ".js"} or "i18n/candidates" in str(f):
@@ -74,10 +76,10 @@ def extract_frontend() -> list[tuple[str, str, str]]:
     return out
 
 
-# ---------- 后端（完整字面量） ----------
+# ---------- Backend (full literals) ----------
 
 def _strip_docstrings(text: str) -> str:
-    """移除三引号 docstring 块，避免把注释当文案"""
+    """Remove triple-quoted docstring blocks so comments are not collected as UI copy."""
     return re.sub(r'""".*?"""', '""', text, flags=re.DOTALL)
 
 
@@ -95,7 +97,7 @@ def _normalize_placeholders(s: str) -> str:
 
 
 def extract_backend_literals(path: Path, kind: str, rel: str) -> list[tuple[str, str, str]]:
-    """提取 py 文件中含中文的完整字符串字面量（docstring 已剔除、日志用途已跳过）"""
+    """Extract Chinese string literals from a py file (docstrings removed, log-only strings skipped)."""
     text = _strip_docstrings(path.read_text(encoding="utf-8"))
     lines = text.split("\n")
     out = []

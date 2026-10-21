@@ -1,8 +1,9 @@
-"""Provider 注册表 — 厂商目录
+"""Provider registry — vendor catalog.
 
-目录条目是"协议族 + 默认值"声明：kind 决定用哪个实现类构造，
-默认模型 / 维度可被 .env 显式覆盖（LLM_MODEL / EMBED_MODEL / EMBED_DIMS）。
-密钥不在此层解析（pydantic-settings 已加载 .env，见 config.api_key_for）。
+A catalog entry declares "implementation family + defaults": kind picks the implementation
+class, while the default model / dimensions can be overridden explicitly by .env
+(LLM_MODEL / EMBED_MODEL / EMBED_DIMS). Secrets are not resolved here
+(pydantic-settings already loaded .env, see config.api_key_for).
 """
 from dataclasses import dataclass, field
 
@@ -10,25 +11,25 @@ from .base import LLMCapabilities
 
 
 class UnknownProviderError(ValueError):
-    """未知供应商名 — .env 配置错误，启动期即暴露"""
+    """Unknown provider name — a .env configuration error, surfaced at startup."""
 
 
 @dataclass(frozen=True)
 class ProviderSpec:
-    name: str                      # 唯一键："deepseek" / "qwen" / "openai" ...
-    label: str                     # 展示名（终端自检 / health）
-    kind: str                      # 实现族："openai_compat"
-    base_url: str                  # OpenAI 兼容 base_url（含版本路径）
-    api_key_env: str               # 密钥环境变量名；免密钥供应商为空串
+    name: str                      # unique key: "deepseek" / "qwen" / "openai" ...
+    label: str                     # display name (terminal self-check / health)
+    kind: str                      # implementation family: "openai_compat"
+    base_url: str                  # OpenAI-compatible base_url (including the version path)
+    api_key_env: str               # secret environment variable; empty for keyless providers
     default_llm_model: str = ""
     default_embed_model: str = ""
     default_embed_dims: int = 0
     llm_capabilities: LLMCapabilities = field(default_factory=LLMCapabilities)
-    # rerank 精排（可选；rerank_model 为空表示该供应商不提供/未配置 rerank）
+    # Rerank (optional; an empty rerank_model means the provider does not offer or configure rerank)
     rerank_base_url: str = ""
     rerank_path: str = ""
     rerank_model: str = ""
-    rerank_shape: str = "dashscope"  # dashscope：input 嵌套 + output.results；flat：顶层字段 + results
+    rerank_shape: str = "dashscope"  # dashscope: nested input + output.results; flat: top-level fields + results
 
 
 PROVIDERS: dict[str, ProviderSpec] = {
@@ -51,7 +52,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
         default_embed_model="text-embedding-v4",
         default_embed_dims=1024,
         llm_capabilities=LLMCapabilities(vision=True, json_mode=True, stream_usage=True),
-        # rerank 走百炼原生 text-rerank 服务（不在 compatible-mode 下）
+        # Rerank uses Bailian's native text-rerank service (outside compatible-mode)
         rerank_base_url="https://dashscope.aliyuncs.com",
         rerank_path="/api/v1/services/rerank/text-rerank/text-rerank",
         rerank_model="gte-rerank-v2",
@@ -106,7 +107,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
         label="Ollama（本机）",
         kind="openai_compat",
         base_url="http://localhost:11434/v1",
-        api_key_env="",  # 免密钥
+        api_key_env="",  # keyless
         default_llm_model="llama3.1",
         default_embed_model="nomic-embed-text",
         default_embed_dims=768,
@@ -116,7 +117,7 @@ PROVIDERS: dict[str, ProviderSpec] = {
 
 
 def get_spec(name: str) -> ProviderSpec:
-    """按名称取厂商目录条目；未知名抛 UnknownProviderError（附可选清单）"""
+    """Look up a catalog entry by name; raises UnknownProviderError with the available list."""
     spec = PROVIDERS.get((name or "").strip().lower())
     if spec is None:
         raise UnknownProviderError(f"未知供应商 '{name}'，可选：{', '.join(sorted(PROVIDERS))}")

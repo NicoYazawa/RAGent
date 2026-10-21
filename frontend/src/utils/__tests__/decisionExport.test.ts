@@ -1,11 +1,11 @@
 ﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
- * 决策链导出 —— 把问答决策链转成 Markdown / JSON，用于教程素材与排查归档。
- * 关键契约：
- *   - Markdown 表格里的竖线必须转义（否则表格错位）
- *   - 耗时 <1s 用毫秒、否则一位小数秒
- *   - 缺失的 token 用量渲染成占位符而不是 undefined
+ * Decision-chain export — turns the Q&A decision chain into Markdown / JSON for tutorials and triage archives.
+ * Key contracts:
+ *   - pipes inside Markdown tables must be escaped (otherwise the table breaks)
+ *   - durations under 1s render in ms, otherwise as seconds with one decimal
+ *   - missing token usage renders as a placeholder instead of undefined
  */
 const MESSAGES: Record<string, string> = {
   'chat.pipeline.stage1': '意图判定',
@@ -17,7 +17,7 @@ const MESSAGES: Record<string, string> = {
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    // 已登记的 key 返回译文；未登记的原样返回 key（与 vue-i18n 行为一致）
+    // a registered key returns its translation; an unregistered one returns the key itself (same as vue-i18n)
     t: (key: string, params?: Record<string, unknown>) =>
       key in MESSAGES ? MESSAGES[key] : params ? `${key}:${JSON.stringify(params)}` : key,
   }),
@@ -70,7 +70,7 @@ describe('stepName', () => {
   })
 
   it('阶段名缺失时回退到类型标签', () => {
-    // step 9 没有对应译文 -> t() 返回 key 本身 -> 走类型标签兜底
+    // step 9 has no translation -> t() returns the key -> the type label fallback applies
     expect(stepName(card({ step: 9 }))).toBe('意图判定')
   })
 })
@@ -180,7 +180,7 @@ describe('copyText', () => {
 
     expect(await copyText('文本')).toBe(true)
     expect(execCommand).toHaveBeenCalledWith('copy')
-    // 降级用的临时 textarea 必须被移除
+    // the temporary textarea used for the fallback must be removed
     expect(document.querySelectorAll('textarea').length).toBe(0)
     vi.unstubAllGlobals()
   })

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import zhCN from '../zh-CN'
 import enUS from '../en-US'
 
-/** 递归展开为 "a.b.c" 形式的叶子 key 列表 */
+/** Recursively flatten into a list of leaf keys shaped like "a.b.c". */
 function leafKeys(obj: unknown, prefix = ''): string[] {
   if (typeof obj !== 'object' || obj === null) return [prefix]
   return Object.entries(obj as Record<string, unknown>).flatMap(([k, v]) =>
@@ -10,7 +10,7 @@ function leafKeys(obj: unknown, prefix = ''): string[] {
   )
 }
 
-/** 递归收集所有叶子字符串值 */
+/** Recursively collect every leaf string value. */
 function leafValues(obj: unknown): string[] {
   if (typeof obj === 'string') return [obj]
   if (typeof obj !== 'object' || obj === null) return []

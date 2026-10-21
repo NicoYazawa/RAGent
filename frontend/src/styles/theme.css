@@ -1,48 +1,48 @@
 @import "tailwindcss";
 
 /* ============================================================
-   RAGent 设计系统 — Data terminal（深色诊断台）
-   方向：卡片比地面更暗，明度分层代替边框装饰；
-   颜色预算 <3%，accent 只作为 1px 选择线出现在最靠近标签的那条边上；
-   数字用等宽字体，正负号写在文字里而不是用颜色。
-   硬约束：无渐变、无发光、无玻璃模糊、无紫色。
+   RAGent design system — Data terminal (a dark diagnostic console)
+   Direction: cards sit darker than the ground and lightness steps replace decorative borders;
+   the colour budget stays under 3%, and the accent appears only as a 1px selection line on the edge nearest the label;
+   numbers use a monospace font and signs live in the text rather than in colour.
+   Hard constraints: no gradients, no glow, no glassmorphism, no purple.
    ============================================================ */
 @theme {
-  /* 地面与表面（tone step，靠明度分层） */
+  /* Ground and surfaces (tone steps, separated by lightness) */
   --color-deep: #171719;
   --color-panel: #131217;
   --color-card: #1b1a1f;
   --color-raise: #212023;
 
-  /* 分隔线 */
+  /* Dividers */
   --color-edge: #222224;
   --color-edge-bright: #3a3a3e;
 
-  /* 唯一 accent：1px 线，不外扩 */
+  /* The single accent: a 1px line, never expanded */
   --color-accent: #22d3ee;
   --color-accent-soft: #7dd3fc;
   --color-accent-dim: #1c6b7a;
 
-  /* 文本三级（全部 ≥4.5:1） */
+  /* Three text levels (all at least 4.5:1) */
   --color-ink: #ffffff;
   --color-ink-dim: #b9babf;
   --color-ink-mute: #8a8c92;
 
-  /* 语义色 */
+  /* Semantic colours */
   --color-warn: #d9a441;
   --color-danger: #e5566f;
   --color-ok: #44a282;
 
-  /* 检索源标识（数据色，非装饰） */
+  /* Retrieval-source identity colours (data, not decoration) */
   --color-src-vector: #4a8ad6;
   --color-src-keyword: #22d3ee;
   --color-src-db: #44a282;
 
-  /* 字体：正文 Public Sans，数字/ID 等宽 */
+  /* Fonts: Public Sans for body text, monospace for numbers/IDs */
   --font-sans: "Public Sans", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
 
-  /* 圆角收敛为三档：4 卡片内元素 / 6 卡片 / 8 浮层 */
+  /* Corners limited to three steps: 4 for elements inside cards / 6 for cards / 8 for overlays */
   --radius-sm: 3px;
   --radius-md: 4px;
   --radius-lg: 6px;
@@ -53,7 +53,7 @@
   --ease-out-tech: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ---------- 全局基础 ---------- */
+/* ---------- Global base ---------- */
 html,
 body {
   height: 100%;
@@ -65,7 +65,7 @@ body {
   font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.55;
-  /* 数字等宽：表格、时间、耗时逐位对齐 */
+  /* Monospace numbers: tables, times and durations align digit by digit */
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -76,7 +76,7 @@ body {
   color: #ffffff;
 }
 
-/* 细滚动条 */
+/* Thin scrollbars */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-edge-bright) transparent;
@@ -96,29 +96,29 @@ body {
   background: transparent;
 }
 
-/* ---------- 工具类 ---------- */
+/* ---------- Utilities ---------- */
 
-/* 所有数字等宽，列对齐 */
+/* All numbers monospace so columns align */
 .num,
 .tnum {
   font-variant-numeric: tabular-nums;
 }
 
-/* 兼容旧调用：发光类退化为纯色，不再有阴影 */
+/* Legacy callers: glow classes degrade to flat colour with no shadow */
 .glow-text {
   color: var(--color-accent);
 }
 .glow-edge {
-  /* 旧呼吸光已移除，保留类名避免调用点报错 */
+  /* The old breathing glow is gone; the class name stays so call sites do not break */
   border-color: var(--color-edge-bright);
 }
 
-/* 旧顶部扫描线已移除 */
+/* The old top scan line is gone */
 .scanline::after {
   content: none;
 }
 
-/* ---------- 过渡 ---------- */
+/* ---------- Transitions ---------- */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -161,7 +161,7 @@ body {
   animation: scaleIn 0.2s var(--ease-out-tech) both;
 }
 
-/* 打字机光标 */
+/* Typewriter caret */
 .typing-caret::after {
   content: "▌";
   color: var(--color-accent);
@@ -179,7 +179,7 @@ body {
   }
 }
 
-/* 思考点 */
+/* Thinking dots */
 @keyframes dotBounce {
   0%,
   80%,
@@ -197,8 +197,8 @@ body {
 }
 
 /* ============================================================
-   亮色模式 — 同名变量覆盖（html.light）
-   地面/表面/分隔线取 §9.2 的亮色默认值，accent 加深保证 4.5:1
+   Light mode — same variable names overridden (html.light)
+   ground/surface/divider take the light defaults from section 9.2 and the accent darkens to keep 4.5:1
    ============================================================ */
 html.light {
   --color-deep: #f9fafb;
@@ -235,7 +235,7 @@ html.light *::-webkit-scrollbar-thumb {
   background: #c9cdd3;
 }
 
-/* 弹层阴影（仅浮层使用） */
+/* Overlay shadow (overlays only) */
 :root {
   --shadow-overlay: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
@@ -243,9 +243,9 @@ html.light {
   --shadow-overlay: 0 12px 28px rgba(17, 17, 17, 0.14);
 }
 
-/* ---------- 键盘可达性 ---------- */
-/* 只给"独立可点击元素"焦点环；输入类控件由自身或容器的边框变化表达焦点，
-   否则会和圆角容器边框叠出双层框 */
+/* ---------- Keyboard accessibility ---------- */
+/* Focus rings only on independently clickable elements; input-like controls express focus through their own
+   or container border change, otherwise a rounded container would show a double frame
 :where(button, a, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 1px solid var(--color-accent);
   outline-offset: 2px;
@@ -254,7 +254,7 @@ html.light {
   outline: none;
 }
 
-/* ---------- 无障碍：尊重系统减少动效偏好 ---------- */
+/* ---------- Accessibility: respect the system reduce-motion preference ---------- */
 @media (prefers-reduced-motion: reduce) {
   .thinking-dot,
   .anim-fade-up,

@@ -4,9 +4,9 @@ import type { Citation } from '@/api/types'
 import type { DecisionCard } from '@/stores/chat'
 
 /**
- * 管线流程图 / 引用溯源抽屉：
- *   - DecisionPipeline：节点四态、按环节的指标文案、回流回边、闲聊旁路、跳过原因
- *   - CitationChunkDrawer：知识库引用定位切片原文、db 引用展示 SQL 与结果行、错误态
+ * Pipeline flowchart / citation drawer:
+ *   - DecisionPipeline: four node states, per-stage metric copy, backflow edges, chitchat bypass, skip reasons
+ *   - CitationChunkDrawer: knowledge-base citations locate the chunk text, db citations show SQL and rows, plus the error state
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

@@ -1,8 +1,10 @@
-"""启动自检 — ES 连通性 + LLM/Embedding 供应商密钥 + ES 索引维度/数据一致性
+"""Startup self-check — ES connectivity + LLM/Embedding provider keys + ES index dims/data consistency.
 
-lifespan 启动阶段执行（main.py 调用 run_startup_checks）：
-- 五项检查并行、单项限时，密钥通过最小真实请求验证（鉴权/余额/模型名）；
-- 异常仅在终端打印醒目提示，不阻断启动（/api/health 返回 degraded）。
+Runs during lifespan startup (main.py calls run_startup_checks):
+- five checks in parallel with a per-check timeout; keys are verified by a minimal real request
+  (auth / balance / model name)
+- failures only print a prominent hint to the terminal and never block startup
+  (/api/health reports degraded instead)
 """
 import asyncio
 import sys
@@ -14,11 +16,12 @@ from . import db
 from .config import settings
 from .es import elastic
 
-_TIMEOUT = 15  # 单项检查超时（秒）
+_TIMEOUT = 15  # per-check timeout in seconds
 
 
 def _print_block(text: str) -> None:
-    """UTF-8 直写终端，避免 Windows GBK 控制台/管道重定向时中文乱码"""
+    """Write UTF-8 straight to the terminal so Chinese text is not mangled by a Windows GBK
+    console or a redirected pipe."""
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except (AttributeError, ValueError):
@@ -27,7 +30,7 @@ def _print_block(text: str) -> None:
 
 
 def _err_message(r: httpx.Response) -> str:
-    """提取 OpenAI 兼容错误体中的 error.message（截断）"""
+    """Extract error.message (truncated) from an OpenAI-compatible error body."""
     try:
         err = r.json().get("error")
         if isinstance(err, dict) and err.get("message"):
@@ -50,9 +53,10 @@ async def check_es() -> tuple[bool, str]:
 
 
 async def check_provider(kind: Literal["llm", "embedding"]) -> tuple[bool, str]:
-    """最小真实请求验证当前供应商的密钥与模型（kind: "llm" | "embedding"）
+    """Verify the active provider's key and model with a minimal real request
+    (kind: "llm" | "embedding").
 
-    覆盖鉴权 / 余额 / 模型名；请求体与 providers/openai_compat.py 保持一致。
+    Covers auth / balance / model name; the request body matches providers/openai_compat.py.
     """
     if kind == "llm":
         spec, base, model = settings.active_llm_spec, settings.resolved_llm_base_url, settings.resolved_llm_model
@@ -92,7 +96,8 @@ async def check_provider(kind: Literal["llm", "embedding"]) -> tuple[bool, str]:
 
 
 async def check_embedding_dims() -> tuple[bool, str]:
-    """ES 索引维度 vs 当前 embedding 供应商维度一致性（不一致则向量检索必然失败）"""
+    """ES index dims vs the active embedding provider dims (a mismatch guarantees that vector
+    retrieval fails)."""
     dims = settings.resolved_embed_dims
     index_dims = await elastic.index_dims()
     if index_dims is None:
@@ -106,10 +111,12 @@ async def check_embedding_dims() -> tuple[bool, str]:
 
 
 async def consistency_status() -> dict:
-    """ES 文档数 vs MySQL ready 切片数一致性状态（health 与启动自检共用）
+    """Consistency between the ES document count and the MySQL ready chunk count (shared by
+    health and the startup self-check).
 
-    防的是「栈重建丢 ES 卷」类静默故障：MySQL 元数据显示 ready 而 ES 实际空库，
-    检索会静默降级为「知识库未覆盖」。返回 match: True/False/None（None=跳过比对）。
+    Guards against silent failures such as "stack rebuilt without the ES volume": MySQL metadata
+    says ready while ES is actually empty, and retrieval silently degrades to "not covered by the
+    knowledge base". Returns match: True/False/None (None = comparison skipped).
     """
     out: dict = {"mysql_ready_chunks": None, "es_docs": None, "match": None, "detail": ""}
     try:
@@ -121,7 +128,8 @@ async def consistency_status() -> dict:
     try:
         index_missing = await elastic.index_dims() is None
     except Exception as e:
-        # ES 宕机时 index_dims 抛错：必须降级为「跳过」而非 500（health 依赖本函数）
+        # When ES is down index_dims raises: degrade to "skipped" rather than a 500 (health relies
+        # on this function)
         out["detail"] = f"ES 查询失败（{type(e).__name__}），跳过比对"
         return out
     if index_missing:
@@ -145,13 +153,15 @@ async def consistency_status() -> dict:
 
 
 async def check_es_mysql_consistency() -> tuple[bool | None, str]:
-    """启动自检入口：不一致 FAIL；跳过态（查询失败/索引不存在）返回 None（打 [SKIP] 徽标）"""
+    """Startup self-check entry: a mismatch is FAIL; skipped states (query failed / index missing)
+    return None (rendered with the [SKIP] badge)."""
     st = await consistency_status()
     return st["match"], st["detail"]
 
 
 async def run_startup_checks() -> None:
-    """并行执行五项检查，终端输出醒目摘要；自检自身异常不阻断启动"""
+    """Run the five checks in parallel and print a prominent terminal summary; an exception in the
+    self-check itself never blocks startup."""
     try:
         results = await asyncio.gather(
             check_es(),
@@ -159,7 +169,7 @@ async def run_startup_checks() -> None:
             check_provider("embedding"),
             check_embedding_dims(),
             check_es_mysql_consistency(),
-            return_exceptions=True,  # 单项异常不吞掉其余四项诊断输出
+            return_exceptions=True,  # one failure must not swallow the other four diagnostics
         )
     except Exception as e:
         _print_block(f"[启动自检] 执行异常，已跳过：{type(e).__name__}: {e}")

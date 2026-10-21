@@ -9,15 +9,15 @@ import type { DecisionStep } from '@/api/types'
 const { t } = useI18n()
 
 /**
- * 决策链回放器 — steps 与 SSE 事件同源同构，离线重演事件流
- * 控制：上一步 / 播放暂停 / 下一步 / 重置 / 倍速（1x 2x 4x）
+ * Decision-chain player — steps share the shape of the SSE events and replay the stream offline
+ * Controls: previous / play-pause / next / reset / speed (1x 2x 4x)
  */
 const props = defineProps<{ steps: DecisionStep[] }>()
 
 const SPEEDS = [1, 2, 4] as const
 const speedIdx = ref(0)
 const playing = ref(false)
-const cursor = ref(0) // 已展示步骤数（0 = 未开始）
+const cursor = ref(0) // number of steps shown (0 = not started)
 let timer: ReturnType<typeof setInterval> | null = null
 
 const intervalMs = computed(() => 950 / SPEEDS[speedIdx.value])
@@ -67,7 +67,7 @@ watch(
 
 onBeforeUnmount(pause)
 
-/** DecisionStep → DecisionCard（含回流轮次推算；elapsed_ms 为单步时长） */
+/** DecisionStep to DecisionCard (backflow rounds derived; elapsed_ms is the per-step duration) */
 const cards = computed<DecisionCard[]>(() => {
   const out: DecisionCard[] = []
   let round = 0
@@ -98,7 +98,7 @@ const progress = computed(() => (props.steps.length ? Math.round((cursor.value /
 
 <template>
   <div class="space-y-3">
-    <!-- 控制栏 -->
+    <!-- Control bar -->
     <div class="sticky top-0 z-10 rounded-lg border border-edge bg-panel/95 p-3">
       <div class="flex items-center gap-2">
         <button
@@ -150,7 +150,7 @@ const progress = computed(() => (props.steps.length ? Math.round((cursor.value /
         <span class="font-mono text-[11px] text-ink-mute">{{ t('logs.steps', { n: `${cursor}/${steps.length}` }) }}</span>
       </div>
 
-      <!-- 进度条 -->
+      <!-- Progress bar -->
       <div class="mt-2.5 h-1 overflow-hidden rounded-full bg-raise">
         <div
           class="h-full rounded-full bg-accent transition-all duration-300"
@@ -159,7 +159,7 @@ const progress = computed(() => (props.steps.length ? Math.round((cursor.value /
       </div>
     </div>
 
-    <!-- 步骤卡片 -->
+    <!-- Step cards -->
     <div class="space-y-2">
       <div v-if="cursor === 0" class="rounded-lg border border-dashed border-edge px-4 py-6 text-center font-mono text-[11px] text-ink-mute">
         {{ t('logs.replayHint') }}

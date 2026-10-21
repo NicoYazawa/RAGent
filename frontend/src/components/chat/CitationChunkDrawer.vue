@@ -7,7 +7,7 @@ import Icon from '@/components/ui/Icon.vue'
 import { getChunkByCitation } from '@/api/admin'
 import type { Citation, KbChunk, KbDocument } from '@/api/types'
 
-/** 引用溯源抽屉：知识库引用 → 定位文档切片原文；NL2SQL 引用 → 数据查询证据（SQL + 结果行） */
+/** Citation drawer: a knowledge-base citation locates the chunk text; an NL2SQL citation shows the data-query evidence (SQL + result rows) */
 const props = defineProps<{ open: boolean; citation: Citation | null }>()
 const emit = defineEmits<{ close: [] }>()
 const { t } = useI18n()
@@ -17,12 +17,12 @@ const error = ref('')
 const doc = ref<KbDocument | null>(null)
 const chunk = ref<KbChunk | null>(null)
 
-/** db 来源（兼容历史遗留：旧消息无 source_type 但 doc_name 含 NL2SQL） */
+/** db source (legacy compatible: old messages have no source_type but a doc_name containing NL2SQL) */
 const isDb = computed(
   () => !!props.citation && (props.citation.source_type === 'db' || props.citation.doc_name.includes('NL2SQL')),
 )
 const dbRows = computed(() => props.citation?.rows ?? [])
-/** 结果表动态列：取各行 key 并集（保序），过滤无展示意义的 id 列 */
+/** Dynamic result columns: union of the row keys (order preserved), dropping the meaningless id column */
 const dbColumns = computed(() => {
   const cols: string[] = []
   for (const r of dbRows.value) {
@@ -48,7 +48,7 @@ watch(
     error.value = ''
     doc.value = null
     chunk.value = null
-    // db 来源：证据已在 citation 中携带（sql + rows），无需查切片库
+    // db source: the evidence already travels in the citation (sql + rows), so no chunk lookup is needed
     if (isDb.value) {
       loading.value = false
       return
@@ -85,13 +85,13 @@ watch(
       {{ error }}
     </div>
 
-    <!-- NL2SQL 数据查询证据 -->
+    <!-- NL2SQL data-query evidence -->
     <div v-else-if="citation && isDb" class="space-y-4 pb-6">
       <div v-if="!citation.sql" class="rounded-xl border border-edge bg-card/70 p-4 text-[12.5px] leading-relaxed text-ink-dim">
         {{ t('chat.cite.dbLegacy') }}
       </div>
       <template v-else>
-        <!-- 查询上下文 -->
+        <!-- Query context -->
         <div class="rounded-xl border border-edge bg-card/70 p-4">
           <div class="flex items-center gap-2.5">
             <Icon name="db" :size="15" class="shrink-0 text-accent" />
@@ -108,7 +108,7 @@ watch(
           </p>
         </div>
 
-        <!-- 生成的 SQL -->
+        <!-- Generated SQL -->
         <div class="rounded-xl border border-edge-bright bg-card/70 p-4">
           <div class="flex items-center gap-2">
             <span class="rounded border border-edge-bright bg-raise px-1.5 py-0.5 font-mono text-[11px] text-accent">SQL</span>
@@ -117,7 +117,7 @@ watch(
           <pre class="mt-3 overflow-x-auto whitespace-pre-wrap break-all font-mono text-[12px] leading-[1.8] text-ink/90">{{ citation.sql }}</pre>
         </div>
 
-        <!-- 查询结果表 -->
+        <!-- Query result table -->
         <div class="rounded-xl border border-edge bg-card/70 p-4">
           <div class="flex items-center gap-2">
             <span class="rounded border border-edge px-1.5 py-0.5 font-mono text-[11px] text-ink-dim">RESULT</span>
@@ -154,7 +154,7 @@ watch(
     </div>
 
     <div v-else-if="citation && doc && chunk" class="space-y-4 pb-6">
-      <!-- 引用上下文 -->
+      <!-- Citation context -->
       <div class="rounded-xl border border-edge bg-card/70 p-4">
         <div class="flex items-center gap-2.5">
           <Icon name="file" :size="15" class="shrink-0 text-accent" />
@@ -171,7 +171,7 @@ watch(
         </p>
       </div>
 
-      <!-- 切片正文 -->
+      <!-- Chunk body -->
       <div class="rounded-xl border border-edge-bright bg-card/70 p-4">
         <div class="flex items-center gap-2">
           <span class="rounded border border-edge-bright bg-raise px-1.5 py-0.5 font-mono text-[11px] text-accent">#{{ chunk.chunk_no }}</span>

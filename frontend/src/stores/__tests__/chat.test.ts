@@ -3,14 +3,14 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { ChatMessage, ChatSession, SseEvent } from '@/api/types'
 
 /**
- * 问答 Store —— SSE 事件 → 决策卡状态机 是前端最核心的状态逻辑。
- * 关键契约：
- *   - 卡片四态：pending / done / warn；warn 由 grade!=pass、correct、reflect fail、error、retrieve degraded 触发
- *   - 回流轮次：correct 提升 round，reflect fail 再 +1（侧栏缩进）
- *   - done 事件结算生成卡耗时并统计轮次
- *   - error 事件写 streamError，并以「链路异常中断」落一条 assistant 消息
- *   - 中断（AbortError）不上抛，也不覆盖本地已渲染的部分答案
- *   - 重新生成会先删掉旧 assistant 消息并请求后端清理，再以 skipUserPersist 重走流
+ * Chat store — the SSE event to decision-card state machine is the most critical front-end logic.
+ * Key contracts:
+ *   - four card states: pending / done / warn; warn comes from grade!=pass, correct, reflect fail, error, retrieve degraded
+ *   - backflow rounds: correct bumps round, a reflect fail adds one more (sidebar indent)
+ *   - the done event settles the generation card timing and counts the rounds
+ *   - the error event stores streamError and persists an assistant message saying the pipeline broke
+ *   - an interruption (AbortError) is not rethrown and does not overwrite the partial answer already rendered
+ *   - regeneration removes the old assistant message, asks the backend to clean up, then replays the stream with skipUserPersist
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -59,7 +59,7 @@ const message = (id: number, role: 'user' | 'assistant', content: string, extra:
   ...extra,
 })
 
-/** 构造 SSE 事件（ts 用当前时间，elapsed 计算才有意义） */
+/** Build an SSE event (ts uses the current time so elapsed calculations are meaningful). */
 const ev = (over: Record<string, unknown>): SseEvent =>
   ({ step: 0, ts: Date.now(), detail: '', ...over }) as unknown as SseEvent
 
@@ -127,7 +127,7 @@ describe('chat store · 会话管理', () => {
     let signal: AbortSignal | undefined
     mockAsk.mockImplementation(async (_id: number, _q: string, _on: unknown, sig?: AbortSignal) => {
       signal = sig
-      await new Promise(() => undefined) // 挂起，模拟进行中的流
+      await new Promise(() => undefined) // never resolves, simulating an in-flight stream
     })
     const s = useChatStore()
     await s.selectSession(1)
@@ -204,7 +204,7 @@ describe('chat store · 事件 → 决策卡', () => {
     expect(s.messages.at(-1)?.content).toBe('NEW [3] invalid ')
     expect(s.messages.at(-1)?.citations?.[0].ref_id).toBe(3)
   })
-  /** 用一串事件驱动一次流，返回 store */
+  /** Drive one stream with a list of events and return the store. */
   async function run(events: SseEvent[], setup?: (s: ReturnType<typeof useChatStore>) => void): Promise<ReturnType<typeof useChatStore>> {
     const s = useChatStore()
     setup?.(s)
@@ -246,13 +246,13 @@ describe('chat store · 事件 → 决策卡', () => {
       ev({ type: 'correct', step: 5, action: 'rewrite_retry', round: 1 }),
       ev({ type: 'reflect', step: 7, result: 'fail', round: 1 }),
     ])
-    // correct 之后会挂一张「正在执行纠正策略…」的等待卡，reflect 到来时结算它
+    // after correct a "running the correction strategy…" pending card appears and is settled when reflect arrives
     expect(s.cards).toHaveLength(3)
     expect(s.cards[1].type).toBe('generate')
     expect(s.cards[1].status).toBe('done')
     expect(s.cards[2].type).toBe('reflect')
     expect(s.cards[2].status).toBe('warn')
-    // correct(round=1) → activeRound=1；reflect fail → activeRound=2（侧栏缩进一层）
+    // correct(round=1) -> activeRound=1; reflect fail -> activeRound=2 (one sidebar indent)
     expect(s.cards[2].round).toBe(2)
   })
 
@@ -278,7 +278,7 @@ describe('chat store · 事件 → 决策卡', () => {
     ])
     expect(s.streamError).toBe('502：上游不可用')
     expect(s.pendingCard).toBeNull()
-    // 等待卡被以 warn 状态结算进卡片列表
+    // the pending card is settled into the card list with warn status
     expect(s.cards[s.cards.length - 1].status).toBe('warn')
     expect(s.activeStage).toBe(0)
   })
@@ -319,7 +319,7 @@ describe('chat store · 事件 → 决策卡', () => {
   })
 
   it('citation 事件把引用写入助手消息', async () => {
-    // mockImplementation 而非 mockResolvedValue：避免返回同一数组引用被本地 push 污染
+    // mockImplementation rather than mockResolvedValue: a shared array reference would be polluted by local pushes
     mockGetMessages.mockImplementation(async () => [
       message(1, 'user', '问题'),
       message(2, 'assistant', '答案', { citations: [{ doc_name: 'a.md', section_path: 'p', chunk_no: 1 }] }),
@@ -470,7 +470,7 @@ describe('chat store · 发送与中断', () => {
     let captured: AbortSignal | undefined
     mockAsk.mockImplementation(async (_id: number, _q: string, _on: unknown, signal?: AbortSignal) => {
       captured = signal
-      await new Promise(() => undefined) // 挂起，保持流在进行中
+      await new Promise(() => undefined) // never resolves, keeping the stream in flight
     })
     const s = useChatStore()
     await s.selectSession(1)
@@ -591,7 +591,7 @@ describe('chat store · 重新生成', () => {
     const args = mockAsk.mock.calls[0]
     expect(args[1]).toBe('原问题')
     expect(args[4]).toBe(true)
-    // 旧助手消息已从本地移除，且没有重复落一条用户消息
+    // the old assistant message is gone locally and no duplicate user message was stored
     expect(s.messages.filter((m) => m.role === 'user')).toHaveLength(1)
   })
 

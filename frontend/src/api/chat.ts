@@ -4,7 +4,7 @@ import { apiJson, jsonInit } from './http'
 import { useLocaleStore } from '@/stores/locale'
 
 /* ============================================================
- * 问答端 API
+ * Chat API
  * ============================================================ */
 
 /** POST /api/chat/sessions */
@@ -27,16 +27,16 @@ export async function deleteSession(sessionId: number): Promise<void> {
   await apiJson(`/api/chat/sessions/${sessionId}`, { method: 'DELETE' })
 }
 
-/** DELETE /api/chat/sessions/{session_id}/last-assistant — 重新生成前清理旧答案与决策日志 */
+/** DELETE /api/chat/sessions/{session_id}/last-assistant — clears the old answer and decision log before regenerating */
 export async function purgeLastAssistant(sessionId: number): Promise<void> {
   await apiJson(`/api/chat/sessions/${sessionId}/last-assistant`, { method: 'DELETE' })
 }
 
 /**
- * POST /api/chat/sessions/{session_id}/ask — SSE 问答流（核心接口）
- * fetch + ReadableStream，经 SseParser 解析回调；
- * images 为多模态图片引用（data URL 新上传 / 站内 URL 重答复用）；
- * 落库（用户/assistant 消息 + 决策日志）由后端完成（事件与日志同源）
+ * POST /api/chat/sessions/{session_id}/ask — SSE Q&A stream (the core endpoint)
+ * fetch + ReadableStream consumed through SseParser callbacks;
+ * images holds multimodal references (data URLs for fresh uploads / in-app URLs reused on regeneration);
+ * persistence (user/assistant messages plus the decision log) is the backend's job (events and log share one source)
  */
 export async function ask(
   sessionId: number,
@@ -75,7 +75,7 @@ export async function ask(
       }
     }
   } catch (err) {
-    // 用户主动中断：吸收 AbortError，其余上抛
+    // a user interruption: absorb AbortError and rethrow anything else
     if ((err as DOMException)?.name === 'AbortError') return
     throw err
   }

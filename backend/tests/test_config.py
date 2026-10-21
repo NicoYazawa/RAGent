@@ -1,4 +1,4 @@
-"""config — provider 开关 / resolved 回退 / 密钥解析 / 向后兼容"""
+"""config — provider switches / resolved fallbacks / key lookup / backward compatibility."""
 import pytest
 
 from app.config import Settings
@@ -56,19 +56,21 @@ def test_api_key_for_prefers_settings_then_environ(monkeypatch):
 
 
 def test_api_key_for_empty_env_name_returns_empty_string():
-    """api_key_for 对未知/空 env 名返回空串（占位由调用方 providers._key_for 决定）"""
+    """api_key_for returns an empty string for an unknown or empty env name (the placeholder is
+    decided by the caller, providers._key_for)."""
     s = Settings(_env_file=None)
     assert s.api_key_for("") == ""
     assert s.api_key_for("NOT_A_REGISTERED_ENV_NAME") == ""
 
 
 def test_key_for_ollama_uses_placeholder(monkeypatch):
-    """免密钥供应商（ollama）走 _key_for 占位分支，返回 'not-needed' 而非空串"""
+    """A keyless provider (ollama) takes the _key_for placeholder branch and returns 'not-needed'
+    instead of an empty string."""
     from app.config import settings
     from app.providers import _key_for
     from app.providers.registry import get_spec
 
     assert _key_for(get_spec("ollama")) == "not-needed"
-    # 对比：有密钥的供应商走 settings.api_key_for
+    # For comparison: a provider with a key goes through settings.api_key_for
     monkeypatch.setattr(settings, "deepseek_api_key", "sk-from-settings", raising=False)
     assert _key_for(get_spec("deepseek")) == "sk-from-settings"

@@ -11,7 +11,7 @@ class _Out(BaseModel):
 
 
 class _FakeLLM:
-    """记录调用参数的结构化假 provider"""
+    """Structured fake provider that records its call arguments."""
 
     name = "fake"
     model = "fake-model"

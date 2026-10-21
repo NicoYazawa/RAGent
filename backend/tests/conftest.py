@@ -1,11 +1,12 @@
-"""pytest 公共 fixture — 确定性测试环境
+"""Shared pytest fixtures — a deterministic test environment.
 
-三条铁律：
-1. **环境无关**：backend/.env 里的模型/维度/密钥/厂商一律不参与测试。
-   `settings` 单例在会话开始时被归一到「厂商目录默认值 + 无密钥」，
-   于是同一份代码在任何机器、任何 .env 内容下跑出同样的结果。
-2. **不外呼**：密钥被清空，杜绝任何测试意外打到真实 DeepSeek/DashScope。
-3. **无污染**：每个用例后重置 provider 缓存与全局 i18n 目录。
+Three hard rules:
+1. **Environment independent**: models/dims/keys/providers in backend/.env never take part in
+   tests. At session start the `settings` singleton is normalized to "provider catalog defaults
+   plus no keys", so the same code produces the same results on any machine with any .env.
+2. **No outbound calls**: keys are cleared, so no test can accidentally hit the real
+   DeepSeek/DashScope endpoints.
+3. **No leakage**: the provider cache and the global i18n catalog are reset after every test.
 """
 import os
 import sys
@@ -23,41 +24,42 @@ from app import providers
 from app.config import settings
 from app.i18n import MESSAGES
 
-# 归一化清单：属性名 -> 归一化后的值（"" / 0 表示清空，走厂商目录默认值）
+# Normalization table: attribute name -> normalized value ("" / 0 clears it and uses the catalog default)
 _NORMALIZE: dict[str, object] = {
-    # 厂商
+    # Providers
     "llm_provider": "deepseek",
     "embed_provider": "qwen",
     "rerank_provider": "qwen",
-    # 模型 / 维度：留空 -> 走厂商目录默认值
+    # Models / dims: empty -> use the provider catalog default
     "llm_model": "",
     "embed_model": "",
     "embed_dims": 0,
     "rerank_model": "",
     "rerank_base_url": "",
-    # base_url：留空 -> 走厂商目录默认值（避免 .env 里的旧 base_url 指向错误厂商）
+    # base_url: empty -> use the provider catalog default (a stale base_url in .env would point at
+    # the wrong provider)
     "llm_base_url": "",
     "embed_base_url": "",
     "deepseek_base_url": "",
     "dashscope_base_url": "",
-    # 密钥：清空 -> 杜绝真实外呼
+    # Keys: cleared -> guarantees no real outbound call
     "deepseek_api_key": "",
     "dashscope_api_key": "",
     "openai_api_key": "",
     "moonshot_api_key": "",
     "zhipu_api_key": "",
     "siliconflow_api_key": "",
-    # 功能开关：精排默认关（各用例显式开启）
+    # Feature switches: rerank is off by default (each test enables it explicitly)
     "rerank_enabled": False,
 }
 
 
 @pytest.fixture(scope="session", autouse=True)
 def _deterministic_settings():
-    """会话级：把 settings 归一到与 .env 无关的确定性状态"""
+    """Session scope: normalize settings into a deterministic state independent of .env."""
     for name, value in _NORMALIZE.items():
         setattr(settings, name, value)
-    # 兜底：清掉同名进程环境变量，避免 os.environ 再次覆盖 .env
+    # Safety net: drop same-named process environment variables so os.environ cannot override .env again
     for name in _NORMALIZE:
         os.environ.pop(name.upper(), None)
     return None
@@ -65,27 +67,27 @@ def _deterministic_settings():
 
 @pytest.fixture(autouse=True)
 def reset_providers():
-    """每个用例后重置 provider 单例，防止跨用例污染"""
+    """Reset the provider singletons after every test to prevent cross-test pollution."""
     yield
     providers.reset_providers()
 
 
 @pytest.fixture(autouse=True)
 def _restore_i18n_catalog():
-    """每个用例后还原全局 MESSAGES 目录（防止用例注入的临时 key 泄漏出去）"""
+    """Restore the global MESSAGES catalog after every test (so keys injected by a test do not leak)."""
     snapshot = dict(MESSAGES)
     yield
     MESSAGES.clear()
     MESSAGES.update(snapshot)
 
 
-# ---------- 公共替身 ----------
+# ---------- Shared test doubles ----------
 
-_MISSING = object()  # 哨兵：区分「路由未命中」与「命中但值为 None」
+_MISSING = object()  # sentinel: distinguishes "route not matched" from "matched but value is None"
 
 
 class FakeDb:
-    """可编程的 db 层替身：按 SQL 关键词路由返回值，并记录全部调用"""
+    """Programmable db-layer double: routes return values by SQL keyword and records every call."""
 
     def __init__(self):
         self.calls: list[tuple[str, object]] = []
@@ -94,15 +96,15 @@ class FakeDb:
         self._routes: list[tuple[str, object]] = []
 
     def route(self, keyword: str, value):
-        """按 SQL 关键词路由：命中则返回指定值（value 可为 dict / list / 可调用对象）
+        """Route by SQL keyword: a match returns the given value (a dict / list / callable).
 
-        后注册的路由优先（可覆盖 fixture 默认值）。
+        Routes registered later win, so they can override a fixture default.
         """
         self._routes.append((keyword, value))
         return self
 
     def _match(self, sql):
-        """返回 (是否命中, 值)；未命中时值为 _MISSING（区别于「命中但值为 None」）"""
+        """Return (matched, value); when unmatched the value is _MISSING (unlike "matched but None")."""
         for keyword, value in reversed(self._routes):
             if keyword in sql:
                 return True, value
@@ -136,7 +138,7 @@ class FakeDb:
 
 @pytest.fixture
 def fake_db(monkeypatch):
-    """把 app.db 的四个异步函数换成 FakeDb；返回 FakeDb 实例供断言"""
+    """Replace the four async db functions with FakeDb; returns the FakeDb instance for assertions."""
     from app import db
 
     fake = FakeDb()
@@ -158,7 +160,7 @@ def fake_db(monkeypatch):
 
 
 def make_es_mock(handler):
-    """构造一个基于 httpx.MockTransport 的 AsyncClient（与 ES 客户端同构）"""
+    """Build an httpx.MockTransport-backed AsyncClient shaped like the ES client."""
     import httpx
 
     return httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="http://mock.es")
@@ -166,7 +168,7 @@ def make_es_mock(handler):
 
 @pytest.fixture
 def api(fake_db):
-    """FastAPI TestClient（db 层已由 fake_db 替换；不触发 lifespan）"""
+    """FastAPI TestClient (the db layer is already replaced by fake_db; lifespan is not triggered)."""
     from fastapi.testclient import TestClient
 
     from app import main

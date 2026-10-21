@@ -9,7 +9,7 @@ from app.es import Elastic
 
 @pytest.fixture
 def es_with_mapping(monkeypatch):
-    """用 MockTransport 替换 es.client，返回可控的 ES 实例与安装器"""
+    """Replace es.client with a MockTransport; returns a controllable ES instance and an installer."""
     es = Elastic()
 
     def install(handler):
@@ -62,7 +62,7 @@ async def test_check_embedding_dims_conflict(monkeypatch):
     ok, detail = await startup_check.check_embedding_dims()
     assert ok is False
     assert "1536" in detail and str(settings.resolved_embed_dims) in detail
-    assert "重建" in detail  # 冲突信息必须给重建指引
+    assert "重建" in detail  # the conflict message must include rebuild instructions
 
 
 async def test_check_embedding_dims_index_absent(monkeypatch):

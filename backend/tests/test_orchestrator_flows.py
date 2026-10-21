@@ -19,7 +19,7 @@ def _parse_events(raw_list):
 
 
 class Harness:
-    """可编排的假环境：控制判定结果、检索结果与生成输出"""
+    """Scriptable fake environment: controls judge results, retrieval results and generated output."""
 
     def __init__(self, monkeypatch):
         self.monkeypatch = monkeypatch
@@ -100,10 +100,10 @@ def h(monkeypatch):
     return Harness(monkeypatch)
 
 
-# ---------- 闲聊旁路 ----------
+# ---------- Chitchat bypass ----------
 
 async def test_chitchat_skips_retrieval(h):
-    """闲聊：不检索，直接流式回答"""
+    """Chitchat: no retrieval, stream the answer directly."""
     h.intent = "chitchat"
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "你好", None)])
 
@@ -115,10 +115,10 @@ async def test_chitchat_skips_retrieval(h):
     assert h.calls["stream"] == 1
 
 
-# ---------- NL2SQL 旁路 ----------
+# ---------- NL2SQL bypass ----------
 
 async def test_data_query_uses_nl2sql_directly(h, monkeypatch):
-    """数据查询：跳过改写，直达数据库检索"""
+    """Data query: skip rewriting and go straight to database retrieval."""
     h.intent = "data_query"
     rows = [RetrieverResult(source="database", score=1.0, title="Q1", content="销售额 100",
                             metadata={"db": True, "sql": "SELECT ...", "rows": [{"id": 1}]})]
@@ -139,7 +139,8 @@ async def test_data_query_uses_nl2sql_directly(h, monkeypatch):
 
 
 async def test_data_query_falls_back_to_documents_when_grade_not_pass(h, monkeypatch):
-    """NL2SQL 结果不达标，必须检索文档而不能直接推断知识库缺失。"""
+    """When NL2SQL results do not pass, documents must be retrieved instead of assuming the knowledge
+    base lacks the answer."""
     h.intent = "data_query"
     h.grade_score = 2.0
     h.grade_verdict = "fail"
@@ -212,10 +213,10 @@ async def test_disabled_database_cannot_be_selected_even_if_router_requests_it(h
     assert events[-1][0] == "done"
 
 
-# ---------- 总结（轻量检索） ----------
+# ---------- Summarization (lightweight retrieval) ----------
 
 async def test_summarize_uses_vector_only(h):
-    """总结场景只开向量路"""
+    """The summarization path enables the vector lane only."""
     h.intent = "summarize"
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "总结一下这批文档", None)])
     assert h.calls["gather"], "总结仍需检索"
@@ -223,10 +224,10 @@ async def test_summarize_uses_vector_only(h):
     assert "rewrite" not in [t for t, _ in events]
 
 
-# ---------- 补充检索（partial） ----------
+# ---------- Supplementary retrieval (partial) ----------
 
 async def test_partial_triggers_single_supplement(h):
-    """partial → 补充检索一次后重新评估"""
+    """partial -> one supplementary retrieval, then re-grade."""
     h.grade_verdict = "partial"
     h.grade_score = 6.0
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到怎么认定", None)])
@@ -234,13 +235,13 @@ async def test_partial_triggers_single_supplement(h):
     assert correct
     assert correct[0]["action"] == "rewrite_retry"
     assert correct[0]["round"] == 1
-    assert len(h.calls["gather"]) == 2  # 主检索 + 补充检索
+    assert len(h.calls["gather"]) == 2  # main retrieval plus one supplement
 
 
-# ---------- CRAG 纠正 ----------
+# ---------- CRAG correction ----------
 
 async def test_crag_rewrite_retry_requeries(h):
-    """fail → CRAG 改写重查"""
+    """fail -> CRAG rewrites the query and re-retrieves."""
     h.grade_verdict = "fail"
     h.grade_score = 2.0
     h.crag_actions = ["rewrite_retry"]
@@ -254,7 +255,7 @@ async def test_crag_rewrite_retry_requeries(h):
 
 
 async def test_crag_give_up_emits_kb_not_covered(h):
-    """CRAG give_up → 产出 give_up 事件 + 知识库未覆盖声明"""
+    """CRAG give_up -> a give_up event plus the knowledge-gap notice."""
     h.grade_verdict = "fail"
     h.grade_score = 2.0
     h.crag_actions = ["give_up"]
@@ -265,7 +266,7 @@ async def test_crag_give_up_emits_kb_not_covered(h):
 
 
 async def test_crag_exhausted_rounds_gives_up(h):
-    """CRAG 轮次用尽 → give_up 收尾"""
+    """CRAG rounds exhausted -> finish with give_up."""
     h.grade_verdict = "fail"
     h.grade_score = 2.0
     h.crag_actions = ["rewrite_retry", "rewrite_retry", "rewrite_retry"]
@@ -276,10 +277,10 @@ async def test_crag_exhausted_rounds_gives_up(h):
     assert correct[-1]["action"] == "give_up"
 
 
-# ---------- 会话与用户消息 ----------
+# ---------- Session and user messages ----------
 
 async def test_session_title_updated_on_first_turn(h, monkeypatch):
-    """首轮提问后自动改会话标题（截断 18 字 + 省略号）"""
+    """The session title is derived from the first question (18 chars plus an ellipsis)."""
     long_q = "迟到到底应该怎么认定和处罚才合规呢请说明"
     seen = {}
 
@@ -295,7 +296,7 @@ async def test_session_title_updated_on_first_turn(h, monkeypatch):
 
 
 async def test_skip_user_persist_does_not_insert_user_message(h, monkeypatch):
-    """重新生成场景（skip_user_persist）不重复落用户消息"""
+    """Regeneration (skip_user_persist) does not store the user message again."""
     inserts = []
 
     async def _aexecute(sql, params=None):
@@ -307,14 +308,14 @@ async def test_skip_user_persist_does_not_insert_user_message(h, monkeypatch):
     events = _parse_events([
         ev async for ev in orchestrator.run_ask(1, "迟到怎么认定", None, skip_user_persist=True)
     ])
-    assert inserts == []  # 用户消息未重复落库
+    assert inserts == []  # the user message was not stored twice
     assert [t for t, _ in events][-1] == "done"
 
 
-# ---------- 异常与超时收尾 ----------
+# ---------- Error and timeout wrap-up ----------
 
 async def test_timeout_emits_504_error_event(h, monkeypatch):
-    """整体超时 → error 事件（code=504），链路不抛异常"""
+    """Overall timeout -> an error event (code=504) and the chain raises nothing."""
     monkeypatch.setattr(orchestrator.settings, "overall_timeout", 0, raising=False)
 
     async def _slow(*a, **k):
@@ -330,7 +331,7 @@ async def test_timeout_emits_504_error_event(h, monkeypatch):
 
 
 async def test_session_missing_emits_404_error_event(h, monkeypatch):
-    """会话不存在 → error 事件（code=404）"""
+    """Missing session -> an error event (code=404)."""
     async def _aquery_one(sql, params=None):
         if "chat_session" in sql:
             return None
@@ -344,7 +345,7 @@ async def test_session_missing_emits_404_error_event(h, monkeypatch):
 
 
 async def test_unexpected_error_emits_500_error_event(h, monkeypatch):
-    """未预期异常 → error 事件（code=500）"""
+    """Unexpected exception -> an error event (code=500)."""
 
     async def _boom(*a, **k):
         raise RuntimeError("内部炸了")
@@ -357,10 +358,10 @@ async def test_unexpected_error_emits_500_error_event(h, monkeypatch):
     assert "内部炸了" in errors[0]["message"]
 
 
-# ---------- 附图问答 ----------
+# ---------- Q&A with images ----------
 
 async def test_image_question_forced_to_kb_qa(h, monkeypatch):
-    """附图问题强制走知识问答主链（不走闲聊/数据查询旁路）"""
+    """Questions with images are forced onto the knowledge Q&A main chain (no chitchat/data-query bypass)."""
     h.intent = "chitchat"
     monkeypatch.setattr(orchestrator, "to_data_urls", lambda urls: ["data:image/png;base64,AA=="])
 
@@ -386,28 +387,28 @@ async def test_image_question_forced_to_kb_qa(h, monkeypatch):
     assert h.calls["gather"], "附图问题仍需检索知识库"
 
 
-# ---------- 反思回流（Self-RAG） ----------
+# ---------- Reflect backflow (Self-RAG) ----------
 
 async def test_reflect_exhausted_rounds_breaks_and_appends_note(h, monkeypatch):
-    """反思轮次用尽 → 停止回流并在答案后追加说明"""
+    """Reflection rounds exhausted -> stop the backflow and append a note to the answer."""
     monkeypatch.setattr(orchestrator.settings, "reflect_max_rounds", 1, raising=False)
     h.reflect_results = ["fail"]
 
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到怎么认定", None)])
     reflect = [d for t, d in events if t == "reflect"]
     assert reflect and reflect[-1]["result"] == "fail"
-    # 只检索一次（回流未发生），说明在 max_rounds 处直接 break
+    # only one retrieval happened (no backflow), because the loop breaks at max_rounds
     assert len(h.calls["gather"]) == 1
 
 
 async def test_reflect_backflow_refetches_with_missing_info(h):
-    """反思失败 → 带着缺失信息定向补检一次"""
+    """Reflection fails -> one targeted supplementary retrieval carrying the missing info."""
     h.reflect_results = ["fail", "pass"]
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到怎么认定", None)])
     reflect = [d for t, d in events if t == "reflect"]
     assert [r["result"] for r in reflect] == ["fail", "pass"]
     assert len(h.calls["gather"]) == 2
-    # 补检查询里带上了缺失信息
+    # the supplementary query carries the missing info
     assert "缺少处罚标准" in h.calls["gather"][1]["query"]
 
 
@@ -457,7 +458,7 @@ async def test_final_stream_matches_persisted_exhaustion_warning(h, monkeypatch)
 
 
 async def test_reflect_backflow_in_data_query_hits_database(h, monkeypatch):
-    """data_query 场景的反思回流回到数据库而不是知识库"""
+    """For data_query the reflect backflow returns to the database instead of the knowledge base."""
     h.intent = "data_query"
     h.grade_score = 9.0
     h.grade_verdict = "pass"
@@ -472,13 +473,13 @@ async def test_reflect_backflow_in_data_query_hits_database(h, monkeypatch):
     monkeypatch.setattr(orchestrator.db_retriever, "search", _db_search)
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "销售额", None)])
     db_events = [d for t, d in events if t == "retrieve" and d.get("source") == "database"]
-    assert len(db_events) >= 2  # 主检索 + 反思回流
+    assert len(db_events) >= 2  # main retrieval plus reflect backflow
     assert "缺少处罚标准" in captured["q"]
-    assert h.calls["gather"] == []  # 没走知识库检索
+    assert h.calls["gather"] == []  # no knowledge-base retrieval happened
 
 
 async def test_reflect_backflow_rerank_failure_breaks_circuit(h, monkeypatch):
-    """回流期精排失败 → 熔断（后续回流不再调用精排）"""
+    """A rerank failure during backflow -> circuit break (later backflow rounds skip rerank)."""
     h.reflect_results = ["fail", "fail"]
     monkeypatch.setattr(orchestrator.settings, "rerank_enabled", True, raising=False)
     monkeypatch.setattr(orchestrator, "_rerank_ready", lambda: True)
@@ -487,9 +488,9 @@ async def test_reflect_backflow_rerank_failure_breaks_circuit(h, monkeypatch):
 
     async def _apply(query, items, locale=None):
         calls["n"] += 1
-        if calls["n"] == 1:  # 主链精排成功
+        if calls["n"] == 1:  # rerank succeeded on the main chain
             return items, {"model": "m", "ms": 1.0, "in": len(items), "out": len(items)}, ""
-        return items, None, "精排失败（boom）"  # 回流精排失败
+        return items, None, "精排失败（boom）"  # rerank failed during backflow
 
     monkeypatch.setattr(orchestrator, "_apply_rerank", _apply)
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到怎么认定", None)])
@@ -498,10 +499,10 @@ async def test_reflect_backflow_rerank_failure_breaks_circuit(h, monkeypatch):
     assert calls["n"] == 2, "熔断后不得再调用精排"
 
 
-# ---------- 路由兜底 ----------
+# ---------- Routing fallback ----------
 
 async def test_invalid_intent_falls_back_to_kb_qa(h):
-    """非法意图 → 代码层兜底改成 kb_qa"""
+    """An invalid intent falls back to kb_qa in code."""
     h.intent = "not-a-valid-intent"
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "问题", None)])
     routers = [d for t, d in events if t == "router"]
@@ -509,16 +510,16 @@ async def test_invalid_intent_falls_back_to_kb_qa(h):
     assert h.calls["gather"], "兜底后应走知识库检索"
 
 
-# ---------- 异常落库失败 ----------
+# ---------- Persistence failure while handling an error ----------
 
 async def test_timeout_persist_failure_does_not_break_stream(h, monkeypatch):
-    """超时场景落库再失败也不影响错误事件下发"""
+    """For a timeout, a failing persist still does not block the error event."""
 
     async def _timeout(*a, **k):
         raise TimeoutError("整体超时")
 
     async def _aexecute(sql, params=None):
-        # 只让"最终落库"失败，用户消息落库保持成功，才能走到超时分支
+        # only the final persist fails while storing the user message succeeds, so the timeout branch is reached
         if "INSERT INTO chat_message" in sql and "'assistant'" in sql:
             raise RuntimeError("落库失败")
         return 1
@@ -532,7 +533,7 @@ async def test_timeout_persist_failure_does_not_break_stream(h, monkeypatch):
 
 
 async def test_error_persist_failure_does_not_break_stream(h, monkeypatch):
-    """异常场景落库再失败也不影响错误事件下发"""
+    """When handling an exception, a failing persist still does not block the error event."""
 
     async def _boom(*a, **k):
         raise RuntimeError("链路炸了")

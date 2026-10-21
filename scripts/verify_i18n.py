@@ -1,14 +1,14 @@
 #!/usr/bin/env python
-"""端到端 i18n 自检（无需启动服务）
+"""End-to-end i18n self-check (no running service required).
 
-校验：
-1. 后端 MESSAGES 目录 zh/en 齐备且非空
-2. 关键 SSE/API 文案双向渲染（英文不含中文）
-3. LLM 提示词 bundle 一致且英文无中文
-4. detect_lang 语言探测
-5. 前端 zh-CN / en-US 目录 key 树完全一致（调用 node 解析 TS）
+Checks:
+1. every backend MESSAGES entry has both zh and en, non-empty
+2. key SSE/API copy renders in both languages (the English one contains no Chinese)
+3. the LLM prompt bundles match and the English prompts contain no Chinese
+4. detect_lang language detection
+5. the zh-CN / en-US key trees match exactly (node parses the TS bundles)
 
-退出码：0 全通过；1 有失败项。
+Exit code: 0 when everything passes; 1 when something fails.
 """
 import re
 import subprocess
@@ -33,7 +33,7 @@ def check(cond: bool, msg: str) -> None:
         failures.append(msg)
 
 
-# 1) 后端目录 zh/en 齐备且非空
+# 1) Backend catalog: both zh and en present and non-empty
 for key, entry in MESSAGES.items():
     if key.startswith("test."):
         continue
@@ -41,7 +41,7 @@ for key, entry in MESSAGES.items():
     for loc in ("zh-CN", "en-US"):
         check(bool(entry.get(loc, "").strip()), f"MESSAGES[{key}][{loc}] 为空")
 
-# 2) 关键文案双向渲染
+# 2) Key copy renders in both languages
 SAMPLES = {
     "sse.router.judging": {"intent": "Knowledge-Base Q&A"},
     "sse.grade.score": {"score": 9.0, "icon": "✓", "suffix": ""},
@@ -56,7 +56,7 @@ for key, params in SAMPLES.items():
     check(zh != en, f"zh/en 渲染相同（可能漏译）：{key}")
     check(not CJK.search(en), f"英文渲染仍含中文：{key} -> {en!r}")
 
-# 3) LLM 提示词 bundle
+# 3) LLM prompt bundles
 check(set(PROMPTS["zh-CN"]) == set(PROMPTS["en-US"]), "PROMPTS zh/en key 不一致")
 for k, v in PROMPTS["en-US"].items():
     check(not CJK.search(v), f"en-US 提示词 {k} 仍含中文")
@@ -66,12 +66,12 @@ check(detect_lang("迟到是怎么认定和处罚的？") == "zh-CN", "detect_la
 check(detect_lang("How is lateness handled?") == "en-US", "detect_lang 英文探测失败")
 check(detect_lang("") == "zh-CN", "detect_lang 空串未回落 zh-CN")
 
-# 5) Accept-Language 解析
+# 5) Accept-Language parsing
 check(resolve_locale("en-US,en;q=0.9") == "en-US", "resolve_locale en 失败")
 check(resolve_locale("zh-CN,zh;q=0.9") == "zh-CN", "resolve_locale zh 失败")
 check(resolve_locale("fr-FR") == "zh-CN", "resolve_locale 未回落默认")
 
-# 6) 前端 key 树一致性（node 解析 TS）
+# 6) Frontend key-tree parity (node parses the TS bundles)
 NODE_JS = r"""
 const fs=require('fs');
 function load(p){return new Function(fs.readFileSync(p,'utf-8').replace('export default','return').replace('as const',''))();}
@@ -86,7 +86,7 @@ console.log((missEn.length===0&&missZh.length===0)?'PARITY OK':'PARITY MISMATCH 
 res = subprocess.run(["node", "-e", NODE_JS], cwd=str(FRONTEND), capture_output=True, text=True)
 check(res.returncode == 0 and "PARITY OK" in res.stdout, f"前端 key 树不一致：{res.stdout.strip()} {res.stderr.strip()}")
 
-# 汇总
+# Summary
 print("=" * 56)
 print(f"后端 MESSAGES keys : {len([k for k in MESSAGES if not k.startswith('test.')])}")
 print(f"提示词 bundle keys : {len(PROMPTS['zh-CN'])}")

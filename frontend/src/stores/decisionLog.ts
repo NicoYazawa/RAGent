@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import type { DecisionLog } from '@/api/types'
 import * as adminApi from '@/api/admin'
 
-/** 决策日志 Store — 过滤分页查询 + 单条详情 */
+/** Decision log store — filtered paginated queries plus single-entry details */
 export const useDecisionLogStore = defineStore('decisionLog', () => {
   const logs = ref<DecisionLog[]>([])
   const total = ref(0)

@@ -1,4 +1,4 @@
-"""会话服务 — 多轮上下文管理、历史消息、重答清理"""
+"""Session service — multi-turn context, message history and regeneration cleanup."""
 import json
 
 from .. import db
@@ -24,7 +24,7 @@ async def get_messages(session_id: int) -> list[dict]:
 
 
 async def delete_session(session_id: int) -> None:
-    # 级联清理会话内消息引用的落盘图片（避免孤儿文件）
+    # Cascade-clean the stored images referenced by the session's messages (avoid orphan files)
     rows = await db.aquery_all(
         "SELECT images FROM chat_message WHERE session_id=%s AND images IS NOT NULL", (session_id,)
     )
@@ -38,7 +38,7 @@ async def delete_session(session_id: int) -> None:
 
 
 async def purge_last_assistant(session_id: int) -> bool:
-    """重新生成前清理：移除最后一条 assistant 消息及其决策日志"""
+    """Cleanup before regeneration: remove the last assistant message and its decision log."""
     row = await db.aquery_one(
         "SELECT id, decision_log_id FROM chat_message WHERE session_id=%s AND role='assistant' ORDER BY id DESC LIMIT 1",
         (session_id,),

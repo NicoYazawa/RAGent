@@ -1,4 +1,4 @@
-"""Pydantic 请求/响应模型 — 字段逐一对齐前端 src/api/types.ts（snake_case）"""
+"""Pydantic request/response models — fields mirror frontend src/api/types.ts (snake_case)."""
 from pydantic import BaseModel, Field
 
 
@@ -10,8 +10,8 @@ class KbCreate(BaseModel):
 class AskRequest(BaseModel):
     question: str = Field(min_length=1)
     kb_ids: list[int] | None = None
-    skip_user_persist: bool = False  # 重新生成场景：不重复落用户消息
-    # 多模态图片引用列表（data URL 或已落盘站内 URL），最多 4 张
+    skip_user_persist: bool = False  # Regeneration: do not persist the user message again
+    # Multimodal image references (data URL or an already stored in-app URL), up to 4
     images: list[str] | None = None
 
 
@@ -46,6 +46,6 @@ class LaneRequest(BaseModel):
 
 
 class FuseRequest(BaseModel):
-    query: str = ""  # 供 Grader 评估用（可选，缺省时仅融合不评估细节）
+    query: str = ""  # Used by the grader (optional; without it fusion runs but nothing is graded)
     lanes: list[RetrievalLaneIn]
-    rerank: bool = False  # 融合后是否走精排（需 settings.rerank_enabled 开启）
+    rerank: bool = False  # Rerank after fusion (requires settings.rerank_enabled)

@@ -13,10 +13,10 @@ def test_resolve_locale_variants():
     assert resolve_locale("en-US,en;q=0.9") == "en-US"
     assert resolve_locale("zh") == "zh-CN"
     assert resolve_locale("en") == "en-US"
-    assert resolve_locale("fr-FR,fr;q=0.9") == "zh-CN"  # 不支持的语言回落默认
+    assert resolve_locale("fr-FR,fr;q=0.9") == "zh-CN"  # an unsupported language falls back to the default
     assert resolve_locale(None) == "zh-CN"
     assert resolve_locale("") == "zh-CN"
-    assert resolve_locale("EN-us") == "en-US"  # 大小写不敏感
+    assert resolve_locale("EN-us") == "en-US"  # case insensitive
 
 
 def test_t_reads_catalog_with_params():

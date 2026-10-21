@@ -1,4 +1,4 @@
-"""data_query 单链路验证（含 NL2SQL 反思回流补查）"""
+"""Single-chain check for data_query (including the NL2SQL reflect-backflow re-query)."""
 import json
 import sys
 import urllib.request

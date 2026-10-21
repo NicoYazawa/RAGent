@@ -5,7 +5,7 @@ import { useLocaleStore } from '../locale'
 describe('locale store', () => {
   beforeEach(() => {
     localStorage.clear()
-    // @ts-expect-error - 重新定义 navigator.language
+    // @ts-expect-error - redefine navigator.language
     delete navigator.language
     setActivePinia(createPinia())
   })

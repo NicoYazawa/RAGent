@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // 开发期代理到 FastAPI 后端（:8000）
+      // dev-time proxy to the FastAPI backend (:8000)
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,

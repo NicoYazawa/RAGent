@@ -9,8 +9,8 @@ import { useThemeStore } from '@/stores/theme'
 import { useLocaleStore } from '@/stores/locale'
 
 /**
- * 应用外壳 — 桌面为 52px 图标轨（顶部品牌、中部五个目的地、底部主题与语言），
- * 手机折叠为底部标签栏。选择态统一为一条 1px accent 线。
+ * App shell — a 52px icon rail on desktop (brand on top, five destinations in the middle, theme and language at the bottom),
+ * collapsing into a bottom tab bar on phones. Selection is always a single 1px accent line.
  */
 const route = useRoute()
 const theme = useThemeStore()
@@ -32,7 +32,7 @@ const themeLabel = computed(() => (theme.mode === 'dark' ? t('layout.theme.toLig
 </script>
 
 <template>
-  <!-- 桌面：图标轨 -->
+  <!-- Desktop: icon rail -->
   <aside class="hidden h-full w-[52px] shrink-0 flex-col items-center border-r border-edge bg-panel py-3 md:flex">
     <router-link to="/chat" class="mb-4 flex h-9 w-9 items-center justify-center" aria-label="RAGent">
       <img src="/logo.png" alt="RAGent" class="h-7 w-7 rounded object-cover" />
@@ -75,7 +75,7 @@ const themeLabel = computed(() => (theme.mode === 'dark' ? t('layout.theme.toLig
     </div>
   </aside>
 
-  <!-- 手机：底部标签栏 -->
+  <!-- Phone: bottom tab bar -->
   <nav
     class="fixed inset-x-0 bottom-0 z-40 flex h-14 items-stretch border-t border-edge bg-panel md:hidden"
     :aria-label="t('layout.mainNav')"

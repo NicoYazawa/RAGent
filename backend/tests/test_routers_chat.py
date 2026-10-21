@@ -8,10 +8,10 @@ routers/chat.py 历史上覆盖率 44%：SSE 入口的 404/400 分支、
 from app.routers import chat
 from app.services import chat_images
 
-# ---------- 会话 ----------
+# ---------- Sessions ----------
 
 def test_create_session_returns_201(api, fake_db):
-    """新建会话 → 201"""
+    """Creating a session -> 201."""
     fake_db.route("INSERT INTO chat_session", 5)
     fake_db.route("SELECT * FROM chat_session", {"id": 5, "title": "新会话"})
     r = api.post("/api/chat/sessions")
@@ -20,7 +20,7 @@ def test_create_session_returns_201(api, fake_db):
 
 
 def test_list_sessions(api, fake_db):
-    """会话列表"""
+    """Session list."""
     fake_db.route("FROM chat_session", [{"id": 1}, {"id": 2}])
     r = api.get("/api/chat/sessions")
     assert r.status_code == 200
@@ -28,14 +28,14 @@ def test_list_sessions(api, fake_db):
 
 
 def test_get_messages_404_when_session_missing(api, fake_db):
-    """会话不存在 → 404"""
+    """Missing session -> 404."""
     fake_db.route("SELECT id FROM chat_session", None)
     r = api.get("/api/chat/sessions/9/messages")
     assert r.status_code == 404
 
 
 def test_get_messages_returns_history(api, fake_db):
-    """会话存在 → 返回历史消息"""
+    """Existing session -> returns the message history."""
     fake_db.route("SELECT id FROM chat_session", {"id": 9})
     fake_db.route("FROM chat_message", [{"role": "user", "content": "问"}])
     r = api.get("/api/chat/sessions/9/messages")
@@ -44,14 +44,14 @@ def test_get_messages_returns_history(api, fake_db):
 
 
 def test_delete_session_404_when_missing(api, fake_db):
-    """会话不存在 → 404"""
+    """Missing session -> 404."""
     fake_db.route("SELECT id FROM chat_session", None)
     r = api.delete("/api/chat/sessions/9")
     assert r.status_code == 404
 
 
 def test_delete_session_success(api, fake_db):
-    """删除会话 → 200"""
+    """Deleting a session -> 200."""
     fake_db.route("SELECT id FROM chat_session", {"id": 9})
     fake_db.route("SELECT images FROM chat_message", [])
     r = api.delete("/api/chat/sessions/9")
@@ -60,29 +60,29 @@ def test_delete_session_success(api, fake_db):
 
 
 def test_purge_last_assistant_returns_removed_flag(api, fake_db):
-    """清理最后一条 assistant 消息 → 返回 removed 布尔"""
+    """Purging the last assistant message -> returns the removed flag."""
     fake_db.route("role='assistant'", {"id": 3, "decision_log_id": None})
     r = api.delete("/api/chat/sessions/9/last-assistant")
     assert r.status_code == 200
     assert r.json() == {"removed": True}
 
 
-# ---------- 图片静态服务 ----------
+# ---------- Image static endpoint ----------
 
 def test_get_image_404_for_unsafe_name(api):
-    """非法图片名 → 404（防路径穿越）"""
+    """An illegal image name -> 404 (blocks path traversal)."""
     r = api.get("/api/chat/images/..%2F..%2Fetc%2Fpasswd")
     assert r.status_code == 404
 
 
 def test_get_image_404_when_missing(api):
-    """文件不存在 → 404"""
+    """Missing file -> 404."""
     r = api.get("/api/chat/images/" + "a" * 32 + ".png")
     assert r.status_code == 404
 
 
 def test_get_image_serves_file(api, tmp_path, monkeypatch):
-    """合法图片 → 200 并带正确 MIME"""
+    """A valid image -> 200 with the correct MIME type."""
     d = tmp_path / "chat_images"
     d.mkdir(parents=True, exist_ok=True)
     monkeypatch.setattr(chat_images, "CHAT_IMAGE_DIR", d)
@@ -95,17 +95,17 @@ def test_get_image_serves_file(api, tmp_path, monkeypatch):
     assert r.headers["content-type"].startswith("image/png")
 
 
-# ---------- SSE 问答入口 ----------
+# ---------- SSE Q&A entry ----------
 
 def test_ask_404_when_session_missing(api, fake_db):
-    """会话不存在 → 404"""
+    """Missing session -> 404."""
     fake_db.route("SELECT id FROM chat_session", None)
     r = api.post("/api/chat/sessions/9/ask", json={"question": "迟到怎么认定"})
     assert r.status_code == 404
 
 
 def test_ask_400_on_invalid_image(api, fake_db, tmp_path, monkeypatch):
-    """图片格式非法 → 400"""
+    """An invalid image format -> 400."""
     monkeypatch.setattr(chat_images, "CHAT_IMAGE_DIR", tmp_path)
     fake_db.route("SELECT id FROM chat_session", {"id": 9})
     r = api.post("/api/chat/sessions/9/ask", json={
@@ -115,7 +115,7 @@ def test_ask_400_on_invalid_image(api, fake_db, tmp_path, monkeypatch):
 
 
 def test_ask_streams_sse_events(api, fake_db, monkeypatch):
-    """问答入口产出 SSE 事件流（event:/data: 两行一组）"""
+    """The ask entry produces an SSE event stream (event:/data: pairs)."""
     async def _run_ask(session_id, question, kb_ids, skip_user_persist=False,
                        image_urls=None, locale=None):
         yield 'event: done\ndata: {"step": 0, "message_id": 1}\n\n'
@@ -130,7 +130,8 @@ def test_ask_streams_sse_events(api, fake_db, monkeypatch):
 
 
 def test_ask_passes_locale_to_run_ask(api, fake_db, monkeypatch):
-    """语言在路由处理器内取出并显式传给 run_ask（SSE 阶段 ContextVar 可能失效）"""
+    """The locale is resolved inside the route handler and passed to run_ask explicitly (the ContextVar
+    may already be gone during SSE streaming)."""
     captured = {}
 
     async def _run_ask(session_id, question, kb_ids, skip_user_persist=False,
@@ -147,10 +148,10 @@ def test_ask_passes_locale_to_run_ask(api, fake_db, monkeypatch):
                  headers={"Accept-Language": "en-US"})
     assert r.status_code == 200
     assert captured["locale"] == "en-US"
-    assert captured["question"] == "迟到怎么认定"  # 已 strip
+    assert captured["question"] == "迟到怎么认定"  # already stripped
 
 
 def test_ask_rejects_empty_question(api, fake_db):
-    """空问题 → 422（AskRequest 校验）"""
+    """An empty question -> 422 (AskRequest validation)."""
     r = api.post("/api/chat/sessions/9/ask", json={"question": ""})
     assert r.status_code == 422

@@ -1,4 +1,4 @@
-"""问答路由 — SSE 问答流核心接口"""
+"""Chat router — the core SSE Q&A streaming endpoint."""
 from fastapi import APIRouter, HTTPException
 from starlette.responses import FileResponse, StreamingResponse
 
@@ -40,14 +40,14 @@ async def delete_session(session_id: int) -> dict:
 
 @router.delete("/sessions/{session_id}/last-assistant")
 async def purge_last_assistant(session_id: int) -> dict:
-    """重新生成前置清理：移除最后一条 assistant 消息及其决策日志"""
+    """Cleanup before regenerating: remove the last assistant message and its decision log."""
     removed = await sessions.purge_last_assistant(session_id)
     return {"removed": removed}
 
 
 @router.get("/images/{name}")
 async def get_chat_image(name: str) -> FileResponse:
-    """问答图片静态服务（chat_message.images 引用的站内 URL）"""
+    """Serve Q&A images statically (the in-app URLs referenced by chat_message.images)."""
     path = chat_images.image_path(name)
     if path is None:
         raise HTTPException(404, t("api.image_not_found"))
@@ -64,8 +64,9 @@ async def ask(session_id: int, body: AskRequest):
         image_urls = chat_images.save_images(body.images or [])
     except ValueError as e:
         raise HTTPException(400, str(e)) from e
-    # SSE 生成器在响应流式阶段才执行，此时中间件的 ContextVar 可能已失效 →
-    # 在路由处理器内（中间件上下文内）先取语言，显式传给 run_ask
+    # The SSE generator only runs while the response streams, by which point the middleware
+    # ContextVar may already be gone -> resolve the locale here, inside the route handler
+    # (still within the middleware context), and pass it to run_ask explicitly
     locale = current_locale()
     gen = run_ask(session_id, body.question.strip(), body.kb_ids, body.skip_user_persist, image_urls, locale=locale)
     return StreamingResponse(

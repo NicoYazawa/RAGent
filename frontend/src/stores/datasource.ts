@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import type { DatasourceItem } from '@/api/types'
 import * as adminApi from '@/api/admin'
 
-/** 数据源配置 Store — 三类检索源开关与连接配置 */
+/** Data-source store — the three retrieval-source switches plus connection settings */
 export const useDatasourceStore = defineStore('datasource', () => {
   const items = ref<DatasourceItem[]>([])
   const loading = ref(false)

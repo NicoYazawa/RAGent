@@ -1,8 +1,11 @@
-"""OpenAI 兼容协议实现 — LLM 对话 / 流式生成（httpx 直连，无 SDK 依赖）
+"""OpenAI-compatible implementation — LLM chat / streaming generation (direct httpx, no SDK).
 
-- judge 场景：response_format=json_object（供应商不支持时自动省略，由门面 _extract_json 兜底）
-- 流式场景：stream_options.include_usage=true 取末包用量；供应商忽略时末尾补全 0 用量
-- client 可注入（测试 MockTransport）；None 时惰性自建并复用，aclose() 关闭
+- judge calls: response_format=json_object (omitted when the provider does not support it, with
+  the facade's _extract_json regex as the fallback)
+- streaming: stream_options.include_usage=true to read usage from the final packet; when the
+  provider ignores it, zero usage is appended at the end
+- the client can be injected (MockTransport in tests); when None a client is created lazily and
+  reused, and aclose() closes it
 """
 import json
 import logging
@@ -18,7 +21,7 @@ _TIMEOUT = 120
 
 
 class OpenAICompatLLM:
-    """LLM 实现：POST {base_url}/chat/completions（流式 / 非流式）"""
+    """LLM implementation: POST {base_url}/chat/completions (streaming and non-streaming)."""
 
     def __init__(
         self,
@@ -43,7 +46,8 @@ class OpenAICompatLLM:
         return self._client
 
     def _auth_headers(self) -> dict:
-        """按请求携带鉴权头（不依赖 client 构造方式，注入 client 同样生效）"""
+        """Send the auth header per request (independent of how the client was built, so an
+        injected client works the same way)."""
         return {"Authorization": f"Bearer {self._api_key}"}
 
     async def aclose(self) -> None:
@@ -117,17 +121,18 @@ class OpenAICompatLLM:
                     if delta:
                         yield delta, None
                 if chunk.get("usage") and not usage_sent:
-                    # 只认首个 usage 包（防门面重复累加）；置于 choices 之后，
-                    # 保证与文本增量合包发送时（部分网关/代理）增量不被丢弃
+                    # Accept only the first usage packet (so the facade cannot double count);
+                    # it is yielded after the choices so that a delta packed together with it
+                    # (some gateways and proxies) is not dropped
                     yield "", self._usage_of(chunk)
                     usage_sent = True
         if not usage_sent:
-            # 供应商忽略 stream_options：补全 0 用量，门面据此跳过累加
+            # The provider ignored stream_options: append zero usage so the facade skips accumulation
             yield "", Usage()
 
 
 class OpenAICompatEmbedder:
-    """Embedding 实现：POST {base_url}/embeddings（批 ≤10 / 重试 1 次 / 截断 6000 字符）"""
+    """Embedding implementation: POST {base_url}/embeddings (batch <=10 / 1 retry / 6000-char truncation)."""
 
     _BATCH = 10
     _MAX_CHARS = 6000

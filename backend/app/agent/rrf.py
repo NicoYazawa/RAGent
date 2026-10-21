@@ -1,14 +1,15 @@
-"""应用层 RRF 融合 — rrf(d) = Σ 1/(k + rank)，k=60
+"""Application-level RRF fusion — rrf(d) = sum of 1/(k + rank), k=60
 
-ES 内置 RRF 需付费订阅，且 MySQL/网页结果无法进 ES 融合，故在 Python 侧实现。
-各路内部先做去重（同文档相邻切片合并）再融合，截取 Top-8 供评估。
+ES built-in RRF requires a paid subscription and cannot fuse MySQL or web results inside
+ES, so fusion runs in Python. Each lane is deduplicated first (adjacent chunks of the same
+document are merged) and the top 8 fused items are kept for grading.
 """
 from dataclasses import dataclass, field
 
 
 @dataclass
 class RetrieverResult:
-    """统一 Result 协议"""
+    """Unified result protocol."""
 
     source: str  # vector / keyword / database / web
     score: float
@@ -31,7 +32,8 @@ def item_key(item: RetrieverResult) -> str:
 
 
 def dedupe_lane(items: list[RetrieverResult]) -> list[RetrieverResult]:
-    """单路内去重：同文档相邻切片合并（保留首位，避免同一文档刷分）"""
+    """Deduplicate within one lane: merge adjacent chunks of the same document (keep the first
+    so a single document cannot flood the ranking)."""
     kept: list[RetrieverResult] = []
     last_doc: tuple | None = None
     for it in items:
@@ -53,7 +55,7 @@ def rrf_fuse(
     top_n: int = 8,
     k: int = 60,
 ) -> list[dict]:
-    """多路融合：返回 [{item, rrf, from_lanes}]，按 rrf 降序截取 top_n"""
+    """Fuse several lanes: return [{item, rrf, from_lanes}] sorted by rrf, truncated to top_n."""
     acc: dict[str, dict] = {}
     for source, items in lanes.items():
         for rank, it in enumerate(dedupe_lane(items)):

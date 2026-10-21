@@ -17,7 +17,7 @@ def _parse_events(raw_list: list[str]) -> list[tuple[str, dict]]:
 
 
 class _FakeRerank:
-    """记录调用并返回指定排序；exc 非空时抛异常（测降级）"""
+    """Records calls and returns the given order; raises when exc is set (to test degradation)."""
 
     name = "qwen"
     model = "gte-rerank-v2"
@@ -103,32 +103,33 @@ def _patch_rerank(monkeypatch, fake):
 
 
 async def test_rerank_on_expands_candidates_and_reorders(rerank_run, monkeypatch):
-    """开启后：单路 top_k 扩到 candidates/2，精排重排生效，SSE 出 rerank 事件"""
-    fake = _FakeRerank(order=[(1, 0.95), (0, 0.55)])  # 乙 提到 甲 前
+    """Enabled: per-lane top_k grows to candidates/2, rerank reorders the results and an SSE rerank
+    event is emitted."""
+    fake = _FakeRerank(order=[(1, 0.95), (0, 0.55)])  # B moves ahead of A
     _patch_rerank(monkeypatch, fake)
 
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到是怎么认定和处罚的？", None)])
 
-    # 候选深度：candidates=20 → 单路 top_k=max(5, 10)=10
+    # candidate depth: candidates=20 -> per-lane top_k=max(5, 10)=10
     assert rerank_run["gather_top_k"] == 10
-    # 精排被调用，query 用完整问题
+    # rerank was called with the full question as the query
     assert fake.calls and fake.calls[0]["query"] == "迟到是怎么认定和处罚的？"
     assert fake.calls[0]["top_n"] == settings.rerank_top_n
-    # SSE rerank 事件
+    # the SSE rerank event
     rr_events = [d for t, d in events if t == "retrieve" and d.get("source") == "rerank"]
     assert rr_events, "开启精排必须产出 source=rerank 的检索事件"
     assert rr_events[0]["hit_count"] == 2
     assert rr_events[0]["rerank"]["model"] == "gte-rerank-v2"
-    # 决策日志含精排步骤
+    # the decision log contains the rerank step
     assert '"source": "rerank"' in rerank_run["steps_json"]
-    # 生成侧上下文按精排结果重排（乙在甲前）
+    # the generation context follows the rerank order (B before A)
     gen_text = json.dumps(rerank_run["gen_msgs"], ensure_ascii=False)
     assert gen_text.index("片段乙") < gen_text.index("片段甲")
     assert [t for t, _ in events][-1] == "done"
 
 
 async def test_rerank_off_no_rerank_event(rerank_run, monkeypatch):
-    """关闭时：候选深度不变（fused_top_n），无 rerank 事件，顺序保持粗排"""
+    """Disabled: candidate depth stays fused_top_n, no rerank event and the coarse order is kept."""
     monkeypatch.setattr(settings, "rerank_enabled", False, raising=False)
 
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到是怎么认定和处罚的？", None)])
@@ -140,7 +141,7 @@ async def test_rerank_off_no_rerank_event(rerank_run, monkeypatch):
 
 
 async def test_rerank_failure_degrades_to_rrf_order(rerank_run, monkeypatch):
-    """精排调用失败：降级保留粗排序，产出 degraded 事件，链路不中断"""
+    """A rerank failure: keep the coarse order, emit a degraded event and do not break the chain."""
     fake = _FakeRerank(exc=RuntimeError("upstream 500"))
     _patch_rerank(monkeypatch, fake)
 
@@ -150,13 +151,14 @@ async def test_rerank_failure_degrades_to_rrf_order(rerank_run, monkeypatch):
     degraded = [d for t, d in events if t == "retrieve" and d.get("degraded") and d.get("rerank_error")]
     assert degraded, "精排失败必须产出 degraded 事件"
     gen_text = json.dumps(rerank_run["gen_msgs"], ensure_ascii=False)
-    assert gen_text.index("片段甲") < gen_text.index("片段乙")  # 保留粗排序
+    assert gen_text.index("片段甲") < gen_text.index("片段乙")  # the coarse order is kept
     assert '"degraded"' in rerank_run["steps_json"]
     assert types[-1] == "done"
 
 
 async def test_rerank_failure_trips_circuit_breaker(rerank_run, monkeypatch):
-    """熔断：精排失败后，CRAG 重查轮不再重复调用已失败的 provider（Important 2 回归）"""
+    """Circuit break: after a rerank failure the CRAG re-query round does not call the failed provider
+    again (Important 2 regression)."""
     fake = _FakeRerank(exc=RuntimeError("upstream 500"))
     _patch_rerank(monkeypatch, fake)
 
@@ -185,14 +187,14 @@ async def test_rerank_failure_trips_circuit_breaker(rerank_run, monkeypatch):
 
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到是怎么认定和处罚的？", None)])
 
-    # 第一轮失败即熔断：CRAG 重查轮（第二次 gather）不再调用精排
+    # a first-round failure breaks the circuit: the CRAG re-query round (second gather) skips rerank
     assert len(fake.calls) == 1, f"熔断失效，精排被重复调用 {len(fake.calls)} 次"
-    assert crag_calls["n"] == 2  # rewrite_retry → 重查 → give_up
+    assert crag_calls["n"] == 2  # rewrite_retry -> re-retrieve -> give_up
     assert [t for t, _ in events][-1] == "done"
 
 
 async def test_reflect_reflow_also_reranks(rerank_run, monkeypatch):
-    """反思回流期同样走精排（带「反思回流·」前缀事件），且候选深度一致"""
+    """Reflect backflow also reranks (events carry the 「反思回流·」 prefix) with the same candidate depth."""
     fake = _FakeRerank(order=[(1, 0.95), (0, 0.55)])
     _patch_rerank(monkeypatch, fake)
 
@@ -224,7 +226,8 @@ async def test_reflect_reflow_also_reranks(rerank_run, monkeypatch):
 
 
 async def test_rerank_on_but_provider_unavailable_keeps_default_depth(rerank_run, monkeypatch):
-    """provider 不可用：候选深度保持默认（不无意义加深 ES 负载），走粗排（Important 1 回归）"""
+    """Provider unavailable: candidate depth stays at its default (no pointless extra ES load) and the
+    coarse order is used (Important 1 regression)."""
     from app.providers.registry import UnknownProviderError
 
     def _boom():
@@ -235,6 +238,6 @@ async def test_rerank_on_but_provider_unavailable_keeps_default_depth(rerank_run
 
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到是怎么认定和处罚的？", None)])
 
-    assert rerank_run["gather_top_k"] == settings.retrieval_top_k  # 未被加深到 10
+    assert rerank_run["gather_top_k"] == settings.retrieval_top_k  # not deepened to 10
     assert not [d for t, d in events if t == "retrieve" and d.get("source") == "rerank"]
     assert [t for t, _ in events][-1] == "done"

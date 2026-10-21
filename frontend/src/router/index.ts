@@ -19,7 +19,7 @@ const router = createRouter({
   ],
 })
 
-// 浏览器标签页标题固定为 RAGent（不随页面/语言变化）
+// The browser tab title is always RAGent (it does not follow the page or language)
 router.afterEach(() => {
   document.title = 'RAGent'
 })

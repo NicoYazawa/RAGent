@@ -1,10 +1,11 @@
-"""HTTP 精排实现 — query + 候选文档 → 按相关度降序的 (索引, 分数)（httpx 直连）
+"""HTTP rerank implementation — query + candidate documents -> (index, score) pairs sorted by
+relevance descending (direct httpx calls).
 
-两种请求/响应形状（registry.rerank_shape 选择）：
-- dashscope：请求 input 嵌套 + parameters.top_n，响应 output.results
-  （阿里云百炼 text-rerank 原生服务，不在 compatible-mode 下）
-- flat：请求顶层 query/documents/top_n，响应顶层 results
-  （SiliconFlow / Jina / Cohere 同构）
+Two request/response shapes, selected by registry.rerank_shape:
+- dashscope: nested input plus parameters.top_n in the request, output.results in the response
+  (Alibaba Cloud Bailian's native text-rerank service, outside compatible-mode)
+- flat: top-level query/documents/top_n in the request, top-level results in the response
+  (the shape used by SiliconFlow / Jina / Cohere)
 """
 import logging
 
@@ -14,7 +15,8 @@ logger = logging.getLogger("agentic.providers.rerank_http")
 
 
 class HttpRerank:
-    """精排实现：单次 POST，候选数由调用方控制（建议 ≤50，供应商上限保护）"""
+    """Rerank implementation: a single POST; the caller controls the candidate count
+    (<=50 recommended to stay within provider limits)."""
 
     def __init__(
         self,

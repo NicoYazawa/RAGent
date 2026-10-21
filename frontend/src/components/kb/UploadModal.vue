@@ -6,7 +6,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import Icon from '@/components/ui/Icon.vue'
 import { useKbStore } from '@/stores/kb'
 
-/** 拖拽上传弹窗 — 类型/大小校验 + 批量上传 + 结果反馈 */
+/** Upload dialog — type/size validation, batch upload and result feedback */
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
 const { t } = useI18n()
@@ -57,7 +57,7 @@ void props
         {{ t('kb.uploadDesc') }}
       </p>
 
-      <!-- 拖拽区 -->
+      <!-- Drop zone -->
       <div
         class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-8 transition-all duration-150"
         :class="dragOver ? 'border-accent bg-raise' : 'border-edge-bright bg-card/50 hover:border-edge-bright'"
@@ -72,7 +72,7 @@ void props
         <input ref="inputRef" type="file" multiple accept=".md,.txt,.pdf,.docx" class="hidden" @change="onPick" />
       </div>
 
-      <!-- 待上传列表 -->
+      <!-- Pending upload list -->
       <div v-if="picked.length" class="space-y-1.5">
         <div v-for="(f, i) in picked" :key="i" class="flex items-center gap-2 rounded-lg border border-edge bg-card px-3 py-2">
           <Icon name="file" :size="14" class="shrink-0 text-ink-mute" />
@@ -84,7 +84,7 @@ void props
         </div>
       </div>
 
-      <!-- 结果反馈 -->
+      <!-- Result feedback -->
       <div v-if="resultMsg" class="space-y-1.5">
         <div class="rounded-lg border border-ok/40 bg-ok/10 px-3 py-2 text-[12px] text-ok">
           {{ t('kb.uploadAccepted', { n: resultMsg.ok }) }}

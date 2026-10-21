@@ -17,7 +17,7 @@ def _mock_client(handler) -> httpx.AsyncClient:
 # ---------- check_es ----------
 
 async def test_check_es_ok(monkeypatch):
-    """ES 返回 200 → 连接正常"""
+    """ES returns 200 -> the connection is healthy."""
     monkeypatch.setattr(startup_check.elastic, "client", _mock_client(lambda r: httpx.Response(200)))
     ok, detail = await startup_check.check_es()
     assert ok is True
@@ -25,7 +25,7 @@ async def test_check_es_ok(monkeypatch):
 
 
 async def test_check_es_auth_failure(monkeypatch):
-    """401 → 提示检查 ES_USER / ES_PASSWORD"""
+    """401 -> hints to check ES_USER / ES_PASSWORD."""
     monkeypatch.setattr(startup_check.elastic, "client", _mock_client(lambda r: httpx.Response(401)))
     ok, detail = await startup_check.check_es()
     assert ok is False
@@ -34,7 +34,7 @@ async def test_check_es_auth_failure(monkeypatch):
 
 
 async def test_check_es_unexpected_status(monkeypatch):
-    """其他状态码 → 响应异常"""
+    """Any other status -> abnormal response."""
     monkeypatch.setattr(startup_check.elastic, "client", _mock_client(lambda r: httpx.Response(503)))
     ok, detail = await startup_check.check_es()
     assert ok is False
@@ -42,7 +42,7 @@ async def test_check_es_unexpected_status(monkeypatch):
 
 
 async def test_check_es_connection_error(monkeypatch):
-    """连接异常 → 提示确认 ES 已启动"""
+    """A connection error -> hints to confirm ES is running."""
     def _boom(req):
         raise httpx.ConnectError("refused")
 
@@ -56,25 +56,25 @@ async def test_check_es_connection_error(monkeypatch):
 # ---------- _err_message ----------
 
 def test_err_message_extracts_error_message():
-    """从 OpenAI 兼容错误体里取 error.message"""
+    """Read error.message from an OpenAI-compatible error body."""
     r = httpx.Response(400, json={"error": {"message": "模型不存在"}})
     assert startup_check._err_message(r) == "模型不存在"
 
 
 def test_err_message_falls_back_to_text():
-    """非 JSON 错误体 → 截断的原始文本"""
+    """A non-JSON error body -> the truncated raw text."""
     r = httpx.Response(500, text="oops")
     assert startup_check._err_message(r) == "oops"
 
 
 def test_err_message_handles_missing_error_field():
-    """错误体无 error 字段 → 回退到原文"""
+    """A body without an error field -> fall back to the raw text."""
     r = httpx.Response(500, json={"detail": "x"})
     assert startup_check._err_message(r) == r.text
 
 
 def test_err_message_truncates_long_message():
-    """错误信息截断到 160 字符"""
+    """The error message is truncated to 160 chars."""
     r = httpx.Response(400, json={"error": {"message": "x" * 500}})
     assert len(startup_check._err_message(r)) == 160
 
@@ -83,11 +83,11 @@ def test_err_message_truncates_long_message():
 
 @pytest.fixture
 def provider_client(monkeypatch):
-    """替换 check_provider 内部新建的 httpx 客户端，并补上密钥（conftest 已清空）"""
+    """Replace the httpx client that check_provider builds internally and restore a key (conftest cleared it)."""
     monkeypatch.setattr(settings, "deepseek_api_key", "sk-test", raising=False)
     monkeypatch.setattr(settings, "dashscope_api_key", "sk-test", raising=False)
     box = {"handler": lambda r: httpx.Response(200, json={})}
-    real_client_cls = httpx.AsyncClient  # 先取引用，避免替换后自调用导致递归
+    real_client_cls = httpx.AsyncClient  # grab the reference first so the patched version cannot recurse into itself
 
     def _factory(*a, **kw):
         return real_client_cls(transport=httpx.MockTransport(box["handler"]),
@@ -98,7 +98,7 @@ def provider_client(monkeypatch):
 
 
 async def test_check_provider_llm_ok(provider_client):
-    """LLM 密钥有效 → OK，并显示模型名"""
+    """A valid LLM key -> OK and the model name is shown."""
     provider_client["handler"] = lambda r: httpx.Response(200, json={})
     ok, detail = await startup_check.check_provider("llm")
     assert ok is True
@@ -106,7 +106,7 @@ async def test_check_provider_llm_ok(provider_client):
 
 
 async def test_check_provider_embedding_reports_dims(provider_client):
-    """Embedding 检查结果带维度信息"""
+    """The embedding check result carries the dimension info."""
     provider_client["handler"] = lambda r: httpx.Response(200, json={})
     ok, detail = await startup_check.check_provider("embedding")
     assert ok is True
@@ -114,7 +114,7 @@ async def test_check_provider_embedding_reports_dims(provider_client):
 
 
 async def test_check_provider_missing_api_key(monkeypatch, provider_client):
-    """未配置密钥 → 明确提示（不发请求）"""
+    """No key configured -> a clear hint (no request is sent)."""
     monkeypatch.setattr(settings, "deepseek_api_key", "", raising=False)
     monkeypatch.setattr(settings, "dashscope_api_key", "", raising=False)
     ok, detail = await startup_check.check_provider("llm")
@@ -130,7 +130,7 @@ async def test_check_provider_missing_api_key(monkeypatch, provider_client):
     (429, "密钥不可用"),
 ])
 async def test_check_provider_status_hints(provider_client, status, hint):
-    """按状态码给出不同的失败原因"""
+    """Each status code maps to a different failure reason."""
     provider_client["handler"] = lambda r: httpx.Response(
         status, json={"error": {"message": "detail"}})
     ok, detail = await startup_check.check_provider("llm")
@@ -140,7 +140,7 @@ async def test_check_provider_status_hints(provider_client, status, hint):
 
 
 async def test_check_provider_network_error(provider_client):
-    """网络异常 → 提示检查网络"""
+    """A network error -> hints to check the network."""
     def _boom(req):
         raise httpx.ConnectError("dns")
 
@@ -153,7 +153,7 @@ async def test_check_provider_network_error(provider_client):
 # ---------- run_startup_checks ----------
 
 async def test_run_startup_checks_survives_gather_failure(monkeypatch):
-    """asyncio.gather 本身抛错时也要打印提示（不静默）"""
+    """An error from asyncio.gather itself still prints a hint (never silent)."""
 
     def _boom(*coros, **kw):
         for c in coros:
@@ -169,7 +169,7 @@ async def test_run_startup_checks_survives_gather_failure(monkeypatch):
 
 
 async def test_run_startup_checks_reports_provider_labels(monkeypatch):
-    """摘要里带厂商标签与检查项名称"""
+    """The summary carries the provider label and the check names."""
     captured = {}
 
     async def _ok(*a, **k):
@@ -188,14 +188,14 @@ async def test_run_startup_checks_reports_provider_labels(monkeypatch):
 
 
 def test_print_block_writes_to_stdout(capsys):
-    """_print_block 把内容打到 stdout（启动日志可见）"""
+    """_print_block writes to stdout (visible in the startup log)."""
     startup_check._print_block("启动自检输出")
     out = capsys.readouterr().out
     assert "启动自检输出" in out
 
 
 def test_print_block_tolerates_stdout_without_reconfigure(monkeypatch):
-    """stdout 不支持 reconfigure（如被重定向）→ 降级继续输出，不抛异常"""
+    """stdout does not support reconfigure (e.g. when redirected) -> keep printing, no exception."""
     written = []
 
     class _NoReconfigure:

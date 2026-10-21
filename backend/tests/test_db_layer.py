@@ -14,7 +14,7 @@ from app import db
 # ---------- _serialize ----------
 
 def test_serialize_converts_datetime_and_date():
-    """datetime / date → ISO 字符串"""
+    """datetime / date -> ISO strings."""
     out = db._serialize({
         "created_at": datetime.datetime(2026, 10, 20, 12, 30, 45),
         "day": datetime.date(2026, 10, 20),
@@ -24,21 +24,21 @@ def test_serialize_converts_datetime_and_date():
 
 
 def test_serialize_converts_decimal():
-    """Decimal：整数值 → int，非整 → float"""
+    """Decimal: integral values -> int, others -> float."""
     out = db._serialize({"n": decimal.Decimal("10"), "ratio": decimal.Decimal("0.25")})
     assert out["n"] == 10 and isinstance(out["n"], int)
     assert out["ratio"] == 0.25 and isinstance(out["ratio"], float)
 
 
 def test_serialize_decodes_bytes():
-    """bytes → UTF-8 字符串（replace 兜底非法字节）"""
+    """bytes -> UTF-8 string (replace as the fallback for invalid bytes)."""
     out = db._serialize({"raw": b"hello", "bad": b"\xff\xfe"})
     assert out["raw"] == "hello"
     assert isinstance(out["bad"], str)
 
 
 def test_serialize_parses_json_fields():
-    """citations / steps / config / images 等 JSON 字段自动反序列化"""
+    """JSON fields such as citations / steps / config / images are deserialized automatically."""
     out = db._serialize({
         "citations": json.dumps([{"doc_name": "手册"}]),
         "steps": json.dumps([{"step": 1}]),
@@ -50,29 +50,29 @@ def test_serialize_parses_json_fields():
     assert out["steps"] == [{"step": 1}]
     assert out["config"] == {"k": "v"}
     assert out["images"] == ["/api/chat/images/a.png"]
-    # 非 JSON 白名单字段保持原样
+    # fields outside the JSON allowlist pass through unchanged
     assert out["other"] == '{"x": 1}'
 
 
 def test_serialize_invalid_json_field_becomes_none():
-    """JSON 字段内容非法 → None（不得抛异常打断整行）"""
+    """Invalid JSON content -> None (no exception that would break the whole row)."""
     out = db._serialize({"citations": "not-json"})
     assert out["citations"] is None
 
 
 def test_serialize_passthrough_plain_values():
-    """普通值原样透传"""
+    """Plain values pass through unchanged."""
     out = db._serialize({"id": 1, "name": "x", "ok": True, "none": None})
     assert out == {"id": 1, "name": "x", "ok": True, "none": None}
 
 
 def test_serialize_json_field_not_string_untouched():
-    """JSON 字段已是 list/dict 时不再解析"""
+    """A JSON field already holding a list/dict is not parsed again."""
     out = db._serialize({"citations": [{"a": 1}]})
     assert out["citations"] == [{"a": 1}]
 
 
-# ---------- 同步原语（Mock 连接） ----------
+# ---------- Synchronous primitives (mock connection) ----------
 
 class _FakeCursor:
     def __init__(self, conn):
@@ -115,7 +115,7 @@ class _FakeConn:
 
 @pytest.fixture
 def fake_conn(monkeypatch):
-    """替换 pymysql.connect，返回可控的假连接"""
+    """Replace pymysql.connect and return a controllable fake connection."""
     holder = {}
 
     def _connect(**kwargs):
@@ -129,14 +129,14 @@ def fake_conn(monkeypatch):
 
 
 def test_query_all_returns_serialized_rows(fake_conn):
-    """query_all 逐行序列化"""
+    """query_all serializes every row."""
     fake_conn["rows"] = [{"id": 1, "n": decimal.Decimal("3")}]
     rows = db.query_all("SELECT * FROM t")
     assert rows == [{"id": 1, "n": 3}]
 
 
 def test_query_one_returns_first_or_none(fake_conn):
-    """query_one 返回首行；无行返回 None"""
+    """query_one returns the first row, or None when there is none."""
     fake_conn["rows"] = [{"id": 7}, {"id": 8}]
     assert db.query_one("SELECT * FROM t") == {"id": 7}
     fake_conn["rows"] = []
@@ -144,17 +144,17 @@ def test_query_one_returns_first_or_none(fake_conn):
 
 
 def test_execute_returns_lastrowid(fake_conn):
-    """execute 返回 lastrowid"""
+    """execute returns lastrowid."""
     assert db.execute("INSERT INTO t VALUES (1)") == 42
 
 
 def test_execute_many_returns_rowcount(fake_conn):
-    """execute_many 返回受影响行数"""
+    """execute_many returns the affected row count."""
     assert db.execute_many("INSERT INTO t VALUES (%s)", [(1,), (2,), (3,)]) == 3
 
 
 def test_get_conn_passes_settings(monkeypatch):
-    """连接参数取自 settings，且强制 utf8mb4"""
+    """Connection parameters come from settings and always force utf8mb4."""
     captured = {}
 
     def _connect(**kwargs):
@@ -169,7 +169,7 @@ def test_get_conn_passes_settings(monkeypatch):
 
 
 def test_get_conn_explicit_database_overrides(monkeypatch):
-    """显式库名覆盖默认库"""
+    """An explicit database name overrides the default database."""
     captured = {}
 
     def _connect(**kwargs):
@@ -181,10 +181,10 @@ def test_get_conn_explicit_database_overrides(monkeypatch):
     assert captured["database"] == "other_db"
 
 
-# ---------- 异步包装 ----------
+# ---------- Async wrappers ----------
 
 async def test_async_wrappers_delegate_to_sync(monkeypatch):
-    """异步包装最终走同步原语（to_thread）"""
+    """The async wrappers end up in the synchronous primitives (to_thread)."""
     calls = []
 
     def _qa(sql, params=None):

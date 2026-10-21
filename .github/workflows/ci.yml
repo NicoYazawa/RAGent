@@ -34,8 +34,8 @@ jobs:
       - name: Lint (ruff)
         working-directory: backend
         run: ruff check .
-      # pytest.ini 已配置 --cov=app --cov-fail-under=90：
-      # 覆盖率低于 90% 直接失败，防止"删测试凑绿灯"
+      # pytest.ini already sets --cov=app --cov-fail-under=90:
+      # below 90% coverage the run fails, so deleting tests cannot turn the build green
       - name: Run tests (coverage gate >= 90%)
         working-directory: backend
         run: python -m pytest -q
@@ -63,8 +63,8 @@ jobs:
       - name: Build (vue-tsc + vite)
         working-directory: frontend
         run: npm run build
-      # vitest.config.ts 已配置 coverage.thresholds（statements/lines >= 90）：
-      # 覆盖率不达标直接失败，防止"删测试凑绿灯"
+      # vitest.config.ts already sets coverage.thresholds (statements/lines >= 90):
+      # falling short fails the run, so deleting tests cannot turn the build green
       - name: Run tests (coverage gate >= 90%)
         working-directory: frontend
         run: npm run test:coverage

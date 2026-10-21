@@ -13,7 +13,7 @@ services:
     env_file:
       - .env
     environment:
-      # 容器内通过服务名访问依赖
+      # Inside the container the dependencies are reached by service name
       - MYSQL_HOST=db
       - ES_URL=http://es:9200
     volumes:
@@ -37,13 +37,13 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DB}
-      # 允许从 compose 网络（其他容器）以 root 连接；默认仅 localhost
+      # Allow root connections from the compose network (other containers); by default only localhost is allowed
       - MYSQL_ROOT_HOST=%
     volumes:
       - db_data:/var/lib/mysql
       - ./ragent_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    # 演示用默认口令，仅绑定回环地址：宿主机本地客户端可连，局域网/公网不可达。
-    # 需要对外暴露时改成 "3306:3306" 即可。
+    # Demo default password, bound to the loopback address only: local clients on the host can connect,
+    # while the LAN and the internet cannot. Change it to "3306:3306" to expose it.
     ports:
       - "127.0.0.1:3306:3306"
     healthcheck:
@@ -55,9 +55,10 @@ services:
     restart: unless-stopped
 
   es:
-    # docker.elastic.co 镜像在本环境首次拉取超时（大层），重试通常可续传完成。
-    # 如需中文 IK 分词，改回 build（见 elasticsearch/Dockerfile），但需确认 IK 插件地址可用。
-    # es.py 在 IK 缺失时自动回退 standard 分词器。
+    # Pulling docker.elastic.co timed out on the first attempt in this environment (large layers);
+    # a retry usually resumes and completes.
+    # For Chinese IK analysis, switch back to build (see elasticsearch/Dockerfile), but confirm the
+    # IK plugin URL is reachable first. es.py falls back to the standard analyzer when IK is missing.
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
     environment:
       - discovery.type=single-node
@@ -65,7 +66,8 @@ services:
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
       - es_data:/usr/share/elasticsearch/data
-    # 同样仅绑定回环地址（ES 索引内含知识库原文，不应暴露到局域网）。
+    # Also bound to the loopback address only (the ES index holds knowledge-base source text and must
+    # not be exposed to the LAN).
     ports:
       - "127.0.0.1:9200:9200"
     healthcheck:

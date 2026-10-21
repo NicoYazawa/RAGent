@@ -2,14 +2,14 @@
 import { SseParser } from '../sseParser'
 import type { SseEvent } from '../types'
 
-/** 事件负载字段随 event 名变化，这里按任意字段读取 */
+/** The payload fields vary with the event name, so any field is read here. */
 const field = (e: SseEvent, key: string): unknown => (e as unknown as Record<string, unknown>)[key]
 
 /**
- * SSE 解析器 —— 问答流的核心。
- * 后端事件格式：`event: <type>\ndata: {json}\n\n`
- * 解析错误会直接导致前端"收不到答案"，因此这里覆盖跨 chunk 缓存、
- * CRLF 归一、非法 JSON 跳过、多行 data 合并等边界。
+ * SSE parser — the heart of the Q&A stream.
+ * Backend event format: `event: <type>\ndata: {json}\n\n`
+ * A parse error means the frontend "never receives the answer", so this covers cross-chunk buffering,
+ * CRLF normalization, skipping invalid JSON and merging multi-line data.
  */
 describe('SseParser', () => {
   it('解析单个完整事件', () => {

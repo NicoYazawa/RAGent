@@ -5,14 +5,14 @@ import type { ChatMessage, DatasourceItem, KbDocument } from '@/api/types'
 import type { DecisionCard } from '@/stores/chat'
 
 /**
- * 中层展示组件 —— 交互契约：
- *   - StatusBadge：五态文案/样式，入库中显示进度点
- *   - DocumentRow：ready 可看切片、failed 可重试、任何状态可删除
- *   - ScoreRing：分数 → 颜色分档与弧长比例（0-10 归一化并做上下限裁剪）
- *   - MessageActions：复制 / 看决策链 / 重新生成
- *   - StepTimingBar：按环节聚合耗时、warn 变色、图例只取前 5
- *   - SourceCard：开关与配置项变更事件
- *   - SideRail / AppLayout：导航项、当前页高亮、主题与语言切换
+ * Mid-level presentational components — interaction contracts:
+ *   - StatusBadge: five states with their copy/style and a progress dot while ingesting
+ *   - DocumentRow: chunks when ready, retry when failed, delete in any state
+ *   - ScoreRing: score to colour tier and arc length (normalized 0-10 and clamped)
+ *   - MessageActions: copy / open the decision chain / regenerate
+ *   - StepTimingBar: aggregates time per stage, turns warn-coloured, legend shows the first 5
+ *   - SourceCard: emits toggle and config-change events
+ *   - SideRail / AppLayout: nav items, active-page highlight, theme and language switching
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -267,7 +267,7 @@ describe('StepTimingBar', () => {
   it('图例最多显示 5 段', () => {
     const types = ['router', 'rewrite', 'retrieve', 'grade', 'correct', 'generate', 'reflect']
     const w = mount(StepTimingBar, { props: { cards: types.map((t, i) => card({ type: t as DecisionCard['type'], elapsedMs: (i + 1) * 10 })) } })
-    // 分段条 7 段 + 图例最多 5 段
+    // 7 segments in the bar and at most 5 legend entries
     expect(w.findAll('.h-1\\.5\\.w-1\\.5').length).toBeLessThanOrEqual(5)
   })
 

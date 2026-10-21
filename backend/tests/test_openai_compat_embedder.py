@@ -17,7 +17,7 @@ def _resp(n: int) -> httpx.Response:
 
 
 def test_embedder_creates_its_own_client_when_not_injected():
-    """未注入 client 时按 base_url 自建（并复用同一实例）"""
+    """Without an injected client one is built from base_url and reused."""
     emb = OpenAICompatEmbedder("qwen", "text-embedding-v4", 1024,
                                 "https://api.example.com/v1", "sk-x")
     client = emb._get_client()
@@ -27,7 +27,7 @@ def test_embedder_creates_its_own_client_when_not_injected():
 
 
 async def test_embedder_aclose_releases_owned_client():
-    """自建 client 在 aclose 后被关闭并置空"""
+    """A self-built client is closed and cleared by aclose."""
     emb = OpenAICompatEmbedder("qwen", "text-embedding-v4", 1024,
                                 "https://api.example.com/v1", "sk-x")
     client = emb._get_client()
@@ -37,7 +37,7 @@ async def test_embedder_aclose_releases_owned_client():
 
 
 async def test_embedder_aclose_keeps_injected_client():
-    """注入的 client 不由门面关闭（所有权归调用方）"""
+    """An injected client is not closed by the facade (the caller owns it)."""
     emb = _embedder(lambda r: _resp(1))
     await emb.aclose()
     assert emb._client is not None
@@ -57,7 +57,8 @@ async def test_embed_texts_batches_of_ten():
 
     assert calls == [10, 10, 5]
     assert len(vecs) == 25
-    # mock 按批次生成本地索引（0..n-1）：验证批内按 index 排序还原 + 批次顺序拼接
+    # the mock emits local indices per batch (0..n-1): verifies per-batch ordering by index plus batch
+# concatenation order
     assert vecs[0][0] == 0.0 and vecs[9][0] == 9.0
     assert vecs[20][0] == 0.0 and vecs[24][0] == 4.0
 
@@ -108,7 +109,7 @@ async def test_batch_retries_once_then_raises():
 
     with pytest.raises(httpx.HTTPStatusError):
         await _embedder(handler).embed_texts(["a", "b"])
-    assert len(calls) == 2  # 首败 + 重试 1 次
+    assert len(calls) == 2  # first attempt fails, one retry
 
 
 async def test_batch_retry_succeeds():

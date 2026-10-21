@@ -1,28 +1,28 @@
 /* ============================================================
- * 类型定义
- * 第 5 章（接口/SSE 协议）与第 6 章（数据设计）
- * 字段命名保持与后端协议一致（snake_case）
+ * Type definitions
+ * Chapter 5 (API/SSE protocol) and chapter 6 (data design)
+ * Field names match the backend protocol (snake_case)
  * ============================================================ */
 
-/* ---------- 通用枚举 ---------- */
+/* ---------- Shared enums ---------- */
 
-/** Q1 意图四分类 */
+/** Q1 intent, four classes */
 export type IntentType = 'chitchat' | 'kb_qa' | 'data_query' | 'summarize'
 
-/** 三类检索源 */
+/** Three retrieval sources */
 export type RetrievalSource = 'vector' | 'keyword' | 'database'
 
-/** 文档入库五态 */
+/** Five document ingestion states */
 export type DocStatus = 'parsing' | 'chunking' | 'embedding' | 'ready' | 'failed'
 
-/* ---------- SSE 事件协议（5.3 节） ---------- */
+/* ---------- SSE event protocol (section 5.3) ---------- */
 
 interface SseBase {
-  /** 决策点序号 */
+  /** Decision point ordinal */
   step: number
-  /** 毫秒时间戳 */
+  /** Millisecond timestamp */
   ts: number
-  /** 人类可读摘要（直接用于侧栏渲染） */
+  /** Human-readable summary (rendered directly in the sidebar) */
   detail: string
 }
 
@@ -43,12 +43,12 @@ export interface RetrieveEvent extends SseBase {
   type: 'retrieve'
   source?: RetrievalSource | 'rerank'
   hit_count?: number
-  /** 检索路异常（ES/Embedding 故障）：与「知识库未覆盖」区分的降级标记 */
+  /** A retrieval-lane error (ES/Embedding failure): the degraded marker that separates it from "not covered" */
   degraded?: boolean
   errors?: Record<string, string>
-  /** 精排失败时的降级说明（source=rerank 成功时不存在） */
+  /** Degradation note when reranking fails (absent when source=rerank succeeds) */
   rerank_error?: string
-  /** 精排信息（source=rerank 时）：模型 / 耗时 / 输入输出条数；失败时为 { error } */
+  /** Rerank info (when source=rerank): model / time / in-out counts; { error } on failure */
   rerank?: { model: string; ms: number; in: number; out: number } | { error: string }
 }
 
@@ -67,9 +67,9 @@ export interface CorrectEvent extends SseBase {
 
 export interface GenerateEvent extends SseBase {
   type: 'generate'
-  /** token 增量 */
+  /** Token delta */
   delta: string
-  /** 新生成轮次，清空被反思否决的旧正文 */
+  /** A new generation round that clears the answer rejected by reflection */
   replace?: boolean
 }
 
@@ -77,12 +77,12 @@ export interface ReflectEvent extends SseBase {
   type: 'reflect'
   result: 'pass' | 'fail'
   round: number
-  /** fail 时描述缺失信息 */
+  /** Describes the missing information on fail */
   missing_info?: string
 }
 
 export interface Citation {
-  /** 答案中的原始 [n] 编号；历史消息可能没有 */
+  /** The raw [n] markers in the answer; older messages may lack them */
   ref_id?: number
   doc_id?: number
   kb_id?: number
@@ -90,7 +90,7 @@ export interface Citation {
   doc_name: string
   section_path: string
   chunk_no: number
-  /** db 来源（NL2SQL）：生成 SQL + 查询结果行，改走「数据查询证据」视图 */
+  /** db source (NL2SQL): the generated SQL plus result rows, shown in the "data query evidence" view */
   source_type?: 'db'
   sql?: string
   rows?: Record<string, string | number | null>[]
@@ -99,7 +99,7 @@ export interface Citation {
 export interface CitationEvent extends SseBase {
   type: 'citation'
   citations: Citation[]
-  /** 经过引用清理后的最终正文，与持久化内容一致 */
+  /** Final body after citation cleanup, identical to what is persisted */
   answer?: string
 }
 
@@ -135,10 +135,10 @@ export type SseEvent =
 
 export type SseEventType = SseEvent['type']
 
-/** 决策步骤卡片 UI 态 */
+/** UI state of a decision step card */
 export type StepVisual = 'pending' | 'done' | 'warn'
 
-/* ---------- 实体（6.2 节数据表映射） ---------- */
+/* ---------- Entities (section 6.2 table mapping) ---------- */
 
 export interface KnowledgeBase {
   id: number
@@ -162,15 +162,15 @@ export interface KbDocument {
   updated_at: string
 }
 
-/** 切片明细（6.2 节 kb_chunk 元数据 / ES kb_chunks 索引） */
+/** Chunk details (section 6.2 kb_chunk metadata / ES kb_chunks index) */
 export interface KbChunk {
   id: number
   doc_id: number
-  /** 切片序号（1 起，与引用溯源 chunk_no 同源） */
+  /** Chunk ordinal (1-based, same source as chunk_no in citations) */
   chunk_no: number
-  /** 章节标题路径（切片时保留） */
+  /** Section heading path (preserved when chunking) */
   section_path: string
-  /** 切片正文（chunk_size=500 字 / overlap=50 字） */
+  /** Chunk body (chunk_size=500 chars / overlap=50 chars) */
   content: string
   token_count: number
 }
@@ -188,13 +188,13 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   citations?: Citation[]
-  /** 用户消息附带图片（data URL 或站内 URL，多模态问答） */
+  /** Images attached to a user message (data URL or in-app URL, multimodal Q&A) */
   images?: string[]
   decision_log_id?: number
   created_at: string
 }
 
-/** 决策链单步（与 SSE 事件同源同构，6.2 steps 结构） */
+/** One decision-chain step (same source and shape as the SSE events, section 6.2 steps) */
 export interface DecisionStep {
   step: number
   type: SseEventType
@@ -222,13 +222,13 @@ export interface DatasourceItem {
   updated_at: string
 }
 
-/* ---------- 检索测试 Playground ---------- */
+/* ---------- Retrieval test playground ---------- */
 
-/** 单路召回命中项 */
+/** A single-lane hit */
 export interface RetrievalHit {
   title: string
   snippet: string
-  /** 原始相关度分（向量 cosine / BM25 / 行匹配度，量纲随路不同） */
+  /** Raw relevance score (vector cosine / BM25 / row match; the scale differs per lane) */
   score: number
   meta: {
     doc_name?: string
@@ -237,14 +237,14 @@ export interface RetrievalHit {
   }
 }
 
-/** 单路召回结果 */
+/** Single-lane recall result */
 export interface RetrievalLane {
   source: RetrievalSource
   latency_ms: number
   hits: RetrievalHit[]
 }
 
-/** RRF 融合后条目：rrf = Σ 1/(60 + rank)，from_lanes 标注命中的路 */
+/** A fused item: rrf = sum of 1/(60 + rank), from_lanes lists the lanes that hit */
 export interface FusedItem {
   key: string
   rrf: number
@@ -252,7 +252,7 @@ export interface FusedItem {
   hit: RetrievalHit
 }
 
-/** Grader 模拟评分 */
+/** Grader scoring */
 export interface RetrievalGrade {
   score: number
   verdict: 'pass' | 'partial' | 'fail'
@@ -265,7 +265,7 @@ export interface RetrievalTestResult {
   grade: RetrievalGrade
 }
 
-/* ---------- 分页与查询 ---------- */
+/* ---------- Pagination and queries ---------- */
 
 export interface Page<T> {
   items: T[]
@@ -282,7 +282,7 @@ export interface DecisionLogQuery {
   page_size: number
 }
 
-/** 问答 SSE 流处理回调 */
+/** Q&A SSE stream callbacks */
 export interface SseHandlers {
   onEvent: (event: SseEvent) => void
   signal?: AbortSignal

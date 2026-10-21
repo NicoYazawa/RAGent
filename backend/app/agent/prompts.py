@@ -1,7 +1,8 @@
-"""各决策点 Prompt — Schema 契约（zh/en 双语 bundle）
+"""Prompts for each decision point — schema contracts (zh/en bilingual bundles).
 
-judge 类 Prompt 全部要求 JSON 输出（deepseek JSON Output 模式要求提示词包含 "json" 字样）。
-语言选择：按「提问语言」（orchestrator 用 llm.detect_lang(question) 决定），答案语言跟随提问。
+Every judge prompt requires JSON output (deepseek JSON Output mode requires the prompt to
+contain the word "json"). Language selection follows the question language (the orchestrator
+decides with llm.detect_lang(question)), so the answer language tracks the question.
 """
 
 from .source_catalog import BUSINESS_DB_SCHEMAS
@@ -184,7 +185,7 @@ CHAT_SYS_EN = """You are the RAGent knowledge-base Q&A assistant (with vision). 
 Answer directly and friendly; if the user attaches an image, inspect it first and answer around the image and question (recognition, description, analysis, comparison are all fine).
 You may briefly introduce your capabilities: for each question you decide autonomously whether to retrieve, which lanes to use, whether the results are good, how to correct, and whether the answer is good — all visible in real time in the decision chain. Keep answers concise."""
 
-# ---------- 双语 bundle ----------
+# ---------- Bilingual bundles ----------
 
 PROMPTS: dict[str, dict[str, str]] = {
     "zh-CN": {
@@ -211,11 +212,11 @@ PROMPTS: dict[str, dict[str, str]] = {
 
 
 def get_prompt(key: str, locale: str = "zh-CN") -> str:
-    """按语言取 system prompt（未知语言回落 zh-CN）"""
+    """Return the system prompt for a locale (unknown locales fall back to zh-CN)."""
     return PROMPTS.get(locale, PROMPTS["zh-CN"])[key]
 
 
-# 向后兼容：模块级只读常量（默认中文）
+# Backward compatibility: module-level read-only constants (Chinese by default)
 ROUTER_SYS = PROMPTS["zh-CN"]["router_sys"]
 PLANNER_SYS = PROMPTS["zh-CN"]["planner_sys"]
 GRADER_SYS = PROMPTS["zh-CN"]["grader_sys"]
@@ -226,7 +227,7 @@ GENERATE_SYS = PROMPTS["zh-CN"]["generate_sys"]
 CHAT_SYS = PROMPTS["zh-CN"]["chat_sys"]
 
 
-# ---------- user-side builders（locale 感知） ----------
+# ---------- User-side builders (locale aware) ----------
 
 
 def _history_block(history: list[dict] | None, locale: str = "zh-CN") -> str:

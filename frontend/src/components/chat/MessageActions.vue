@@ -7,8 +7,8 @@ import type { ChatMessage } from '@/api/types'
 import { copyText } from '@/utils/decisionExport'
 
 /**
- * 助手答案操作条 — 悬停浮现：
- * 复制全文 / 查看决策链 / 重新生成（仅最后一条）
+ * Assistant answer action bar — appears on hover:
+ * copy the full text / open the decision chain / regenerate (last message only)
  */
 const props = defineProps<{
   message: ChatMessage

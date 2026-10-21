@@ -3,13 +3,13 @@ import { createPinia, setActivePinia } from 'pinia'
 import { apiJson, jsonInit } from '../http'
 
 /**
- * HTTP 基础层 —— 所有后端调用的唯一出口。
- * 关键契约：非 2xx 抛后端的 detail/message（而不是裸 HTTP 状态码），
- * 且自动带上 Accept-Language（后端据此返回中英文文案）。
+ * HTTP base layer — the single exit point for every backend call.
+ * Key contract: a non-2xx response throws the backend detail/message (not a bare HTTP status),
+ * and Accept-Language is always attached (the backend uses it to pick the copy).
  */
 describe('apiJson', () => {
   beforeEach(() => {
-    // apiJson 会读 locale store，必须先激活 pinia
+    // apiJson reads the locale store, so pinia must be active first
     setActivePinia(createPinia())
     localStorage.clear()
     vi.stubGlobal('fetch', vi.fn())

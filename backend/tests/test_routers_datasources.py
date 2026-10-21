@@ -3,7 +3,7 @@ import json
 
 
 def test_get_datasources_returns_ordered_sources(api, fake_db):
-    """列表按 vector / keyword / database 固定顺序返回"""
+    """The list is returned in the fixed vector / keyword / database order."""
     fake_db.route("FROM datasource_config", [
         {"source_type": "database", "enabled": True, "config": {}, "updated_at": "t3"},
         {"source_type": "vector", "enabled": True, "config": {"k": "v"}, "updated_at": "t1"},
@@ -15,11 +15,11 @@ def test_get_datasources_returns_ordered_sources(api, fake_db):
     assert [b["source_type"] for b in body] == ["vector", "keyword", "database"]
     assert body[0]["config"] == {"k": "v"}
     assert body[1]["enabled"] is False
-    assert body[1]["config"] == {}  # None 归一为空对象
+    assert body[1]["config"] == {}  # None is normalized to an empty object
 
 
 def test_get_datasources_skips_unknown_source(api, fake_db):
-    """配置表里的未知源类型不出现在结果中"""
+    """An unknown source type in the config table never appears in the result."""
     fake_db.route("FROM datasource_config", [
         {"source_type": "web", "enabled": True, "config": {}, "updated_at": "t"},
     ])
@@ -28,13 +28,13 @@ def test_get_datasources_skips_unknown_source(api, fake_db):
 
 
 def test_update_datasources_rejects_unknown_type(api, fake_db):
-    """未知源类型 → 400"""
+    """An unknown source type -> 400."""
     r = api.put("/api/admin/datasources", json={"items": [{"source_type": "web", "enabled": True}]})
     assert r.status_code == 400
 
 
 def test_update_datasources_inserts_new_source(api, fake_db):
-    """不存在的源 → INSERT"""
+    """A source that does not exist -> INSERT."""
     fake_db.route("SELECT id FROM datasource_config", None)
     r = api.put("/api/admin/datasources", json={
         "items": [{"source_type": "vector", "enabled": True, "config": {"top_k": "5"}}]})
@@ -48,7 +48,7 @@ def test_update_datasources_inserts_new_source(api, fake_db):
 
 
 def test_update_datasources_updates_existing_source(api, fake_db):
-    """已存在的源 → UPDATE"""
+    """An existing source -> UPDATE."""
     fake_db.route("SELECT id FROM datasource_config", {"id": 2})
     r = api.put("/api/admin/datasources", json={
         "items": [{"source_type": "keyword", "enabled": False, "config": {}}]})
@@ -58,7 +58,7 @@ def test_update_datasources_updates_existing_source(api, fake_db):
 
 
 def test_update_datasources_counts_all_items(api, fake_db):
-    """多条目计数正确"""
+    """The count is correct for several items."""
     fake_db.route("SELECT id FROM datasource_config", {"id": 1})
     r = api.put("/api/admin/datasources", json={"items": [
         {"source_type": "vector", "enabled": True},
@@ -68,7 +68,7 @@ def test_update_datasources_counts_all_items(api, fake_db):
 
 
 def test_update_datasources_accepts_empty_list(api, fake_db):
-    """空条目列表 → updated=0"""
+    """An empty item list -> updated=0."""
     r = api.put("/api/admin/datasources", json={"items": []})
     assert r.status_code == 200
     assert r.json() == {"updated": 0}

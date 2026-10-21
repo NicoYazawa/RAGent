@@ -1,15 +1,15 @@
-﻿# Ruff 配置 —— 目标：让"测试反模式"在 CI 里就红，而不是等人工 review
+﻿# Ruff configuration — goal: make "test anti-patterns" fail in CI instead of waiting for human review
 #
-# 保留的规则（与"测试有效性"直接相关）：
-#   F401 / F841   未使用的 import / 变量 —— 往往是"抄来的测试没改完"
-#   B011 / B015   assert False / 无用比较 —— 死断言
-#   B904          except 内 raise 缺 from —— 异常链丢失
-#   I001          import 顺序 —— 降低 review 噪音
-#   RUF100        无效的 noqa
-#   E9 / F        语法级与未定义名
+# Rules kept (directly tied to test effectiveness):
+#   F401 / F841   unused import / variable — usually a copied test that was never finished
+#   B011 / B015   assert False / useless comparison — dead assertions
+#   B904          raise inside except without from — lost exception chain
+#   I001          import order — less review noise
+#   RUF100        invalid noqa
+#   E9 / F        syntax-level issues and undefined names
 #
-# 恒真断言（如 `assert ("a", b) or any(...)`）由 tests/test_test_quality.py 的
-# AST 静态检查兜底（ruff 无对应规则），那才是真正拦这类问题的关卡。
+# Always-true assertions (such as `assert ("a", b) or any(...)`) are caught by the AST
+# static checks in tests/test_test_quality.py (ruff has no rule for them); that is the real gate.
 target-version = "py312"
 line-length = 120
 exclude = [".git", ".venv", "data", "scripts", "__pycache__"]
@@ -17,17 +17,17 @@ exclude = [".git", ".venv", "data", "scripts", "__pycache__"]
 [lint]
 select = ["E9", "F", "W", "I", "B", "C4", "PT", "SIM", "RUF"]
 ignore = [
-    "E501",    # 行长交给 formatter
-    "B008",    # FastAPI Depends() 写在默认值里是标准写法
-    "RUF001",  # 中文全角标点
+    "E501",    # line length is the formatter's job
+    "B008",    # FastAPI Depends() in a default value is the standard style
+    "RUF001",  # Chinese full-width punctuation
     "RUF002",
     "RUF003",
-    "SIM105",  # contextlib.suppress 未必更清晰
-    "SIM108",  # 三元未必更清晰
-    "SIM300",  # yoda 条件
-    "PT006",   # parametrize 名字用逗号串更易读
-    "PT011",   # 部分用例故意宽匹配（如 ValueError 的多种来源）
-    "PT018",   # 复合断言可读性优先
+    "SIM105",  # contextlib.suppress is not always clearer
+    "SIM108",  # a ternary is not always clearer
+    "SIM300",  # yoda conditions
+    "PT006",   # a comma-separated parametrize name is easier to read
+    "PT011",   # some tests match broadly on purpose (several ValueError sources)
+    "PT018",   # compound assertions are preferred for readability
     "RUF005",
     "RUF015",
     "RUF059",
@@ -35,7 +35,7 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-# 测试里允许用魔法数字做断言（那就是期望值本身）
+# tests may use magic numbers as assertions (that is the expected value itself)
 "tests/*" = ["PLR2004", "S101"]
 "scripts/*" = ["S101", "T201", "B008"]
 

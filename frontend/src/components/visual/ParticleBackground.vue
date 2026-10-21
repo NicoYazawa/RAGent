@@ -3,9 +3,9 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import * as THREE from 'three'
 
 /**
- * 全屏知识节点网络背景：
- * - 青色粒子缓慢漂移，近邻节点自动连线（AdditiveBlending 叠加发光，无贴图渐变）
- * - 鼠标视差；页面隐藏自动暂停；组件卸载完整释放 GPU 资源
+ * Full-screen knowledge-node network background:
+ * - teal particles drift slowly and neighbouring nodes link automatically (AdditiveBlending glow, no texture gradients)
+ * - pointer parallax, automatic pause when the page is hidden, full GPU cleanup on unmount
  */
 const container = ref<HTMLDivElement>()
 
@@ -25,11 +25,11 @@ onMounted(() => {
   renderer.setSize(el.clientWidth, el.clientHeight)
   el.appendChild(renderer.domElement)
 
-  /* ---------- 粒子 ---------- */
+  /* ---------- Particles ---------- */
   const isNarrow = el.clientWidth < 900
   const COUNT = isNarrow ? 70 : 130
-  const RANGE = { x: 46, y: 26, z: 14 } // 粒子活动空间
-  const LINK_DIST = isNarrow ? 6.5 : 7.6 // 连线距离阈值
+  const RANGE = { x: 46, y: 26, z: 14 } // particle space
+  const LINK_DIST = isNarrow ? 6.5 : 7.6 // link distance threshold
 
   const positions = new Float32Array(COUNT * 3)
   const colors = new Float32Array(COUNT * 3)
@@ -52,7 +52,7 @@ onMounted(() => {
   pointGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
   pointGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
 
-  // 实心圆粒子纹理（纯色圆点，非渐变）
+  // solid round particle texture (flat dots, no gradient)
   const dotCanvas = document.createElement('canvas')
   dotCanvas.width = 32
   dotCanvas.height = 32
@@ -76,7 +76,7 @@ onMounted(() => {
   const points = new THREE.Points(pointGeo, pointMat)
   scene.add(points)
 
-  /* ---------- 连线 ---------- */
+  /* ---------- Links ---------- */
   const MAX_LINKS = COUNT * 6
   const linePositions = new Float32Array(MAX_LINKS * 6)
   const lineColors = new Float32Array(MAX_LINKS * 6)
@@ -92,7 +92,7 @@ onMounted(() => {
   const lines = new THREE.LineSegments(lineGeo, lineMat)
   scene.add(lines)
 
-  /* ---------- 交互与循环 ---------- */
+  /* ---------- Interaction and loop ---------- */
   let raf = 0
   let running = true
   const mouse = { x: 0, y: 0 }
@@ -122,7 +122,7 @@ onMounted(() => {
     if (!running) return
     raf = requestAnimationFrame(tick)
 
-    // 粒子漂移 + 边界环绕
+    // particle drift with edge wrapping
     for (let i = 0; i < COUNT; i++) {
       const v = velocities[i]
       let x = positions[i * 3] + v.x
@@ -140,7 +140,7 @@ onMounted(() => {
     }
     pointGeo.attributes.position.needsUpdate = true
 
-    // 近邻连线重建（颜色亮度随距离衰减，AdditiveBlending 下等效透明度）
+    // rebuild neighbour links (brightness decays with distance, an effective alpha under AdditiveBlending)
     let li = 0
     for (let i = 0; i < COUNT && li < MAX_LINKS; i++) {
       va.set(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2])
@@ -169,7 +169,7 @@ onMounted(() => {
         }
       }
     }
-    // 未用满的连线顶点置黑（AdditiveBlending 下不可见）
+    // unused link vertices are set to black (invisible under AdditiveBlending)
     for (let k = li * 6; k < MAX_LINKS * 6; k++) {
       linePositions[k] = 0
       lineColors[k] = 0
@@ -177,7 +177,7 @@ onMounted(() => {
     lineGeo.attributes.position.needsUpdate = true
     lineGeo.attributes.color.needsUpdate = true
 
-    // 摄像机视差缓动
+    // camera parallax easing
     camTarget.x = mouse.x * 2.2
     camTarget.y = mouse.y * 1.4
     camera.position.x += (camTarget.x - camera.position.x) * 0.03
@@ -192,7 +192,7 @@ onMounted(() => {
   document.addEventListener('visibilitychange', onVisibility)
   raf = requestAnimationFrame(tick)
 
-  /* ---------- 清理 ---------- */
+  /* ---------- Cleanup ---------- */
   onBeforeUnmount(() => {
     running = false
     cancelAnimationFrame(raf)

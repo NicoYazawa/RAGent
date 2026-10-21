@@ -23,7 +23,7 @@ export default defineConfig({
       include: ['src/**/*.{ts,vue}'],
       exclude: ['src/**/*.d.ts', 'src/test/setup.ts', 'src/**/__tests__/**'],
       thresholds: {
-        // 与后端 pytest.ini 的 --cov-fail-under=90 对齐：覆盖率低于 90% 直接失败
+        // aligned with --cov-fail-under=90 in the backend pytest.ini: below 90% the run fails
         statements: 90,
         lines: 90,
         branches: 85,

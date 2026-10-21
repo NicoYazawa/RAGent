@@ -25,7 +25,7 @@ def _rerank(handler, shape: str = "dashscope") -> HttpRerank:
 
 
 async def test_dashscope_shape_request_and_parse():
-    """DashScope 形状：input 嵌套 + parameters.top_n；响应 output.results 按分降序"""
+    """DashScope shape: nested input plus parameters.top_n; the response is output.results sorted by score."""
     seen = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -51,7 +51,7 @@ async def test_dashscope_shape_request_and_parse():
 
 
 async def test_flat_shape_request_and_parse():
-    """flat 形状（SiliconFlow/Jina/Cohere 同构）：顶层字段 + 顶层 results"""
+    """flat shape (same as SiliconFlow/Jina/Cohere): top-level fields plus top-level results."""
     seen = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -83,7 +83,7 @@ async def test_empty_documents_skips_http():
         return httpx.Response(200, json={"output": {"results": []}})
 
     assert await _rerank(handler).rerank("q", [], 1) == []
-    assert called["n"] == 0  # 空候选不发请求
+    assert called["n"] == 0  # no request is sent without candidates
 
 
 async def test_non_200_raises():
@@ -110,7 +110,7 @@ def test_protocol_structural_match():
 
 
 async def test_malformed_result_item_is_skipped():
-    """条目字段非法（非数字）→ 跳过该条，不影响其余条目"""
+    """An entry with invalid (non-numeric) fields is skipped without affecting the others."""
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"output": {"results": [
             {"index": "not-a-number", "relevance_score": 0.5},
@@ -122,7 +122,7 @@ async def test_malformed_result_item_is_skipped():
 
 
 async def test_negative_index_is_dropped():
-    """负索引视为无效（不返回越界位置）"""
+    """A negative index is invalid (no out-of-range position is returned)."""
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={"output": {"results": [
             {"index": -1, "relevance_score": 0.9},
@@ -132,7 +132,7 @@ async def test_negative_index_is_dropped():
 
 
 def test_rerank_creates_its_own_client_when_not_injected():
-    """未注入 client 时按 base_url 自建（并复用同一实例）"""
+    """Without an injected client one is built from base_url and reused."""
     rr = HttpRerank(name="qwen", model="gte-rerank-v2", base_url="https://api.example.com/v1",
                     path="/rerank", api_key="sk-x", shape="flat")
     client = rr._get_client()
@@ -142,7 +142,7 @@ def test_rerank_creates_its_own_client_when_not_injected():
 
 
 async def test_rerank_aclose_releases_owned_client():
-    """自建 client 在 aclose 后被关闭并置空"""
+    """A self-built client is closed and cleared by aclose."""
     rr = HttpRerank(name="qwen", model="gte-rerank-v2", base_url="https://api.example.com/v1",
                     path="/rerank", api_key="sk-x", shape="flat")
     client = rr._get_client()
@@ -152,7 +152,7 @@ async def test_rerank_aclose_releases_owned_client():
 
 
 async def test_rerank_aclose_keeps_injected_client():
-    """注入的 client 不由门面关闭（所有权归调用方）"""
+    """An injected client is not closed by the facade (the caller owns it)."""
     rr = _rerank(lambda r: httpx.Response(200, json={"output": {"results": []}}))
     await rr.aclose()
     assert rr._client is not None

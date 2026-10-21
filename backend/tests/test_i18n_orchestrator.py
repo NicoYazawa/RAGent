@@ -7,17 +7,18 @@ from app.i18n import MESSAGES
 
 
 def test_catalog_key_parity():
-    """zh/en 目录 key 集合必须一致
+    """The zh/en catalog key sets must match.
 
-    注：conftest 已隔离全局 MESSAGES（用例注入的临时 key 会在用例后还原），
-    因此这里不再需要跳过 "test." 前缀——真实 key 若以 test. 开头也应被校验。
+    Note: conftest isolates the global MESSAGES catalog (temporary keys injected by a test are
+    restored afterwards), so the "test." prefix no longer needs skipping here — a real key
+    starting with test. must be validated too.
     """
     for key, entry in MESSAGES.items():
         assert set(entry.keys()) == {"zh-CN", "en-US"}, f"key {key} 语言不全"
 
 
 def test_all_orchestrator_sse_keys_exist():
-    """orchestrator 用到的 key 必须已在目录中（防改文案漏翻译）"""
+    """Every key the orchestrator uses must exist in the catalog (so copy edits cannot miss translations)."""
     src = Path(orchestrator.__file__).read_text(encoding="utf-8")
     used = set(re.findall(r't\("(sse\.[a-z0-9.]+)"', src))
     assert used, "orchestrator 中未发现 sse.* key"
@@ -26,7 +27,7 @@ def test_all_orchestrator_sse_keys_exist():
 
 
 def test_all_orchestrator_error_disclaimer_keys_exist():
-    """error./disclaimer./cite. 字面量 key 也必须存在"""
+    """Literal error./disclaimer./cite. keys must exist as well."""
     src = Path(orchestrator.__file__).read_text(encoding="utf-8")
     used = set(re.findall(r't\("((?:error|disclaimer|cite)\.[a-z0-9.]+)"', src))
     assert used, "orchestrator 中未发现 error/disclaimer/cite key"
@@ -42,7 +43,7 @@ def test_run_ask_accepts_locale_param():
 
 
 async def test_sse_events_localized(monkeypatch):
-    """英文 locale 下决策链 detail 为英文（打穿 _run，mock 决策点）"""
+    """Under the English locale the decision-chain detail is English (drives _run with mocked decision points)."""
     from app.agent.rrf import RetrieverResult
 
     async def _aquery_all(sql, params=None):
@@ -94,6 +95,6 @@ async def test_sse_events_localized(monkeypatch):
     async for ev in orchestrator.run_ask(1, "How is lateness handled?", None, locale="en-US"):
         events.append(ev)
     details = " ".join(events)
-    assert "Vector retrieval" in details  # 英文 detail
-    assert "相关度" not in details  # 不得出现中文 detail
-    assert "9.0" in details  # 分数照常渲染
+    assert "Vector retrieval" in details  # English detail
+    assert "相关度" not in details  # no Chinese detail may appear
+    assert "9.0" in details  # the score still renders

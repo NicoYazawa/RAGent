@@ -3,11 +3,11 @@ import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 
 /**
- * 聊天输入区 —— 关键契约：
- *   - Enter 发送 / Shift+Enter 换行 / 输入法组合中不误发
- *   - 流式期间显示「停止生成」，输入框禁用
- *   - 图片附件：选择/粘贴/拖拽、非图片过滤、超量与超大告警、移除、点击预览
- *   - 只有图片没有文字时用默认问句兜底
+ * Chat input area — key contracts:
+ *   - Enter sends / Shift+Enter inserts a newline / IME composition never sends by accident
+ *   - during streaming it shows "Stop generating" and the input is disabled
+ *   - image attachments: pick/paste/drop, non-image filtering, over-count and oversize warnings, removal, click to preview
+ *   - an image without text falls back to the default question
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {
@@ -30,7 +30,7 @@ import { useChatStore } from '@/stores/chat'
 
 const imgFile = (name = 'a.png', size = 1024) => new File([new Uint8Array(size)], name, { type: 'image/png' })
 
-/** 通过隐藏 file input 附加图片，并等待 FileReader 异步读取完成 */
+/** Attach an image through a hidden file input and wait for FileReader to finish. */
 async function attach(w: ReturnType<typeof mount>, files: File[], expected: number): Promise<void> {
   const input = w.find('input[type="file"]')
   Object.defineProperty(input.element, 'files', { value: files })
@@ -135,7 +135,7 @@ describe('ChatInput', () => {
 
   it('拖拽图片也能加入附件', async () => {
     const w = mount(ChatInput)
-    // drop 监听挂在输入框的外层容器上
+    // the drop listener sits on the outer container of the input
     const zone = w.find('textarea').element.parentElement as HTMLElement
     const ev = new Event('drop', { bubbles: true, cancelable: true })
     Object.defineProperty(ev, 'dataTransfer', { value: { files: [imgFile('d.png')] } })

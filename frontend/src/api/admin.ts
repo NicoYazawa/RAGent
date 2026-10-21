@@ -16,7 +16,7 @@ import { useI18n } from 'vue-i18n'
 import { apiJson, jsonInit } from './http'
 
 /* ============================================================
- * 管理端 API
+ * Admin API
  * ============================================================ */
 
 /** GET /api/admin/kb */
@@ -38,24 +38,24 @@ export async function listDocuments(kbId: number): Promise<KbDocument[]> {
   return apiJson<KbDocument[]>(`/api/admin/kb/${kbId}/documents`)
 }
 
-/** POST /api/admin/kb/{kb_id}/documents（multipart 上传，202 异步入库） */
+/** POST /api/admin/kb/{kb_id}/documents (multipart upload, 202 asynchronous ingestion) */
 export async function uploadDocument(kbId: number, file: File): Promise<KbDocument> {
   const fd = new FormData()
   fd.append('file', file)
   return apiJson<KbDocument>(`/api/admin/kb/${kbId}/documents`, { method: 'POST', body: fd })
 }
 
-/** DELETE /api/admin/kb/{kb_id}/documents/{doc_id}（先 ES 后 MySQL） */
+/** DELETE /api/admin/kb/{kb_id}/documents/{doc_id} (ES first, then MySQL) */
 export async function deleteDocument(kbId: number, docId: number): Promise<void> {
   await apiJson(`/api/admin/kb/${kbId}/documents/${docId}`, { method: 'DELETE' })
 }
 
-/** GET /api/admin/kb/{kb_id}/documents/{doc_id}/chunks（切片明细，分页） */
+/** GET /api/admin/kb/{kb_id}/documents/{doc_id}/chunks (chunk details, paginated) */
 export async function listDocumentChunks(kbId: number, docId: number, page: number, pageSize = 8): Promise<Page<KbChunk>> {
   return apiJson<Page<KbChunk>>(`/api/admin/kb/${kbId}/documents/${docId}/chunks?page=${page}&page_size=${pageSize}`)
 }
 
-/** GET /api/admin/chunks/by-citation?doc_name=&chunk_no=（引用溯源定位单切片） */
+/** GET /api/admin/chunks/by-citation?doc_name=&chunk_no= (locate a single chunk for a citation) */
 export async function getChunkByCitation(
   docName: string,
   chunkNo: number,
@@ -85,7 +85,7 @@ export async function updateDatasources(items: DatasourceItem[]): Promise<{ upda
   return apiJson<{ updated: number }>('/api/admin/datasources', jsonInit('PUT', { items }))
 }
 
-/** GET /api/admin/decision-logs（过滤：会话 ID、时间范围 + 分页） */
+/** GET /api/admin/decision-logs (filters: session ID, time range, plus pagination) */
 export async function queryDecisionLogs(query: DecisionLogQuery): Promise<Page<DecisionLog>> {
   const params = new URLSearchParams()
   if (query.session_id != null) params.set('session_id', String(query.session_id))
@@ -102,11 +102,11 @@ export async function getDecisionLog(logId: number): Promise<DecisionLog> {
 }
 
 /* ============================================================
- * 检索测试 Playground — 四路召回 / 应用层 RRF / 真实 Grader
- * 调用 POST /api/admin/retrieval-test/{lane,fuse}
+ * Retrieval test playground — per-lane recall / application-level RRF / the real grader
+ * Calls POST /api/admin/retrieval-test/{lane,fuse}
  * ============================================================ */
 
-/** 单路召回（各路独立调用，走后端检索适配层） */
+/** Single-lane recall (one call per lane, through the backend retrieval adapters) */
 export async function testRetrieveLane(query: string, source: RetrievalSource, topK = 5, kbIds?: number[]): Promise<RetrievalLane> {
   return apiJson<RetrievalLane>(
     '/api/admin/retrieval-test/lane',
@@ -114,7 +114,7 @@ export async function testRetrieveLane(query: string, source: RetrievalSource, t
   )
 }
 
-/** 应用层 RRF 融合（k=60）+ Grader 评分（LLM-as-Judge） */
+/** Application-level RRF fusion (k=60) plus grader scoring (LLM-as-judge) */
 export async function fuseAndGrade(lanes: RetrievalLane[], query = ''): Promise<{ fused: FusedItem[]; grade: RetrievalGrade }> {
   return apiJson<{ fused: FusedItem[]; grade: RetrievalGrade }>(
     '/api/admin/retrieval-test/fuse',
@@ -122,7 +122,7 @@ export async function fuseAndGrade(lanes: RetrievalLane[], query = ''): Promise<
   )
 }
 
-/** 数据源类型 → 展示元数据（随语言切换） */
+/** Data-source type to display metadata (follows the language) */
 export function sourceMeta(source: RetrievalSource): { label: string; short: string; desc: string; icon: string; color: string } {
   const { t } = useI18n({ useScope: 'global' })
   const icon: Record<RetrievalSource, string> = { vector: 'search', keyword: 'zap', database: 'db' }

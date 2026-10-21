@@ -4,9 +4,9 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { KbDocument } from '@/api/types'
 
 /**
- * 知识库侧抽屉与上传弹窗：
- *   - ChunkDrawer：打开即拉切片、分页、展开/收起正文、错误态
- *   - UploadModal：拖拽/选择文件、待上传列表与移除、上传结果反馈
+ * Knowledge-base drawer and upload modal:
+ *   - ChunkDrawer: fetches chunks on open, pagination, expand/collapse the body, error state
+ *   - UploadModal: drag/pick files, pending list with removal, upload result feedback
  */
 
 vi.mock('vue-i18n', async (importOriginal) => {

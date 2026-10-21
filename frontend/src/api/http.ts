@@ -1,10 +1,10 @@
 import { useLocaleStore } from '@/stores/locale'
 
 /* ============================================================
- * HTTP 基础层 — fetch 封装（后端 FastAPI :8000，经 vite 代理）
+ * HTTP base layer — fetch wrapper (backend FastAPI on :8000, reached through the vite proxy)
  * ============================================================ */
 
-/** JSON 请求封装：非 2xx 抛出后端 message（FastAPI HTTPException detail）；自动附加 Accept-Language */
+/** JSON request wrapper: a non-2xx response throws the backend message (FastAPI HTTPException detail); Accept-Language is attached automatically */
 export async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
   const locale = useLocaleStore().locale
   const r = await fetch(path, {

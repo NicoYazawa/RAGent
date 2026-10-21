@@ -7,8 +7,8 @@ import { sourceMeta, fuseAndGrade, getDatasources, testRetrieveLane } from '@/ap
 import type { FusedItem, RetrievalGrade, RetrievalLane, RetrievalSource } from '@/api/types'
 
 /**
- * 检索测试 Playground — 直观验证 Q3/Q4 链路：
- * 三路并行召回（按数据源开关裁剪）→ 应用层 RRF 融合（k=60）→ Grader 评分
+ * Retrieval test playground — verify the Q3/Q4 chain visually:
+ * three parallel lanes (trimmed by the data-source switches) -> application-level RRF fusion (k=60) -> grading
  */
 const { t } = useI18n()
 const ALL_SOURCES: RetrievalSource[] = ['vector', 'keyword', 'database']
@@ -56,7 +56,7 @@ async function run(): Promise<void> {
   reset()
   for (const s of enabled.value) lanes.value[s].status = 'loading'
 
-  // 三路并行召回，各路独立完成即点亮（模拟 asyncio.gather）
+  // three lanes in parallel, each lights up as it finishes (mimicking asyncio.gather)
   const done = Promise.all(
     enabled.value.map(async (s) => {
       try {
@@ -69,7 +69,7 @@ async function run(): Promise<void> {
   )
   await done
 
-  // 全部召回完成后融合 + 评分（真实模式传 query 供 Grader 评估）
+  // fuse and grade once all lanes finish (real mode passes the query for the grader)
   fusing.value = true
   try {
     const ready = enabled.value.map((s) => lanes.value[s].lane).filter((l): l is RetrievalLane => l != null)
@@ -85,7 +85,7 @@ async function run(): Promise<void> {
 const disabledSources = () => ALL_SOURCES.filter((s) => !enabled.value.includes(s))
 const hasResult = () => fused.value != null || grade.value != null
 
-/** 示例 chip：填充并立即执行 */
+/** Sample chip: fill the query and run immediately */
 function useSample(q: string): void {
   query.value = q
   void run()
@@ -104,7 +104,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
 <template>
   <div class="h-full overflow-y-auto">
     <div class="mx-auto max-w-5xl px-4 py-6 md:px-8">
-      <!-- 页头 -->
+      <!-- Page header -->
       <div class="mb-6">
         <h1 class="text-[24px] font-semibold leading-tight text-ink">
           {{ t('playground.title') }}
@@ -114,7 +114,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
         </p>
       </div>
 
-      <!-- 工具栏 -->
+      <!-- Toolbar -->
       <div class="rounded-lg border border-edge bg-card p-4">
         <div class="flex flex-wrap items-center gap-3">
           <div class="flex min-w-[240px] flex-1 items-center gap-2 rounded-lg border border-edge bg-panel px-3 transition-colors duration-150 focus-within:border-accent/70">
@@ -155,7 +155,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
           </button>
         </div>
 
-        <!-- 示例 chips -->
+        <!-- Sample chips -->
         <div class="mt-3 flex flex-wrap items-center gap-1.5">
           <span class="shrink-0 font-mono text-[11px] tracking-wider text-ink-mute">{{ t('playground.sampleLabel') }}</span>
           <button
@@ -173,7 +173,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
         </div>
       </div>
 
-      <!-- 空态：当前召回配置 + 检索链路（数据来自真实开关状态） -->
+      <!-- Empty state: current recall config plus the retrieval chain (data comes from the real switches) -->
       <div
         v-if="!loadingConfig && !running && !hasResult() && lanes.vector?.status === 'idle'"
         class="mt-6 grid gap-4 lg:grid-cols-2"
@@ -237,7 +237,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
       </div>
 
       <template v-if="lanes.vector?.status !== 'idle'">
-        <!-- ① 三路召回 -->
+        <!-- (1) Three-lane recall -->
         <h3 class="mb-3 mt-6 flex items-center gap-2 text-[13.5px] font-semibold text-ink">
           <span class="font-mono text-[11px] text-ink-mute">①</span>
           {{ t('playground.recall') }}
@@ -278,7 +278,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
           </div>
         </div>
 
-        <!-- ② RRF 融合 -->
+        <!-- (2) RRF fusion -->
         <h3 class="mb-3 mt-6 flex items-center gap-2 text-[13.5px] font-semibold text-ink">
           <span class="font-mono text-[11px] text-accent">②</span>
           {{ t('playground.rrf') }}
@@ -321,7 +321,7 @@ function verdictLabel(v: RetrievalGrade['verdict']): string {
           <div v-else class="px-4 py-6 text-center font-mono text-[11px] text-ink-mute">{{ t('playground.fuseEmpty') }}</div>
         </div>
 
-        <!-- ③ Grader 评分 -->
+        <!-- (3) Grading -->
         <h3 class="mb-3 mt-6 flex items-center gap-2 text-[13.5px] font-semibold text-ink">
           <span class="font-mono text-[11px] text-accent">③</span>
           {{ t('playground.grader') }}

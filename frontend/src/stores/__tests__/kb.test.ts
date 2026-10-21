@@ -27,7 +27,7 @@ beforeEach(() => {
   setActivePinia(createPinia())
   vi.clearAllMocks()
   vi.useFakeTimers()
-  // 清掉上一个用例遗留的轮询定时器（store 没有暴露 stopPolling）
+  // clear the polling timer left by the previous test (the store exposes no stopPolling)
   vi.clearAllTimers()
 })
 
@@ -108,7 +108,7 @@ describe('kb store', () => {
     const s = useKbStore()
     await s.refresh()
     expect(s.documents).toEqual([])
-    // 不得以空/0 的知识库 id 发起请求
+    // no request may be issued with an empty or 0 knowledge-base id
     const calledWith = mockAdmin.listDocuments.mock.calls.map((c) => c[0])
     expect(calledWith).not.toContain(null)
     expect(calledWith).not.toContain(0)

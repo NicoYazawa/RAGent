@@ -12,7 +12,7 @@ import pytest
 from app.agent import orchestrator, retrievers
 from app.agent.rrf import RetrieverResult
 
-# ---------- gather_lanes：错误不再静默变空路 ----------
+# ---------- gather_lanes: errors no longer become silent empty lanes ----------
 
 async def test_gather_lanes_reports_lane_errors(monkeypatch):
     async def _boom(*a, **k):
@@ -25,7 +25,7 @@ async def test_gather_lanes_reports_lane_errors(monkeypatch):
     monkeypatch.setattr(retrievers.keyword_retriever, "search", _ok)
     lanes, errors = await retrievers.gather_lanes("q", None, 5, ["vector", "keyword"])
 
-    assert lanes["vector"] == []  # 失败路仍给空列表，管线不中断
+    assert lanes["vector"] == []  # the failing lane still yields an empty list and the pipeline continues
     assert len(lanes["keyword"]) == 1
     assert "vector" in errors
     assert "401" in errors["vector"]
@@ -48,7 +48,7 @@ async def test_gather_lanes_empty_sources():
     assert (lanes, errors) == ({}, {})
 
 
-# ---------- 声明文案：降级 vs 知识库未覆盖 ----------
+# ---------- Notice copy: degraded vs not-covered ----------
 
 def test_degraded_note_contains_sources_and_warning():
     note = orchestrator.degraded_note({"vector": "HTTPStatusError: 401", "keyword": "ConnectError"})
@@ -67,7 +67,7 @@ def test_give_up_disclaimer_with_errors_prepends_degraded_note():
     assert d.index("检索服务异常") < d.index("知识库未覆盖")
 
 
-# ---------- 端到端：检索路异常 → degraded 事件 + 日志 + 生成侧声明 ----------
+# ---------- End to end: a lane error -> degraded event + log + generation-side notice ----------
 
 def _parse_events(raw_list: list[str]) -> list[tuple[str, dict]]:
     out = []
@@ -79,11 +79,11 @@ def _parse_events(raw_list: list[str]) -> list[tuple[str, dict]]:
 
 @pytest.fixture
 def degraded_run(monkeypatch):
-    """打穿 _run 全链路：DB / 决策点 / gather_lanes / stream_generate 全部 mock"""
+    """Drives the whole _run chain with DB / decision points / gather_lanes / stream_generate all mocked."""
     captured = {"gen_msgs": None, "steps_json": None}
 
     async def _aquery_all(sql, params=None):
-        return []  # 无历史
+        return []  # no history
 
     async def _aquery_one(sql, params=None):
         if "chat_session" in sql:
@@ -136,26 +136,27 @@ async def test_run_marks_retrieval_degraded_end_to_end(degraded_run):
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到是怎么认定和处罚的？", None)])
     types = [t for t, _ in events]
 
-    # 1. SSE 出现 degraded 检索事件（带失败路与原因）
+    # 1. the SSE stream carries a degraded retrieval event (failing lane plus reason)
     degraded = [d for t, d in events if t == "retrieve" and d.get("degraded")]
     assert degraded, "检索路异常必须产生 degraded 事件"
     assert "vector" in degraded[0]["errors"]
     assert "401" in degraded[0]["errors"]["vector"]
 
-    # 2. 决策日志记录了降级步骤
+    # 2. the decision log records the degraded step
     assert degraded_run["steps_json"] is not None
     assert '"degraded"' in degraded_run["steps_json"]
 
-    # 3. 生成侧声明区分「检索服务异常」与「知识库未覆盖」
+    # 3. the generation-side notice separates "retrieval service error" from "not covered"
     gen_text = json.dumps(degraded_run["gen_msgs"], ensure_ascii=False)
     assert "检索服务异常" in gen_text
 
-    # 4. 链路正常收尾
+    # 4. the chain finishes normally
     assert types[-1] == "done"
 
 
 async def test_run_without_lane_errors_has_no_degraded_event(monkeypatch, degraded_run):
-    """对照：检索正常（仅无命中）时不打 degraded，声明保持纯知识库未覆盖"""
+    """Control case: healthy retrieval with zero hits is not degraded, and the notice stays a pure
+    not-covered message."""
     async def _gather_ok(query, kb_ids, top_k, sources):
         return {"vector": [], "keyword": []}, {}
 
@@ -169,7 +170,8 @@ async def test_run_without_lane_errors_has_no_degraded_event(monkeypatch, degrad
 
 
 async def test_reflect_reflow_also_marks_degraded(monkeypatch, degraded_run):
-    """反思回流期的检索异常同样打 degraded（前缀「反思回流·」），且 errors 跨轮累积"""
+    """A lane error during reflect backflow is degraded too (the 「反思回流·」 prefix) and errors
+    accumulate across rounds."""
     reflect_calls = {"n": 0}
 
     async def _judge2(schema, system, user, usage, attempts=2, images=None):
@@ -191,7 +193,8 @@ async def test_reflect_reflow_also_marks_degraded(monkeypatch, degraded_run):
     events = _parse_events([ev async for ev in orchestrator.run_ask(1, "迟到是怎么认定和处罚的？", None)])
     types = [t for t, _ in events]
 
-    # 反思失败必须产出 result=fail 的 reflect 事件（此前此处是非空元组恒真断言，等于没断言）
+    # a failed reflection must produce a reflect event with result=fail (this used to be a truthy-tuple
+# assertion, which asserted nothing)
     reflect_fail = [d for t, d in events if t == "reflect" and d.get("result") == "fail"]
     assert reflect_fail, "反思不通过时必须产出 result=fail 的 reflect 事件"
     reflow = [d for t, d in events if t == "retrieve" and d.get("degraded") and d["detail"].startswith("反思回流·")]

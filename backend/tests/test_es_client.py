@@ -24,7 +24,7 @@ def _es(handler) -> Elastic:
 # ---------- index_dims ----------
 
 async def test_index_dims_reads_mapping():
-    """从 mapping 读取 dense_vector 维度"""
+    """Read the dense_vector dims from the mapping."""
     def handler(req):
         return httpx.Response(200, json={"kb_chunks": {"mappings": {"properties": {
             "embedding": {"type": "dense_vector", "dims": 1024}}}}})
@@ -33,7 +33,7 @@ async def test_index_dims_reads_mapping():
 
 
 async def test_index_dims_none_when_index_absent():
-    """索引不存在 → None"""
+    """Index missing -> None."""
     def handler(req):
         return httpx.Response(404, json={})
 
@@ -41,7 +41,7 @@ async def test_index_dims_none_when_index_absent():
 
 
 async def test_index_dims_none_on_malformed_mapping():
-    """mapping 异常 → None（不得抛异常打断启动自检）"""
+    """Malformed mapping -> None (no exception that would break the startup self-check)."""
     def handler(req):
         return httpx.Response(200, json={"kb_chunks": {"mappings": {"properties": {}}}})
 
@@ -49,7 +49,7 @@ async def test_index_dims_none_on_malformed_mapping():
 
 
 async def test_index_dims_raises_for_other_errors():
-    """非 404 的错误状态码 → 抛错（由调用方降级）"""
+    """A non-404 error status -> raise (the caller degrades)."""
     def handler(req):
         return httpx.Response(500, text="boom")
 
@@ -57,25 +57,25 @@ async def test_index_dims_raises_for_other_errors():
         await _es(handler).index_dims()
 
 
-# ---------- kb_id 隔离过滤 ----------
+# ---------- kb_id isolation filter ----------
 
 def test_kb_filter_match_all_when_no_ids():
-    """不指定知识库 → match_all"""
+    """No knowledge base given -> match_all."""
     assert Elastic._kb_filter(None) == {"match_all": {}}
 
 
 def test_kb_filter_term_for_single_id():
-    """单库 → term"""
+    """One knowledge base -> term."""
     assert Elastic._kb_filter([3]) == {"term": {"kb_id": 3}}
 
 
 def test_kb_filter_terms_for_multiple_ids():
-    """多库 → terms"""
+    """Several knowledge bases -> terms."""
     assert Elastic._kb_filter([3, 7]) == {"terms": {"kb_id": [3, 7]}}
 
 
 async def test_knn_search_sends_kb_filter():
-    """kNN 请求体必须带 kb_id 过滤（隔离失效 = 串库）"""
+    """The kNN request body must carry the kb_id filter (losing it means cross-base leakage)."""
     seen = {}
 
     def handler(req):
@@ -104,7 +104,7 @@ async def test_knn_filters_candidates_before_ranking(ids, expected):
 
 
 async def test_knn_search_maps_hits():
-    """命中结果映射为 {_score→score, ..._source}"""
+    """Hits map to {_score -> score, ..._source}."""
     def handler(req):
         return httpx.Response(200, json={"hits": {"hits": [
             {"_score": 0.87, "_source": {"doc_name": "手册", "content": "c", "chunk_no": 2}}]}})
@@ -114,7 +114,7 @@ async def test_knn_search_maps_hits():
 
 
 async def test_knn_search_null_score_becomes_zero():
-    """_score 为 null → 0.0"""
+    """A null _score becomes 0.0."""
     def handler(req):
         return httpx.Response(200, json={"hits": {"hits": [{"_score": None, "_source": {}}]}})
 
@@ -123,7 +123,7 @@ async def test_knn_search_null_score_becomes_zero():
 
 
 async def test_match_search_sends_bm25_body():
-    """BM25 请求体：multi_match + section_path 加权 + kb 过滤"""
+    """BM25 request body: multi_match with section_path boosting plus the kb filter."""
     seen = {}
 
     def handler(req):
@@ -138,10 +138,10 @@ async def test_match_search_sends_bm25_body():
     assert seen["body"]["size"] == 4
 
 
-# ---------- 索引创建 / 分词器探测 ----------
+# ---------- Index creation / analyzer probing ----------
 
 async def test_probe_analyzer_detects_ik():
-    """IK 分词器可用 → ik_max_word"""
+    """IK analyzer available -> ik_max_word."""
     def handler(req):
         return httpx.Response(200, json={})
 
@@ -149,7 +149,7 @@ async def test_probe_analyzer_detects_ik():
 
 
 async def test_probe_analyzer_falls_back_to_standard():
-    """IK 不可用（报错/非 200）→ standard"""
+    """IK unavailable (error or non-200) -> standard."""
     def handler(req):
         raise httpx.ConnectError("nope")
 
@@ -162,7 +162,7 @@ async def test_probe_analyzer_falls_back_to_standard():
 
 
 async def test_ensure_index_skips_when_exists():
-    """索引已存在 → 不重建"""
+    """Index already exists -> do not recreate it."""
     called = {"put": 0}
 
     def handler(req):
@@ -176,7 +176,7 @@ async def test_ensure_index_skips_when_exists():
 
 
 async def test_ensure_index_creates_with_dims():
-    """索引不存在 → 按当前 embedding 维度建索引"""
+    """Index missing -> create it with the active embedding dims."""
     seen = {}
 
     def handler(req):
@@ -197,7 +197,7 @@ async def test_ensure_index_creates_with_dims():
 
 
 async def test_ensure_index_raises_on_put_failure():
-    """建索引失败 → 抛错（由 lifespan 降级为服务降级启动）"""
+    """Index creation fails -> raise (lifespan turns it into a degraded startup)."""
     def handler(req):
         if req.method == "HEAD":
             return httpx.Response(404)
@@ -209,10 +209,10 @@ async def test_ensure_index_raises_on_put_failure():
         await _es(handler).ensure_index()
 
 
-# ---------- bulk / 删除 / 计数 / ping ----------
+# ---------- bulk / delete / count / ping ----------
 
 async def test_bulk_index_sends_ndjson():
-    """bulk 请求体是 NDJSON，每条文档两行"""
+    """The bulk request body is NDJSON with two lines per document."""
     seen = {}
 
     def handler(req):
@@ -231,7 +231,7 @@ async def test_bulk_index_sends_ndjson():
 
 
 async def test_bulk_index_raises_on_partial_failure():
-    """bulk 部分失败必须报错（否则静默丢数据）"""
+    """A partial bulk failure must raise (otherwise data is lost silently)."""
     def handler(req):
         return httpx.Response(200, json={"errors": True, "items": [{"index": {"error": "x"}}]})
 
@@ -240,7 +240,7 @@ async def test_bulk_index_raises_on_partial_failure():
 
 
 async def test_delete_by_doc_posts_delete_by_query():
-    """按 doc_id 删除走 _delete_by_query"""
+    """Deleting by doc_id goes through _delete_by_query."""
     seen = {}
 
     def handler(req):
@@ -255,7 +255,7 @@ async def test_delete_by_doc_posts_delete_by_query():
 
 
 async def test_count_returns_document_count():
-    """count 返回文档总数"""
+    """count returns the total number of documents."""
     def handler(req):
         return httpx.Response(200, json={"count": 156})
 
@@ -263,7 +263,7 @@ async def test_count_returns_document_count():
 
 
 async def test_count_defaults_to_zero():
-    """count 字段缺失 → 0"""
+    """A missing count field becomes 0."""
     def handler(req):
         return httpx.Response(200, json={})
 
@@ -279,7 +279,7 @@ async def test_ping_true_on_200():
 
 
 async def test_ping_false_on_error():
-    """ping：连接异常 → False（不抛异常，health 才能降级而非 500）"""
+    """ping: connection error -> False (no exception, so health can degrade instead of 500)."""
     def handler(req):
         raise httpx.ConnectError("down")
 
@@ -287,7 +287,7 @@ async def test_ping_false_on_error():
 
 
 async def test_ping_false_on_non_200():
-    """ping：非 200 → False"""
+    """ping: non-200 -> False."""
     def handler(req):
         return httpx.Response(503, json={})
 
@@ -295,7 +295,7 @@ async def test_ping_false_on_non_200():
 
 
 async def test_close_releases_client():
-    """close 释放 httpx 客户端"""
+    """close releases the httpx client."""
     es = _es(lambda r: httpx.Response(200, json={}))
     await es.close()
     assert es.client.is_closed

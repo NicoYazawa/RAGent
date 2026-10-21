@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-/** 检索质量评分环（0-10）：≥7 青、5~7 琥珀、<5 红 */
+/** Retrieval quality ring (0-10): >=7 teal, 5-7 amber, <5 red */
 const props = defineProps<{ score: number; size?: number }>()
 
 const R = 20
-const CIRC = 2 * Math.PI * R * 0.75 // 270° 弧
+const CIRC = 2 * Math.PI * R * 0.75 // 270-degree arc
 
 const ratio = computed(() => Math.max(0, Math.min(1, props.score / 10)))
-// 颜色跟随主题变量（暗色亮青 / 亮色深青），保证浅底可读
+// colours follow the theme variables (bright teal on dark, deep teal on light) for readability on light backgrounds
 const color = computed(() =>
   props.score >= 7 ? 'var(--color-accent)' : props.score >= 5 ? 'var(--color-warn)' : 'var(--color-danger)',
 )

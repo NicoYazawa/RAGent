@@ -14,7 +14,7 @@ from app.providers.registry import UnknownProviderError
 
 
 def _clear_overrides(monkeypatch):
-    """清空模型/维度覆盖字段，使 resolved_* 回退到厂商目录默认值"""
+    """Clear the model/dims override fields so resolved_* falls back to the provider catalog defaults."""
     monkeypatch.setattr(settings, "llm_model", "", raising=False)
     monkeypatch.setattr(settings, "embed_model", "", raising=False)
     monkeypatch.setattr(settings, "embed_dims", 0, raising=False)
@@ -78,17 +78,17 @@ def test_unknown_provider_raises_on_build(monkeypatch):
 
 
 async def test_close_providers_no_error():
-    """关闭所有 provider 不抛异常（幂等），且关闭后单例被清空"""
+    """Closing all providers never raises (idempotent) and clears the singletons."""
     providers.get_llm()
     await providers.close_providers()
-    await providers.close_providers()  # 重复关闭也安全
+    await providers.close_providers()  # closing twice is safe
     assert providers._llm_singleton is None
     assert providers._embed_singleton is None
     assert providers._rerank_singleton is None
 
 
 def test_build_llm_rejects_unsupported_kind(monkeypatch):
-    """非 openai_compat 实现族 → 明确报错（Phase 2 扩展点）"""
+    """An implementation family other than openai_compat -> a clear error (phase-2 extension point)."""
     from app.providers.registry import ProviderSpec
 
     spec = ProviderSpec(
@@ -104,7 +104,7 @@ def test_build_llm_rejects_unsupported_kind(monkeypatch):
 
 
 def test_build_embedder_rejects_unsupported_kind(monkeypatch):
-    """Embedding 侧同样拦截未知实现族"""
+    """The embedding side rejects unknown implementation families too."""
     from app.providers.registry import ProviderSpec
 
     spec = ProviderSpec(

@@ -9,7 +9,7 @@ import MarkdownText from '@/components/chat/MarkdownText.vue'
 import type { DecisionLog } from '@/api/types'
 import { useDecisionLogStore } from '@/stores/decisionLog'
 
-/** 日志详情抽屉：基本信息 + 最终答案 + 决策链回放 */
+/** Log detail drawer: basic info, final answer and decision-chain replay */
 const props = defineProps<{ open: boolean; logId: number | null }>()
 const emit = defineEmits<{ close: [] }>()
 
@@ -49,7 +49,7 @@ function fmt(iso: string): string {
     </div>
 
     <div v-else-if="detail" class="space-y-4 pb-6">
-      <!-- 基本信息 -->
+      <!-- Basic info -->
       <div class="rounded-xl border border-edge bg-card/70 p-4">
         <div class="flex items-start gap-2.5">
           <Icon name="chat" :size="15" class="mt-0.5 shrink-0 text-accent" />
@@ -65,7 +65,7 @@ function fmt(iso: string): string {
         </div>
       </div>
 
-      <!-- Tab 切换 -->
+      <!-- Tab switch -->
       <div class="flex items-center gap-1 rounded-lg border border-edge bg-panel/60 p-1">
         <button
           type="button"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** 标签 — tone: accent/warn/danger/ok/mute */
+/** Tag — tone: accent/warn/danger/ok/mute */
 withDefaults(defineProps<{ tone?: 'accent' | 'warn' | 'danger' | 'ok' | 'mute' }>(), { tone: 'accent' })
 </script>
 

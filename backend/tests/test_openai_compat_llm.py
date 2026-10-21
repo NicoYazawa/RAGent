@@ -136,7 +136,8 @@ async def test_astream_yields_zero_usage_when_vendor_silent():
 
 
 async def test_astream_usage_and_delta_same_chunk_not_dropped():
-    """usage 与文本增量合包发送（部分网关）：delta 不得被丢弃，usage 照常上报"""
+    """usage arriving in the same packet as a delta (some gateways): the delta must not be dropped and
+    usage is still reported."""
     sse = (
         'data: {"choices":[{"delta":{"content":"末段"}}],"usage":{"prompt_tokens":3,"completion_tokens":1}}\n\n'
         "data: [DONE]\n\n"
@@ -152,7 +153,7 @@ async def test_astream_usage_and_delta_same_chunk_not_dropped():
 
 
 async def test_astream_ignores_duplicate_usage_packages():
-    """流中重复 usage 包只取首个（防门面 token 重复累加）"""
+    """Only the first usage packet in a stream is used (prevents double counting in the facade)."""
     sse = (
         'data: {"choices":[],"usage":{"prompt_tokens":3,"completion_tokens":1}}\n\n'
         'data: {"choices":[],"usage":{"prompt_tokens":99,"completion_tokens":99}}\n\n'
@@ -169,7 +170,7 @@ async def test_astream_ignores_duplicate_usage_packages():
 
 
 async def test_astream_skips_malformed_sse_line():
-    """SSE 中的非法 JSON 行被跳过（不中断整条流）"""
+    """An invalid JSON line in the SSE stream is skipped (the stream keeps going)."""
     sse = (
         'data: {"choices":[{"delta":{"content":"好"}}]}\n\n'
         "data: {不是合法 json}\n\n"
@@ -187,7 +188,7 @@ async def test_astream_skips_malformed_sse_line():
 
 
 def test_llm_creates_its_own_client_when_not_injected():
-    """未注入 client 时按 base_url 自建（并复用同一实例）"""
+    """Without an injected client one is built from base_url and reused."""
     llm = OpenAICompatLLM("x", "m", "https://api.example.com/v1", "k", _full_caps())
     client = llm._get_client()
     assert client is not None
@@ -196,7 +197,7 @@ def test_llm_creates_its_own_client_when_not_injected():
 
 
 async def test_llm_aclose_releases_owned_client():
-    """自建 client 在 aclose 后被关闭并置空"""
+    """A self-built client is closed and cleared by aclose."""
     llm = OpenAICompatLLM("x", "m", "https://api.example.com/v1", "k", _full_caps())
     client = llm._get_client()
     await llm.aclose()
@@ -205,7 +206,7 @@ async def test_llm_aclose_releases_owned_client():
 
 
 async def test_llm_aclose_keeps_injected_client():
-    """注入的 client 不由门面关闭（所有权归调用方）"""
+    """An injected client is not closed by the facade (the caller owns it)."""
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json={})
 
